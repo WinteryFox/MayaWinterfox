@@ -83,7 +83,7 @@
         <dependency>
             <groupId>com.github.austinv11</groupId>
             <artifactId>Discord4j</artifactId>
-            <version>5ddbb3b396adb9087c9406637145556d50801788</version>
+            <version>fe1cdae1bbcd165974fc3b8ce2f243c8635f7fb4</version>
         </dependency>
 
         <dependency>
@@ -107,7 +107,7 @@
         <dependency>
             <groupId>com.sedmelluq</groupId>
             <artifactId>lavaplayer</artifactId>
-            <version>1.2.42</version>
+            <version>1.2.56</version>
         </dependency>
 
         <dependency>
@@ -138,18 +138,6 @@
             <groupId>commons-validator</groupId>
             <artifactId>commons-validator</artifactId>
             <version>1.4.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.ehcache</groupId>
-            <artifactId>ehcache</artifactId>
-            <version>3.4.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>javax.cache</groupId>
-            <artifactId>cache-api</artifactId>
-            <version>1.0.0</version>
         </dependency>
     </dependencies>
 </project>
