@@ -1,0 +1,23 @@
+<configuration>
+    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>latest.log</file>
+        <encoder>
+            <pattern>[%d{yyyy.MM.dd HH:mm} %t %-5level] %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%d{yyyy.MM.dd HH:mm:ss} %t %-5level] %msg%n</pattern>
+        </encoder>
+    </appender>
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
+    </root>
+    <logger name="org.apache" level="NONE"/>
+    <logger name="com.sedmelluq" level="INFO"/>
+    <logger name="httpclient" level="INFO"/>
+    <logger name="sx.blah.discord.Discord4J" level="INFO"/>
+    <logger name="com.winter.mayawinterfox" level="INFO"/>
+    <logger name="org.ehcache" level="INFO"/>
+</configuration>

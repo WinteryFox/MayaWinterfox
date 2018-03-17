@@ -1,0 +1,53 @@
+
+###########################
+# BOT SETTINGS AND TOKENS #
+###########################
+
+# Is the bot running in debug mode? (true/false)
+debug=false
+# The production bot token
+token=token
+# The debug bot token, this is not required if you do not plan to use debug mode
+debug-token=token
+# All errors will be logged to this channel
+error-channel=channelID
+# The PostgreSQL database password, it will try to connect to localhost:5432 as user postgres
+db-password=password
+# The database connection pool size
+db-pool-size=100
+# The global system administrators IDs, these IDs will be give access to all functionality no matter what permissions may be set
+# These IDs are comma separated, no spaces in-between!
+# It is highly recommended you keep these 3 IDs in here, thank you!
+globals=288996157202497536,192322936219238400,155954930191040513
+# The https://bots.discord.pw/api access token
+bots-pw-token=token
+# The https://discordbots.org/api access token
+bots-org-token=token
+# The MyAnimeList credentials eg. bob:BobIsCool
+mal-credentials=username:password
+# The Mashape API access token, this is used by the urban dictionary command
+mashape-key=token
+# The YouTube token, this is used to search YouTube for songs
+youtube-key=token
+# The default prefix
+prefix=.horo
+
+
+###################
+# Global Settings #
+###################
+
+# The maximum prefixes regular users are allowed to set
+max-prefixes=3
+# The maximum prefixes premium users are allowed to set
+max-prefixes-premium=10
+
+# The maximum auto-roles regular users are allowed to set
+max-autoroles=3
+# The maximum auto-roles premium users are allowed to set
+max-autoroles-premium=10
+
+# The maximum song queue regular users are allowed to set
+max-song-queue=10
+# The maximum song queue premium users are allowed to set
+max-song-queue-premium=50
