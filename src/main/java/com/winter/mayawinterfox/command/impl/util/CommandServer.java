@@ -11,6 +11,7 @@ import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.util.EmbedBuilder;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,7 +34,7 @@ public class CommandServer extends Node<Command> {
 
 					EmbedBuilder builder = new EmbedBuilder()
 							.withColor(ColorUtil.withinTwoHues(0.333333f, 0.888888f))
-							.withTimestamp(LocalDateTime.now())
+							.withTimestamp(Instant.now())
 							.withTitle(target.getName())
 							.withThumbnail(target.getIconURL())
 							.appendField(Localisation.getMessage(target, "id"), target.getStringID(), false)

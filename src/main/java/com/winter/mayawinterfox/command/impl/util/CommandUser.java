@@ -13,6 +13,7 @@ import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.util.EmbedBuilder;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,7 +39,7 @@ public class CommandUser extends Node<Command> {
 							.withColor(target.getColorForGuild(e.getGuild()))
 							.withTitle(target.getName() + "#" + target.getDiscriminator())
 							.withThumbnail(ImageUtil.getAvatar(target))
-							.withTimestamp(LocalDateTime.now())
+							.withTimestamp(Instant.now())
 							.appendField(Localisation.getMessage(e.getGuild(), "id"), target.getStringID(), false)
 							.appendField(Localisation.getMessage(e.getGuild(), "creation"), target.getCreationDate().toString(), false);
 

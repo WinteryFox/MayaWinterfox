@@ -5,6 +5,7 @@ import com.winter.mayawinterfox.checks.PermissionChecks;
 import com.winter.mayawinterfox.command.Command;
 import com.winter.mayawinterfox.data.Node;
 import com.winter.mayawinterfox.util.MessageUtil;
+import sx.blah.discord.handle.obj.StatusType;
 import sx.blah.discord.util.Image;
 
 import java.util.Arrays;
@@ -24,7 +25,7 @@ public class CommandSet extends Node<Command> {
 						"",
 						PermissionChecks.isGlobal(),
 						e -> {
-							Main.getClient().changePlayingText(MessageUtil.args(e.getMessage()).substring("set playing".length()));
+							Main.getClient().changePresence(StatusType.valueOf(MessageUtil.args(e.getMessage()).substring("set playing".length())));
 							return true;
 						}
 				), Collections.emptyList()),

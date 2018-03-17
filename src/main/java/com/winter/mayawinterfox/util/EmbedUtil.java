@@ -16,6 +16,7 @@ import sx.blah.discord.util.EmbedBuilder;
 
 import java.awt.*;
 import java.net.URL;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 public class EmbedUtil {
@@ -32,7 +33,7 @@ public class EmbedUtil {
 				.withColor(ColorUtil.withinTwoHues(0.333333333f, 0.8333333333f))
 				.withTitle(Localisation.getMessage(guild, "success"))
 				.withDescription(Localisation.getMessage(guild, description, replacements))
-				.withTimestamp(LocalDateTime.now())
+				.withTimestamp(Instant.now())
 				.build();
 	}
 
@@ -53,7 +54,7 @@ public class EmbedUtil {
 				.appendField("ID", target.getStringID(), true)
 				.appendField(Localisation.getMessage(guild, "by"), by.getName(), true)
 				.appendField("ID", by.getStringID(), true)
-				.withTimestamp(LocalDateTime.now());
+				.withTimestamp(Instant.now());
 		if (reason != null)
 			eb.appendField(Localisation.getMessage(guild, "reason"), reason, false);
 		return eb.build();
@@ -76,7 +77,7 @@ public class EmbedUtil {
 				.appendField("ID", target.getStringID(), true)
 				.appendField(Localisation.getMessage(guild, "by"), by.getName(), true)
 				.appendField("ID", by.getStringID(), true)
-				.withTimestamp(LocalDateTime.now());
+				.withTimestamp(Instant.now());
 		if (reason != null)
 			eb.appendField(Localisation.getMessage(guild, "reason"), reason, false);
 		return eb.build();
@@ -93,7 +94,7 @@ public class EmbedUtil {
 				.withColor(ColorUtil.withinTwoHues(0.333333333f, 0.8333333333f))
 				.withDescription("[" + Localisation.getMessage(guild, "source") + "](" + image + ")")
 				.withImage(image)
-				.withTimestamp(LocalDateTime.now())
+				.withTimestamp(Instant.now())
 				.build();
 	}
 
@@ -109,7 +110,7 @@ public class EmbedUtil {
 				.withColor(ColorUtil.withinTwoHues(0.333333333f, 0.8333333333f))
 				.withDescription("[" + Localisation.getMessage(guild, "source") + "](" + image + ")")
 				.withImage(image.toExternalForm())
-				.withTimestamp(LocalDateTime.now())
+				.withTimestamp(Instant.now())
 				.build();
 	}
 

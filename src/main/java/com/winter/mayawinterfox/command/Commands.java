@@ -38,6 +38,8 @@ import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.EmbedBuilder;
 import sx.blah.discord.util.RequestBuffer;
 
+import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.*;
@@ -123,7 +125,7 @@ public class Commands implements IListener<MessageReceivedEvent> {
 				EmbedBuilder builder = new EmbedBuilder()
 						.withColor(ColorUtil.withinTwoHues(0.33333333f, 0.888888888f))
 						.withTitle("Help for " + command.getData().getName())
-						.withTimestamp(LocalDateTime.now());
+						.withTimestamp(Instant.now());
 				builder.appendField("**.maya" + command.getData().getName() + "**", Localisation.getMessage(guild, command.getData().getHelp()), false);
 				getHelp(guild, builder, command.getChildren());
 
@@ -177,14 +179,17 @@ public class Commands implements IListener<MessageReceivedEvent> {
 								if (gotten != null) {
 									LOGGER.debug(String.format("Found `%s`", gotten.getData().getName()));
 									if (Caches.getGuild(e.getGuild()).hasCustomPermissions()) {
-										String perm = getPermission(gotten);
+										/*String perm = getPermission(gotten);
 										if (PermissionChecks.hasPermission(perm).test(e)) {
 											e.getChannel().setTypingStatus(true);
 											gotten.getData().call(e);
 											e.getChannel().setTypingStatus(false);
 										} else {
 											RequestBuffer.request(() -> e.getMessage().addReaction(ReactionEmoji.of("\uD83D\uDEAB")));
-										}
+										}*/
+										e.getChannel().setTypingStatus(true);
+										gotten.getData().call(e);
+										e.getChannel().setTypingStatus(false);
 									} else {
 										if (gotten.getData().getCheck().test(e)) {
 											e.getChannel().setTypingStatus(true);

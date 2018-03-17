@@ -21,8 +21,8 @@ public class GuildMeta extends Guild implements Serializable {
 	private boolean newGuild;
 	private boolean permissions;
 
-	public GuildMeta(IShard shard, String name, long id, String icon, long ownerID, long afkChannel, int afkTimeout, String region, int verification, Set<String> prefixes, Set<Long> autoroles, String language, String welcome, String pm, boolean levelupNotifications, boolean premium, boolean newGuild, boolean permissions) {
-		super(shard, name, id, icon, ownerID, afkChannel, afkTimeout, region, verification);
+	public GuildMeta(IShard shard, String name, long id, String icon, long ownerID, long afkChannel, int afkTimeout, String region, int verification, long systemChannelId, Set<String> prefixes, Set<Long> autoroles, String language, String welcome, String pm, boolean levelupNotifications, boolean premium, boolean newGuild, boolean permissions) {
+		super(shard, name, id, icon, ownerID, afkChannel, afkTimeout, region, verification, systemChannelId);
 		this.prefixes = prefixes;
 		this.autoroles = autoroles;
 		this.language = language;
@@ -33,7 +33,7 @@ public class GuildMeta extends Guild implements Serializable {
 		this.newGuild = newGuild;
 		this.permissions = permissions;
 	}
-
+	
 	public Set<String> getPrefixes() {
 		if (prefixes.isEmpty()) {
 			return Collections.singleton(Main.config.get(Main.ConfigValue.PREFIX));

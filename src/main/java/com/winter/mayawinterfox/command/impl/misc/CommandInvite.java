@@ -9,6 +9,7 @@ import com.winter.mayawinterfox.util.MessageUtil;
 import sx.blah.discord.handle.obj.Permissions;
 import sx.blah.discord.util.EmbedBuilder;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collections;
 
@@ -23,7 +24,7 @@ public class CommandInvite extends Node<Command> {
 					MessageUtil.sendMessage(e.getChannel(), new EmbedBuilder()
 							.withColor(ColorUtil.withinTwoHues(0.3333333f, 0.8888888f))
 							.withThumbnail(Main.getClient().getApplicationIconURL())
-							.withTimestamp(LocalDateTime.now())
+							.withTimestamp(Instant.now())
 							.withTitle("Invite")
 							.withDesc("https://discordapp.com/oauth2/authorize?client_id=289381714885869568&scope=bot&permissions=372435975")
 							.build());
