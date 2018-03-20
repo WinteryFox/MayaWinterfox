@@ -108,7 +108,7 @@ public class Database {
 	 */
 	public static void connect() {
 		poolingDataSource = new MysqlConnectionPoolDataSource();
-		poolingDataSource.setServerName("localhost");
+		poolingDataSource.setServerName("51.15.87.28");
 		poolingDataSource.setPort(3306);
 		poolingDataSource.setUser("maya");
 		poolingDataSource.setPassword(Main.config.get(Main.ConfigValue.DB_PASS));
@@ -124,8 +124,8 @@ public class Database {
 						"id BIGINT PRIMARY KEY NOT NULL," +
 						"newguild BOOLEAN NOT NULL DEFAULT true," +
 						"language VARCHAR(2) NOT NULL DEFAULT 'en'," +
-						"welcome VARCHAR(1024) DEFAULT null," +
-						"pm VARCHAR(1024) DEFAULT null," +
+				"welcome VARCHAR(128) DEFAULT null," +
+				"pm VARCHAR(128) DEFAULT null," +
 						"lvlup BOOLEAN NOT NULL DEFAULT true," +
 				"premium BOOLEAN NOT NULL DEFAULT false," +
 				"permission BOOLEAN NOT NULL DEFAULT true);")) &&
@@ -139,7 +139,7 @@ public class Database {
 						"PRIMARY KEY(id, role));")) &&
 				(executeUnsafe("CREATE TABLE IF NOT EXISTS user(" +
 						"id BIGINT PRIMARY KEY NOT NULL," +
-						"description VARCHAR(1024) NOT NULL DEFAULT 'A very mysterious person...'," +
+						"description VARCHAR(128) NOT NULL DEFAULT 'A very mysterious person...'," +
 						"level INTEGER NOT NULL DEFAULT 1," +
 						"xp INTEGER NOT NULL DEFAULT 0," +
 						"maxxp INTEGER NOT NULL DEFAULT 420," +
@@ -153,17 +153,17 @@ public class Database {
 				(executeUnsafe("CREATE TABLE IF NOT EXISTS usergroup(" +
 						"guild BIGINT NOT NULL," +
 						"userid BIGINT NOT NULL," +
-						"groupname VARCHAR(256) NOT NULL," +
+						"groupname VARCHAR(128) NOT NULL," +
 						"PRIMARY KEY(guild, userid, groupname));")) &&
 				(executeUnsafe("CREATE TABLE IF NOT EXISTS permission(" +
 						"guild BIGINT NOT NULL," +
 						"userid BIGINT NOT NULL," +
-						"permission VARCHAR(256) NOT NULL," +
+						"permission VARCHAR(128) NOT NULL," +
 						"PRIMARY KEY(guild, userid, permission));")) &&
 				(executeUnsafe("CREATE TABLE IF NOT EXISTS groups(" +
 						"guild BIGINT NOT NULL," +
-						"groupname VARCHAR(256) NOT NULL," +
-						"permission VARCHAR(256) NOT NULL," +
+						"groupname VARCHAR(128) NOT NULL," +
+						"permission VARCHAR(128) NOT NULL," +
 						"role BIGINT DEFAULT NULL," +
 						"PRIMARY KEY(guild, groupname, permission));")) &&
 				(executeUnsafe("CREATE TABLE IF NOT EXISTS item(" +
@@ -172,7 +172,7 @@ public class Database {
 						"PRIMARY KEY(id, item));") &&
 						(executeUnsafe("CREATE TABLE IF NOT EXISTS wolf(" +
 								"id BIGINT PRIMARY KEY NOT NULL," +
-								"name VARCHAR(1024) NOT NULL DEFAULT 'Wolf'," +
+								"name VARCHAR(128) NOT NULL DEFAULT 'Wolf'," +
 								"state INTEGER NOT NULL DEFAULT 0," +
 								"happiness INTEGER NOT NULL DEFAULT 100," +
 								"energy INTEGER NOT NULL DEFAULT 100," +
@@ -193,7 +193,7 @@ public class Database {
 								"neck INTEGER NOT NULL DEFAULT 0);")) &&
 						executeUnsafe("CREATE TABLE IF NOT EXISTS permission(" +
 								"id BIGINT NOT NULL," +
-								"permission VARCHAR(256)," +
+								"permission VARCHAR(128)," +
 								"PRIMARY KEY(id, permission));"));
 	}
 }

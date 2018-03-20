@@ -13,9 +13,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Caches {
-
+	
 	//private static final Logger LOGGER = LoggerFactory.getLogger(Caches.class);
-
+	
 	//private static CacheManager manager = CacheManagerBuilder.newCacheManagerBuilder()
 	//		.withCache("guilds",
 	//				CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, GuildMeta.class, ResourcePoolsBuilder.heap(1000)))
@@ -23,9 +23,10 @@ public class Caches {
 	//				CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, UserMeta.class, ResourcePoolsBuilder.heap(5000))).build(true);
 	//private static Cache<Long, GuildMeta> GUILDS = manager.getCache("guilds", Long.class, GuildMeta.class);
 	//private static Cache<Long, UserMeta> USERS = manager.getCache("users", Long.class, UserMeta.class);
-
+	
 	/**
 	 * Get a guild from the cache, if the guild is not already in the cache the guild will be put into it
+	 *
 	 * @param guild The guild implementation to getGuild the meta for
 	 * @return The guild meta for the guild implementation
 	 */
@@ -43,11 +44,37 @@ public class Caches {
 		List<Row> settings = Database.get("SELECT * FROM guild WHERE id=?", guild.getLongID());
 		List<Row> prefixes = Database.get("SELECT * FROM prefixes WHERE id=?", guild.getLongID());
 		List<Row> autoroles = Database.get("SELECT * FROM autoroles WHERE id=?", guild.getLongID());
-		return new GuildMeta(guild.getShard(), guild.getName(), guild.getLongID(), guild.getIcon() != null ? guild.getIcon() : "", guild.getOwnerLongID(), guild.getAFKChannel() != null ? guild.getAFKChannel().getLongID() : 0L, guild.getAFKTimeout(), guild.getRegion().getID(), guild.getVerificationLevel().ordinal(), guild.getSystemChannel() != null ? guild.getSystemChannel().getLongID() : 0L, prefixes.stream().map(v -> (String) v.get("prefix")).collect(Collectors.toSet()), autoroles.stream().map(v -> (Long) v.get("role")).collect(Collectors.toSet()), (String) settings.get(0).get("language"), (String) settings.get(0).get("welcome"), (String) settings.get(0).get("pm"), (boolean) settings.get(0).get("lvlup"), (boolean) settings.get(0).get("premium"), (boolean) settings.get(0).get("newguild"), (boolean) settings.get(0).get("permission"));
+		return new GuildMeta(guild.getShard(),
+				guild.getName() != null ? guild.getName() : "",
+				guild.getLongID(),
+				guild.getIcon() != null ? guild.getIcon() : "",
+				guild.getOwnerLongID(),
+				guild.getAFKChannel() != null ? guild.getAFKChannel().getLongID() : 0L,
+				guild.getAFKTimeout(),
+				guild.getRegion() != null ? guild.getRegion().getID() : "error",
+				guild.getVerificationLevel() != null ? guild.getVerificationLevel().ordinal() : 0,
+				guild.getSystemChannel() != null ? guild.getSystemChannel().getLongID() : 0L,
+				prefixes.stream().map(v -> (String) v.get("prefix")).collect(Collectors.toSet()),
+				autoroles.stream().map(v -> (Long) v.get("role")).collect(Collectors.toSet()),
+				(String) settings.get(0).get("language"),
+				(String) settings.get(0).get("welcome"),
+				(String) settings.get(0).get("pm"),
+				(boolean) settings.get(0).get("lvlup"),
+				(boolean) settings.get(0).get("premium"),
+				(boolean) settings.get(0).get("newguild"),
+				(boolean) settings.get(0).get("permission")
+				/*"en",
+				"hi",
+				"groovy",
+				false,
+				false,
+				false,
+				false*/);
 	}
-
+	
 	/**
 	 * Get a user from the cache, if the user is not already in the cache the user will be put into it
+	 *
 	 * @param user The user implementation to getGuild the meta for
 	 * @return The user meta for the user implementation
 	 */
@@ -63,7 +90,7 @@ public class Caches {
 		List<Row> result = Database.get("SELECT * FROM user WHERE id=?;", user.getLongID());
 		return new UserMeta(user.getShard(), user.getName(), user.getLongID(), user.getDiscriminator(), user.getAvatar(), user.getPresence(), user.isBot(), (String) result.get(0).get("description"), (int) result.get(0).get("level"), (int) result.get(0).get("xp"), (int) result.get(0).get("maxxp"), (long) result.get(0).get("totalxp"), (int) result.get(0).get("coins"), (int) result.get(0).get("gems"), ItemProvider.getItemById((int) result.get(0).get("background")), (boolean) result.get(0).get("notifications"), (boolean) result.get(0).get("premium"), (Date) result.get(0).get("premiumexpiry"));
 	}
-
+	
 	/**
 	 * Get the guild cache
 	 * @return The guild cache
@@ -71,7 +98,7 @@ public class Caches {
 	//public static Cache<Long, GuildMeta> getGuildCache() {
 	//	return GUILDS;
 	//}
-
+	
 	/**
 	 * Get the user cache
 	 * @return The user cache
@@ -79,7 +106,7 @@ public class Caches {
 	//public static Cache<Long, UserMeta> getUserCache() {
 	//	return USERS;
 	//}
-
+	
 	//public static CacheManager getManager() {
 	//	return manager;
 	//}

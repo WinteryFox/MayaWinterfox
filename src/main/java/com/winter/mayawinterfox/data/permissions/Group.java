@@ -17,8 +17,8 @@ public class Group {
 	private final Set<String> permissions;
 	private final Set<IUser> members = new HashSet<>();
 	private Long roleID;
-
-	public Group(IGuild guild, String name) {
+	
+	Group(IGuild guild, String name) {
 		this.guild = guild;
 		this.name = name;
 		this.permissions = Database.get("SELECT permission FROM groups WHERE guild=? AND groupname=?;", guild.getLongID(), name).stream().map(v -> (String) v.get("permission")).collect(Collectors.toSet());

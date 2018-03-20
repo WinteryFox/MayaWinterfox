@@ -31,7 +31,7 @@ public class HTTPHandler {
 	 * @throws MalformedURLException When the URL is invalid
 	 */
 	public static URL requestCat() throws UnirestException, MalformedURLException {
-		return new URL(Unirest.get("http://www.random.cat/meow").asJson().getBody().getObject().getString("file"));
+		return new URL(Unirest.get("http://aws.random.cat/meow").asJson().getBody().getObject().getString("file"));
 	}
 
 	/**
