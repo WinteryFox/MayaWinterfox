@@ -74,6 +74,13 @@ public class TrackScheduler extends AudioEventAdapter {
 
 	@Override
 	public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
+		if (guild.getConnectedVoiceChannel() != null && guild.getConnectedVoiceChannel().getConnectedUsers().size() <= 1) {
+			queue.clear();
+			player.stopTrack();
+			guild.getConnectedVoiceChannel().leave();
+			MessageUtil.sendMessage(MusicUtils.getGuildMusicManager(guild).getBoundChannel(), "inactive-disconnected");
+			MusicUtils.getGuildMusicManager(guild).setBoundChannel(null);
+		}
 		this.lastTrack = track;
 		if (endReason.mayStartNext) {
 			if (repeat) {

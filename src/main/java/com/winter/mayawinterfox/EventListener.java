@@ -4,17 +4,17 @@ import com.winter.mayawinterfox.command.Commands;
 import com.winter.mayawinterfox.data.cache.Caches;
 import com.winter.mayawinterfox.data.cache.meta.GuildMeta;
 import com.winter.mayawinterfox.data.cache.meta.UserMeta;
+import com.winter.mayawinterfox.data.music.GuildMusicManager;
 import com.winter.mayawinterfox.data.schedule.Cooldowns;
 import com.winter.mayawinterfox.exceptions.ErrorHandler;
-import com.winter.mayawinterfox.util.ColorUtil;
-import com.winter.mayawinterfox.util.EmbedUtil;
-import com.winter.mayawinterfox.util.GuildUtil;
-import com.winter.mayawinterfox.util.MessageUtil;
+import com.winter.mayawinterfox.util.*;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.guild.GuildCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.guild.member.UserJoinEvent;
+import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelLeaveEvent;
 import sx.blah.discord.handle.obj.IChannel;
+import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.EmbedBuilder;
 
@@ -23,7 +23,30 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class EventListener {
-
+	
+	@EventSubscriber
+	public void onUserLeftVoice(UserVoiceChannelLeaveEvent e) {
+		try {
+			Commands.THREAD_POOL.submit(() -> {
+				IGuild guild = e.getGuild();
+				if (guild.getConnectedVoiceChannel() != null && guild.getConnectedVoiceChannel().getConnectedUsers().size() <= 1) {
+					GuildMusicManager manager = MusicUtils.getGuildMusicManager(guild);
+					manager.getScheduler().clearQueue();
+					manager.getPlayer().stopTrack();
+					guild.getConnectedVoiceChannel().leave();
+					MessageUtil.sendMessage(manager.getBoundChannel(), "inactive-disconnected");
+					MusicUtils.getGuildMusicManager(guild).setBoundChannel(null);
+				}
+			}).get(60, TimeUnit.SECONDS);
+		} catch (TimeoutException ex) {
+			ErrorHandler.log(ex, "thread-timeout");
+		} catch (InterruptedException ex) {
+			ErrorHandler.log(ex, "thread-interrupted");
+		} catch (ExecutionException ex) {
+			ErrorHandler.log(ex, "thread-execution");
+		}
+	}
+	
 	@EventSubscriber
 	public void onGuildCreated(GuildCreateEvent e) {
 		if (e.getClient().isReady()) {
