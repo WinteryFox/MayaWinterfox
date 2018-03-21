@@ -56,20 +56,29 @@ public class Caches {
 				guild.getSystemChannel() != null ? guild.getSystemChannel().getLongID() : 0L,
 				prefixes.stream().map(v -> (String) v.get("prefix")).collect(Collectors.toSet()),
 				autoroles.stream().map(v -> (Long) v.get("role")).collect(Collectors.toSet()),
+				guild.getChannelByID((Long) settings.get(0).get("welcomeChannel")),
 				(String) settings.get(0).get("language"),
 				(String) settings.get(0).get("welcome"),
 				(String) settings.get(0).get("pm"),
 				(boolean) settings.get(0).get("lvlup"),
 				(boolean) settings.get(0).get("premium"),
 				(boolean) settings.get(0).get("newguild"),
-				(boolean) settings.get(0).get("permission")
-				/*"en",
-				"hi",
-				"groovy",
-				false,
-				false,
-				false,
-				false*/);
+				(boolean) settings.get(0).get("permission"),
+				(boolean) settings.get(0).get("welcomeEnabled"),
+				(boolean) settings.get(0).get("welcomeEmbed"));
+		
+		/*Set<String> prefixes,
+		Set<Long> autoroles,
+		IChannel welcomeChannel,
+		String language,
+		String welcome,
+		String pm,
+		boolean levelupNotifications,
+		boolean premium,
+		boolean newGuild,
+		boolean permissions,
+		boolean welcomeEnabled,
+		boolean welcomeEmbed*/
 	}
 	
 	/**

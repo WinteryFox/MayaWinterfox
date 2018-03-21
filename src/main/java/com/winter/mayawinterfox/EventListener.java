@@ -37,8 +37,7 @@ public class EventListener {
 							guild.setNewGuild(false);
 						}
 					}
-				})
-				                    .get(15, TimeUnit.SECONDS);
+				}).get(15, TimeUnit.SECONDS);
 			} catch (TimeoutException ex) {
 				ErrorHandler.log(ex, "thread-timeout");
 			} catch (InterruptedException ex) {
@@ -68,8 +67,7 @@ public class EventListener {
 							user.setTotalXP(user.getTotalXP() + 30);
 						}
 					}
-				})
-				                    .get(15, TimeUnit.SECONDS);
+				}).get(15, TimeUnit.SECONDS);
 			} catch (TimeoutException ex) {
 				ErrorHandler.log(ex, "thread-timeout");
 			} catch (InterruptedException ex) {
@@ -99,8 +97,7 @@ public class EventListener {
 					else
 						MessageUtil.sendMessage(guild.getWelcomeChannel(), message);
 				}
-			})
-			                    .get(15, TimeUnit.SECONDS);
+			}).get(15, TimeUnit.SECONDS);
 		} catch (TimeoutException ex) {
 			ErrorHandler.log(ex, "thread-timeout");
 		} catch (InterruptedException ex) {

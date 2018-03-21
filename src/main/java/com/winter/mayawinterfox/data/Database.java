@@ -120,17 +120,19 @@ public class Database {
 	 * @return true upon successful setup and false on failure
 	 */
 	public static boolean setup() {
-		return (executeUnsafe("CREATE TABLE IF NOT EXISTS guild(" +
-				                      "id BIGINT PRIMARY KEY NOT NULL," +
-				                      "newguild BOOLEAN NOT NULL DEFAULT true," +
-				                      "language VARCHAR(2) NOT NULL DEFAULT 'en'," +
-				                      "welcomeEnabled BOOLEAN NOT NULL DEFAULT false," +
-				                      "welcomeEmbed BOOLEAN NOT NULL DEFAULT false," +
-				                      "welcome TEXT NOT NULL DEFAULT 'Welcome to [server] [user], we hope you enjoy your stay here!'," +
-				                      "pm TEXT NOT NULL DEFAULT 'Welcome to [server] [user], we hope you enjoy your stay here!',l" +
-				                      "vlup BOOLEAN NOT NULL DEFAULT true," +
-				"premium BOOLEAN NOT NULL DEFAULT false," +
-				"permission BOOLEAN NOT NULL DEFAULT true);")) &&
+		return (
+				executeUnsafe("CREATE TABLE IF NOT EXISTS guild(" +
+						"id BIGINT PRIMARY KEY NOT NULL," +
+						"newguild BOOLEAN NOT NULL DEFAULT TRUE," +
+						"language VARCHAR(2) NOT NULL DEFAULT 'en'," +
+						"welcomeEnabled BOOLEAN NOT NULL DEFAULT FALSE," +
+						"welcomeEmbed BOOLEAN NOT NULL DEFAULT FALSE," +
+						"welcomeChannel BIGINT NOT NULL DEFAULT 0," +
+						"welcome TEXT NOT NULL," +
+						"pm TEXT NOT NULL," +
+						"lvlup BOOLEAN NOT NULL DEFAULT TRUE," +
+						"premium BOOLEAN NOT NULL DEFAULT FALSE," +
+						"permission BOOLEAN NOT NULL DEFAULT TRUE);")) &&
 				(executeUnsafe("CREATE TABLE IF NOT EXISTS prefixes(" +
 						"id BIGINT NOT NULL," +
 						"prefix VARCHAR(128) NOT NULL," +
@@ -141,7 +143,7 @@ public class Database {
 						"PRIMARY KEY(id, role));")) &&
 				(executeUnsafe("CREATE TABLE IF NOT EXISTS user(" +
 						"id BIGINT PRIMARY KEY NOT NULL," +
-						"description VARCHAR(128) NOT NULL DEFAULT 'A very mysterious person...'," +
+						"description TEXT NOT NULL," +
 						"level INTEGER NOT NULL DEFAULT 1," +
 						"xp INTEGER NOT NULL DEFAULT 0," +
 						"maxxp INTEGER NOT NULL DEFAULT 420," +

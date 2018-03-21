@@ -1,6 +1,5 @@
 package com.winter.mayawinterfox.command;
 
-import com.winter.mayawinterfox.checks.PermissionChecks;
 import com.winter.mayawinterfox.command.impl.admin.*;
 import com.winter.mayawinterfox.command.impl.animal.CommandInventory;
 import com.winter.mayawinterfox.command.impl.animal.CommandShop;
@@ -39,8 +38,6 @@ import sx.blah.discord.util.EmbedBuilder;
 import sx.blah.discord.util.RequestBuffer;
 
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
@@ -187,9 +184,6 @@ public class Commands implements IListener<MessageReceivedEvent> {
 										} else {
 											RequestBuffer.request(() -> e.getMessage().addReaction(ReactionEmoji.of("\uD83D\uDEAB")));
 										}*/
-										e.getChannel().setTypingStatus(true);
-										gotten.getData().call(e);
-										e.getChannel().setTypingStatus(false);
 									} else {
 										if (gotten.getData().getCheck().test(e)) {
 											e.getChannel().setTypingStatus(true);
