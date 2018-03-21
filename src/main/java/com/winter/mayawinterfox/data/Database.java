@@ -64,7 +64,7 @@ public class Database {
 	 * @param sql The sql to execute
 	 * @return True on success false on failure
 	 */
-	private static boolean executeUnsafe(String sql) {
+	public static boolean executeUnsafe(String sql) {
 		try (
 				Connection con = poolingDataSource.getConnection();
 				Statement statement = con.createStatement()
@@ -121,12 +121,14 @@ public class Database {
 	 */
 	public static boolean setup() {
 		return (executeUnsafe("CREATE TABLE IF NOT EXISTS guild(" +
-						"id BIGINT PRIMARY KEY NOT NULL," +
-						"newguild BOOLEAN NOT NULL DEFAULT true," +
-						"language VARCHAR(2) NOT NULL DEFAULT 'en'," +
-				"welcome VARCHAR(128) DEFAULT null," +
-				"pm VARCHAR(128) DEFAULT null," +
-						"lvlup BOOLEAN NOT NULL DEFAULT true," +
+				                      "id BIGINT PRIMARY KEY NOT NULL," +
+				                      "newguild BOOLEAN NOT NULL DEFAULT true," +
+				                      "language VARCHAR(2) NOT NULL DEFAULT 'en'," +
+				                      "welcomeEnabled BOOLEAN NOT NULL DEFAULT false," +
+				                      "welcomeEmbed BOOLEAN NOT NULL DEFAULT false," +
+				                      "welcome TEXT NOT NULL DEFAULT 'Welcome to [server] [user], we hope you enjoy your stay here!'," +
+				                      "pm TEXT NOT NULL DEFAULT 'Welcome to [server] [user], we hope you enjoy your stay here!',l" +
+				                      "vlup BOOLEAN NOT NULL DEFAULT true," +
 				"premium BOOLEAN NOT NULL DEFAULT false," +
 				"permission BOOLEAN NOT NULL DEFAULT true);")) &&
 				(executeUnsafe("CREATE TABLE IF NOT EXISTS prefixes(" +
