@@ -166,7 +166,7 @@ public class GuildMeta extends Guild implements Serializable {
 	}
 
 	public void setCustomPermissions(boolean permissions) {
-		if (!Database.set("UPDATE guild SET permissions=? WHERE id=?", permissions, id))
+		if (!Database.set("UPDATE guild SET permission=? WHERE id=?", permissions, id))
 			throw new UpdateFailedException("Failed to update guild in database.");
 		this.permissions = permissions;
 	}

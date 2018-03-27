@@ -49,7 +49,7 @@ public class Main {
 			System.exit(1);
 		}
 		b.withRecommendedShardCount();
-
+		
 		b.registerListener(new Commands());
 		b.registerListener(new EventListener());
 
@@ -62,12 +62,6 @@ public class Main {
 
 		ItemProvider.loadFoods();
 		ItemProvider.loadItems();
-
-		//Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-		//	Caches.getManager().removeCache("guilds");
-		//	Caches.getManager().removeCache("users");
-		//	Caches.getManager().close();
-		//}));
 
 		musicManagers = new HashMap<>();
 		playerManager = new DefaultAudioPlayerManager();

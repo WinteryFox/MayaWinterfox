@@ -4,9 +4,7 @@ import com.winter.mayawinterfox.command.impl.admin.*;
 import com.winter.mayawinterfox.command.impl.animal.CommandInventory;
 import com.winter.mayawinterfox.command.impl.animal.CommandShop;
 import com.winter.mayawinterfox.command.impl.animal.CommandWolf;
-import com.winter.mayawinterfox.command.impl.developer.CommandEval;
 import com.winter.mayawinterfox.command.impl.developer.CommandSet;
-import com.winter.mayawinterfox.command.impl.developer.CommandUpdate;
 import com.winter.mayawinterfox.command.impl.fun.*;
 import com.winter.mayawinterfox.command.impl.image.*;
 import com.winter.mayawinterfox.command.impl.misc.CommandInvite;
@@ -49,10 +47,10 @@ public class Commands implements IListener<MessageReceivedEvent> {
 	public static final Map<Category, List<Node<Command>>> COMMAND_MAP = new EnumMap<>(Category.class);
 
 	static {
-		COMMAND_MAP.put(Category.DEV, new ArrayList<>(Arrays.asList(new CommandSet(), new CommandEval(), new CommandUpdate())));
+		COMMAND_MAP.put(Category.DEV, new ArrayList<>(Arrays.asList(new CommandSet())));
 		COMMAND_MAP.put(Category.STATUS, new ArrayList<>(Arrays.asList(new CommandPing(), new CommandHi())));
 		COMMAND_MAP.put(Category.FUN, new ArrayList<>(Arrays.asList(new CommandColor(), new CommandCoinFlip(), new CommandEightball(), new CommandHug(), /*new CommandKiss(), new CommandPat(),*/ new CommandCookie(), new CommandKawaii(), new CommandPornstar(), new CommandRate(), new CommandShoot(), new CommandWoop(), new CommandSay(), new CommandUrban(), new CommandSilentSay(), new CommandAnime())));
-		COMMAND_MAP.put(Category.ADMIN, new ArrayList<>(Arrays.asList(new CommandKick(), new CommandBan(), new CommandPrefix(), new CommandPurge(), new CommandAssign(), new CommandRemove(), new CommandLanguage(), new CommandPermission())));
+		COMMAND_MAP.put(Category.ADMIN, new ArrayList<>(Arrays.asList(new CommandKick(), new CommandBan(), new CommandPrefix(), new CommandPurge(), new CommandAssign(), new CommandRemove(), new CommandLanguage(), new CommandPermission(), new CommandWelcome())));
 		COMMAND_MAP.put(Category.ANIMAL, new ArrayList<>(Arrays.asList(new CommandWolf(), new CommandInventory())));
 		COMMAND_MAP.put(Category.PROFILE, new ArrayList<>(Arrays.asList(new CommandProfile())));
 		COMMAND_MAP.put(Category.MISC, new ArrayList<>(Arrays.asList(new CommandLinks(), new CommandInvite())));

@@ -4,11 +4,15 @@ import com.winter.mayawinterfox.command.Commands;
 import com.winter.mayawinterfox.data.cache.Caches;
 import com.winter.mayawinterfox.data.cache.meta.GuildMeta;
 import com.winter.mayawinterfox.data.cache.meta.UserMeta;
+import com.winter.mayawinterfox.data.http.HTTPHandler;
 import com.winter.mayawinterfox.data.music.GuildMusicManager;
 import com.winter.mayawinterfox.data.schedule.Cooldowns;
 import com.winter.mayawinterfox.exceptions.ErrorHandler;
 import com.winter.mayawinterfox.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sx.blah.discord.api.events.EventSubscriber;
+import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.guild.GuildCreateEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.guild.member.UserJoinEvent;
@@ -23,6 +27,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class EventListener {
+	
+	private final Logger LOGGER = LoggerFactory.getLogger(EventListener.class);
+	
+	@EventSubscriber
+	public void onReady(ReadyEvent e) {
+		LOGGER.info("Ready! Total guilds: " + e.getClient().getGuilds().size());
+		if (Main.config.get(Main.ConfigValue.DEBUG).equalsIgnoreCase("false")) {
+			HTTPHandler.postStats(e.getClient().getOurUser().getShard().getInfo()[0]);
+			LOGGER.info("Posted stats!");
+		}
+	}
 	
 	@EventSubscriber
 	public void onUserLeftVoice(UserVoiceChannelLeaveEvent e) {
@@ -60,7 +75,8 @@ public class EventListener {
 							guild.setNewGuild(false);
 						}
 					}
-				}).get(15, TimeUnit.SECONDS);
+					HTTPHandler.postStats(e.getClient().getShards().indexOf(e.getClient().getOurUser().getShard()));
+				}).get(30, TimeUnit.SECONDS);
 			} catch (TimeoutException ex) {
 				ErrorHandler.log(ex, "thread-timeout");
 			} catch (InterruptedException ex) {
@@ -106,7 +122,7 @@ public class EventListener {
 		try {
 			Commands.THREAD_POOL.submit(() -> {
 				GuildMeta guild = Caches.getGuild(e.getGuild());
-				if (guild.isWelcomeEnabled()) {
+				if (guild.isWelcomeEnabled() && guild.getWelcomeChannel() != null) {
 					UserMeta user = Caches.getUser(e.getUser());
 					String message = guild.getWelcome()
 					                      .replace("[user]", user.getName())
@@ -118,7 +134,7 @@ public class EventListener {
 						                                                                     .withTimestamp(e.getJoinTime())
 						                                                                     .build());
 					else
-						MessageUtil.sendMessage(guild.getWelcomeChannel(), message);
+						MessageUtil.sendRawMessage(guild.getWelcomeChannel(), message);
 				}
 			}).get(15, TimeUnit.SECONDS);
 		} catch (TimeoutException ex) {

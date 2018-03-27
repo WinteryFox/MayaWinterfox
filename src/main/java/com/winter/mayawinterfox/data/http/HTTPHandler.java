@@ -12,6 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.XML;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sx.blah.discord.api.internal.json.objects.EmbedObject;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.util.EmbedBuilder;
@@ -22,6 +24,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 public class HTTPHandler {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(HTTPHandler.class);
 
 	/**
 	 * Get a random cat image~ Nyan~!
@@ -40,26 +44,39 @@ public class HTTPHandler {
 	 * @param shard The shard to post stats for
 	 */
 	public static void postStats(int shard) {
-		JSONObject o = new JSONObject();
-		o.put("server_count", Main.getClient().getGuilds().size());
-		o.put("shard_id", shard);
-		o.put("shard_count", Main.getClient().getShardCount());
+		JSONObject pw = new JSONObject();
+		pw.put("server_count", Main.getClient().getGuilds().size());
+		pw.put("shard_id", shard);
+		pw.put("shard_count", Main.getClient().getShardCount());
+		
+		JSONObject org = new JSONObject();
+		org.put("shards", Main.getClient().getShards().stream().map(s -> s.getGuilds().size()).toArray());
 
 		try {
-			Unirest.post("https://bots.discord.pw/api/bots/289381714885869568/stats")
+			LOGGER.info("Content: " + pw.toString());
+			HttpResponse<JsonNode> result = Unirest.post("https://bots.discord.pw/api/bots/289381714885869568/stats")
 					.header("Authorization", Main.config.get(Main.ConfigValue.BOTS_PW_TOKEN))
 					.header("Content-Type", "application/json")
-					.body(o.toString())
+					.body(pw.toString())
 					.asJson();
+			LOGGER.info("Status: " + result.getStatus());
+			LOGGER.info("Text: " + result.getStatusText());
+			if (result.getBody() != null)
+				LOGGER.info("Response: " + result.getBody().toString());
 		} catch (UnirestException e) {
 			ErrorHandler.log(e, "Something went wrong while posting stats to bots.discord.pw!");
 		}
 		try {
-			Unirest.post("https://discordbots.org/api/bots/289381714885869568/stats")
+			LOGGER.info("Content: " + org.toString());
+			HttpResponse<JsonNode> result = Unirest.post("https://discordbots.org/api/bots/289381714885869568/stats")
 					.header("Authorization", Main.config.get(Main.ConfigValue.BOTS_ORG_TOKEN))
 					.header("Content-Type", "application/json")
-					.body(o.toString())
+					.body(org.toString())
 					.asJson();
+			LOGGER.info("Status: " + result.getStatus());
+			LOGGER.info("Text: " + result.getStatusText());
+			if (result.getBody() != null)
+				LOGGER.info("Response: " + result.getBody().toString());
 		} catch (UnirestException e) {
 			ErrorHandler.log(e, "Something went wrong while posting stats to discordbots.org!");
 		}
