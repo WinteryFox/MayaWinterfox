@@ -27,7 +27,7 @@ public class ParsingUtil {
 			long id = Long.parseLong(s);
 			return Main.getClient().fetchUser(id);
 		} else if (s.matches("[^#]+#\\d{4}")) {
-			return Main.getClient().getUsersByName(s.replaceAll("([^#]+)#\\d{4}", "$1")).parallelStream().filter(u -> u.getDiscriminator().equals(s.replaceAll(".+#(\\d{4})", "$1"))).findFirst().orElse(null);
+			return Main.getClient().getUsersByName(s.replaceAll("([^#]+)#\\d{4}", "$1")).parallelStream().filter(u -> u.getDiscriminator().equals(s.replaceAll(".+#(\\d{4})", "$1"))).findFirst().orElseThrow(() -> new IllegalArgumentException("No users found"));
 		}
 		throw new IllegalArgumentException("Not a valid user string!");
 	}
@@ -48,21 +48,20 @@ public class ParsingUtil {
 			long id = Long.parseLong(s);
 			return guild.getRoleByID(id);
 		} else {
-			return guild.getRolesByName(s).parallelStream().findFirst().orElseThrow(() -> new IllegalArgumentException("Not a valid role string."));
+			return guild.getRolesByName(s).parallelStream().findFirst().orElseThrow(() -> new IllegalArgumentException("No roles found."));
 		}
 	}
-
-	public static IChannel getChannel(IGuild guild,
-	                                  String s) {
-		LOGGER.debug(String.format("Passed in with '%s'...", s));
-		if (s.matches("#+")) {
-			s.replaceAll("#(a-z)", "$1");
-			return guild.getChannelsByName(s)
-			            .parallelStream()
-			            .findFirst()
-			            .orElseThrow(() -> new IllegalArgumentException("Not a valid channel string."));
+	
+	public static IChannel getChannel(IGuild guild, String s) {
+		LOGGER.info(String.format("Passed in with '%s'...", s));
+		if (s.matches("<#\\d+>")) {
+			long id = Long.parseLong(s.replaceAll("<#(\\d+)>", "$1"));
+			return guild.getChannelByID(id);
+		} else if (s.matches("\\d+")) {
+			long id = Long.parseLong(s);
+			return guild.getChannelByID(id);
 		} else {
-
+			return guild.getChannelsByName(s).parallelStream().findFirst().orElseThrow(() -> new IllegalArgumentException("No channels found"));
 		}
 	}
 

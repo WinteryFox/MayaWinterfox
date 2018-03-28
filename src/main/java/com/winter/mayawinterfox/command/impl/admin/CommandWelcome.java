@@ -5,6 +5,7 @@ import com.winter.mayawinterfox.command.Command;
 import com.winter.mayawinterfox.data.Node;
 import com.winter.mayawinterfox.data.cache.Caches;
 import com.winter.mayawinterfox.data.cache.meta.GuildMeta;
+import com.winter.mayawinterfox.data.dialog.impl.ChannelDialog;
 import com.winter.mayawinterfox.data.dialog.impl.InputDialog;
 import com.winter.mayawinterfox.util.MessageUtil;
 import com.winter.mayawinterfox.util.ParsingUtil;
@@ -54,16 +55,15 @@ public class CommandWelcome extends Node<Command> {
 							String[] args = MessageUtil.argsArray(e.getMessage());
 							IChannel channel;
 							if (args.length > 1)
-								channel = ParsingUtil.getChannel(MessageUtil.args(e.getMessage())
-								                                            .substring("welcome set ".length()));
+								channel = ParsingUtil.getChannel(e.getGuild(), MessageUtil.args(e.getMessage())
+										.substring("welcome channel ".length()));
 							else
-								channel = new ChannelDialog().open();
+								channel = new ChannelDialog(e.getChannel(), e.getAuthor()).open();
 							if (channel == null)
 								return false;
-
-							Caches.getGuild(e.getGuild())
-							      .setWelcome(welcome);
-							MessageUtil.sendMessage(e.getChannel(), "welcome-set", welcome);
+							
+							Caches.getGuild(e.getGuild()).setWelcomeChannel(channel);
+							MessageUtil.sendMessage(e.getChannel(), "welcome-channel-set", channel.mention());
 							return true;
 						}
 				), Collections.emptyList()),

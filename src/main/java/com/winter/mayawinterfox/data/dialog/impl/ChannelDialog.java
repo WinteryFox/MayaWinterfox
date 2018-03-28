@@ -9,7 +9,7 @@ import sx.blah.discord.handle.obj.IUser;
 
 import java.util.concurrent.TimeUnit;
 
-public class ChannelDialog extends Dialog<String> {
+public class ChannelDialog extends Dialog<IChannel> {
 
 	public ChannelDialog(IChannel channel,
 	                     IUser user) {
@@ -25,6 +25,6 @@ public class ChannelDialog extends Dialog<String> {
 		      ColorUtil.withinTwoHues(0.3333f, 0.8888f),
 		      1L,
 		      TimeUnit.MINUTES,
-		      o -> o == null ? null : ParsingUtil.getChannel(o));
+				o -> o == null ? null : ParsingUtil.getChannel(channel.getGuild(), o));
 	}
 }
