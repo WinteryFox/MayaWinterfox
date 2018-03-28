@@ -3,6 +3,7 @@ package com.winter.mayawinterfox.util;
 import com.winter.mayawinterfox.Main;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IRole;
 import sx.blah.discord.handle.obj.IUser;
@@ -48,6 +49,20 @@ public class ParsingUtil {
 			return guild.getRoleByID(id);
 		} else {
 			return guild.getRolesByName(s).parallelStream().findFirst().orElseThrow(() -> new IllegalArgumentException("Not a valid role string."));
+		}
+	}
+
+	public static IChannel getChannel(IGuild guild,
+	                                  String s) {
+		LOGGER.debug(String.format("Passed in with '%s'...", s));
+		if (s.matches("#+")) {
+			s.replaceAll("#(a-z)", "$1");
+			return guild.getChannelsByName(s)
+			            .parallelStream()
+			            .findFirst()
+			            .orElseThrow(() -> new IllegalArgumentException("Not a valid channel string."));
+		} else {
+
 		}
 	}
 

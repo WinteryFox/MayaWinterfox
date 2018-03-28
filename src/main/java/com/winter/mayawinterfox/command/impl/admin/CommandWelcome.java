@@ -5,7 +5,10 @@ import com.winter.mayawinterfox.command.Command;
 import com.winter.mayawinterfox.data.Node;
 import com.winter.mayawinterfox.data.cache.Caches;
 import com.winter.mayawinterfox.data.cache.meta.GuildMeta;
+import com.winter.mayawinterfox.data.dialog.impl.InputDialog;
 import com.winter.mayawinterfox.util.MessageUtil;
+import com.winter.mayawinterfox.util.ParsingUtil;
+import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.Permissions;
 
 import java.util.Arrays;
@@ -33,16 +36,34 @@ public class CommandWelcome extends Node<Command> {
 							if (args.length > 1)
 								welcome = MessageUtil.args(e.getMessage()).substring("welcome set ".length());
 							else
-								welcome =
+								welcome = new InputDialog(e.getChannel(), e.getAuthor(), "input-item").open();
+							if (welcome == null)
+								return false;
+
+							Caches.getGuild(e.getGuild())
+							      .setWelcome(welcome);
+							MessageUtil.sendMessage(e.getChannel(), "welcome-set", welcome);
 							return true;
 						}
 				), Collections.emptyList()),
 				new Node<>(new Command(
-						"set",
-						"set-help",
+						"channel",
+						"channel-help",
 						PermissionChecks.hasPermission(Permissions.MANAGE_SERVER),
 						e -> {
-							
+							String[] args = MessageUtil.argsArray(e.getMessage());
+							IChannel channel;
+							if (args.length > 1)
+								channel = ParsingUtil.getChannel(MessageUtil.args(e.getMessage())
+								                                            .substring("welcome set ".length()));
+							else
+								channel = new ChannelDialog().open();
+							if (channel == null)
+								return false;
+
+							Caches.getGuild(e.getGuild())
+							      .setWelcome(welcome);
+							MessageUtil.sendMessage(e.getChannel(), "welcome-set", welcome);
 							return true;
 						}
 				), Collections.emptyList()),
