@@ -68,11 +68,28 @@ public class CommandWelcome extends Node<Command> {
 						}
 				), Collections.emptyList()),
 				new Node<>(new Command(
-						"set",
-						"set-help",
+						"toggle",
+						"toggle-help",
 						PermissionChecks.hasPermission(Permissions.MANAGE_SERVER),
 						e -> {
-							
+							boolean enabled = Caches.getGuild(e.getGuild()).toggleWelcomeEnabled();
+							if (enabled)
+								MessageUtil.sendMessage(e.getChannel(), "welcome-enabled");
+							else
+								MessageUtil.sendMessage(e.getChannel(), "welcome-disabled");
+							return true;
+						}
+				), Collections.emptyList()),
+				new Node<>(new Command(
+						"embed",
+						"embed-help",
+						PermissionChecks.hasPermission(Permissions.MANAGE_SERVER),
+						e -> {
+							boolean enabled = Caches.getGuild(e.getGuild()).toggleWelcomeEmbed();
+							if (enabled)
+								MessageUtil.sendMessage(e.getChannel(), "embed-enabled");
+							else
+								MessageUtil.sendMessage(e.getChannel(), "embed-disabled");
 							return true;
 						}
 				), Collections.emptyList())));

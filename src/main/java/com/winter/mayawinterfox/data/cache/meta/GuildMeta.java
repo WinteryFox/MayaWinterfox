@@ -174,20 +174,20 @@ public class GuildMeta extends Guild implements Serializable {
 	public boolean isWelcomeEnabled() {
 		return welcomeEnabled;
 	}
-
-	public void toggleWelcomeEnabled() {
+	
+	public boolean toggleWelcomeEnabled() {
 		if (!Database.set("UPDATE guild SET welcomeEnabled=? WHERE id=?", !welcomeEnabled, id))
 			throw new UpdateFailedException("Failed to update guild in database.");
-		welcomeEnabled = !welcomeEnabled;
+		return welcomeEnabled = !welcomeEnabled;
 	}
 
 	public boolean isWelcomeEmbed() {
 		return welcomeEmbed;
 	}
-
-	public void toggleWelcomeEmbed() {
+	
+	public boolean toggleWelcomeEmbed() {
 		if (!Database.set("UPDATE guild SET welcomeEmbed=? WHERE id=?", !welcomeEmbed, id))
 			throw new UpdateFailedException("Failed to update guild in database.");
-		welcomeEmbed = !welcomeEmbed;
+		return welcomeEmbed = !welcomeEmbed;
 	}
 }
