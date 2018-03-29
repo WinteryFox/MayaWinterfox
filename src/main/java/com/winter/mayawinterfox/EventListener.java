@@ -1,6 +1,7 @@
 package com.winter.mayawinterfox;
 
 import com.winter.mayawinterfox.command.Commands;
+import com.winter.mayawinterfox.data.Database;
 import com.winter.mayawinterfox.data.cache.Caches;
 import com.winter.mayawinterfox.data.cache.meta.GuildMeta;
 import com.winter.mayawinterfox.data.cache.meta.UserMeta;
@@ -92,6 +93,7 @@ public class EventListener {
 	public void onGuildDeleted(GuildLeaveEvent e) {
 		if (e.getClient().isReady()) {
 			LOGGER.info("Lost a guild! Currently in " + e.getClient().getGuilds().size() + " guilds!");
+			Database.set("UPDATE guild SET newguild=TRUE WHERE id=?;", e.getGuild().getLongID());
 		}
 	}
 
