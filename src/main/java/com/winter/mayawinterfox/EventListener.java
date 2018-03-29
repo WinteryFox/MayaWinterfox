@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import sx.blah.discord.api.events.EventSubscriber;
 import sx.blah.discord.handle.impl.events.ReadyEvent;
 import sx.blah.discord.handle.impl.events.guild.GuildCreateEvent;
+import sx.blah.discord.handle.impl.events.guild.GuildLeaveEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.guild.member.UserJoinEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelLeaveEvent;
@@ -75,7 +76,7 @@ public class EventListener {
 							guild.setNewGuild(false);
 						}
 					}
-					HTTPHandler.postStats(e.getClient().getShards().indexOf(e.getClient().getOurUser().getShard()));
+					LOGGER.info("Gained a guild! Currently in " + e.getClient().getGuilds().size() + " guilds!");
 				}).get(30, TimeUnit.SECONDS);
 			} catch (TimeoutException ex) {
 				ErrorHandler.log(ex, "thread-timeout");
@@ -84,6 +85,13 @@ public class EventListener {
 			} catch (ExecutionException ex) {
 				ErrorHandler.log(ex, "thread-execution");
 			} catch (DiscordException ignored) { }
+		}
+	}
+	
+	@EventSubscriber
+	public void onGuildDeleted(GuildLeaveEvent e) {
+		if (e.getClient().isReady()) {
+			LOGGER.info("Lost a guild! Currently in " + e.getClient().getGuilds().size() + " guilds!");
 		}
 	}
 
