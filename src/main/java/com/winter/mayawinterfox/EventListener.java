@@ -19,8 +19,11 @@ import sx.blah.discord.handle.impl.events.guild.GuildLeaveEvent;
 import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
 import sx.blah.discord.handle.impl.events.guild.member.UserJoinEvent;
 import sx.blah.discord.handle.impl.events.guild.voice.user.UserVoiceChannelLeaveEvent;
+import sx.blah.discord.handle.impl.events.shard.ReconnectSuccessEvent;
+import sx.blah.discord.handle.obj.ActivityType;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
+import sx.blah.discord.handle.obj.StatusType;
 import sx.blah.discord.util.DiscordException;
 import sx.blah.discord.util.EmbedBuilder;
 
@@ -35,10 +38,16 @@ public class EventListener {
 	@EventSubscriber
 	public void onReady(ReadyEvent e) {
 		LOGGER.info("Ready! Total guilds: " + e.getClient().getGuilds().size());
+		e.getClient().changePresence(StatusType.ONLINE, ActivityType.PLAYING, ".mayahelp | .mayainvite");
 		if (Main.config.get(Main.ConfigValue.DEBUG).equalsIgnoreCase("false")) {
 			HTTPHandler.postStats(e.getClient().getOurUser().getShard().getInfo()[0]);
 			LOGGER.info("Posted stats!");
 		}
+	}
+	
+	@EventSubscriber
+	public void onReconnect(ReconnectSuccessEvent e) {
+		e.getClient().changePresence(StatusType.ONLINE, ActivityType.PLAYING, ".mayahelp | .mayainvite");
 	}
 	
 	@EventSubscriber
