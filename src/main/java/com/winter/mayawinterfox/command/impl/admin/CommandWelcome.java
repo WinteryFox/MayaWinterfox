@@ -24,12 +24,12 @@ public class CommandWelcome extends Node<Command> {
 				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
 				e -> {
 					GuildMeta guild = Caches.getGuild(e.getGuild());
-					MessageUtil.sendMessage(e.getChannel(), "welcome-message", guild.getWelcome());
+					MessageUtil.sendMessage(e.getChannel(), "welcome-message", guild.getWelcome(), guild.isWelcomeEnabled() ? "ENABLED" : "DISABLED", guild.getWelcomeChannel() != null ? guild.getWelcomeChannel().mention() : "NOT SET");
 					return true;
 				}
 		), Arrays.asList(new Node<>(new Command(
 						"set",
-						"set-help",
+						"welcome-set-help",
 						PermissionChecks.hasPermission(Permissions.MANAGE_SERVER),
 						e -> {
 							String[] args = MessageUtil.argsArray(e.getMessage());
@@ -49,7 +49,7 @@ public class CommandWelcome extends Node<Command> {
 				), Collections.emptyList()),
 				new Node<>(new Command(
 						"channel",
-						"channel-help",
+						"welcome-channel-help",
 						PermissionChecks.hasPermission(Permissions.MANAGE_SERVER),
 						e -> {
 							String[] args = MessageUtil.argsArray(e.getMessage());
@@ -69,7 +69,7 @@ public class CommandWelcome extends Node<Command> {
 				), Collections.emptyList()),
 				new Node<>(new Command(
 						"toggle",
-						"toggle-help",
+						"welcome-toggle-help",
 						PermissionChecks.hasPermission(Permissions.MANAGE_SERVER),
 						e -> {
 							boolean enabled = Caches.getGuild(e.getGuild()).toggleWelcomeEnabled();
@@ -82,7 +82,7 @@ public class CommandWelcome extends Node<Command> {
 				), Collections.emptyList()),
 				new Node<>(new Command(
 						"embed",
-						"embed-help",
+						"welcome-embed-help",
 						PermissionChecks.hasPermission(Permissions.MANAGE_SERVER),
 						e -> {
 							boolean enabled = Caches.getGuild(e.getGuild()).toggleWelcomeEmbed();
