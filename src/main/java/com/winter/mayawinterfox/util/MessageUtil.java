@@ -39,11 +39,11 @@ public class MessageUtil {
 
 	public static Message sendMessage(TextChannel channel, String messageKey, Consumer<EmbedCreateSpec> embed, InputStream file, String fileName, Object... params) {
 		try {
-			return new MessageCreateSpec()
+			channel.createMessage(spec -> spec
 					.setContent(Localisation.getMessage(channel.getGuild().block(), messageKey, params))
 					.setEmbed(embed)
 					.setFile(fileName, file)
-					.setTts(false);
+					.setTts(false)).block();
 		} catch (Exception e) {
 			ErrorHandler.log(e, channel, "error");
 		} finally {
@@ -58,11 +58,11 @@ public class MessageUtil {
 		return null;
 	}
 
-	public static Message sendMessage(IChannel channel, EmbedObject embed, InputStream file, String fileName) {
+	public static Message sendMessage(TextChannel channel, Consumer<EmbedCreateSpec> embed, InputStream file, String fileName) {
 		try {
-			return RequestBuffer.request(() -> {
-				return channel.sendFile(embed, file, fileName);
-			}).get();
+			channel.createMessage(spec -> spec
+					.setFile(fileName, file)
+					.setTts(false)).block();
 		} catch (Exception e) {
 			ErrorHandler.log(e, channel, "error");
 		} finally {
@@ -82,10 +82,9 @@ public class MessageUtil {
 	 * @param channel The channel to send the message in
 	 * @param embed The embed object to send
 	 */
-	public static Message sendMessage(IChannel channel, EmbedObject embed) {
-		return RequestBuffer.request(() -> {
-			return channel.sendMessage(embed);
-		}).get();
+	public static Message sendMessage(TextChannel channel, Consumer<EmbedCreateSpec> embed) {
+		channel.createMessage(spec -> spec
+				.setEmbed(embed)).block();
 	}
 
 	/**
