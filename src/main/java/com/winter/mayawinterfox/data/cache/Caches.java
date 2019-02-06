@@ -5,17 +5,18 @@ import com.winter.mayawinterfox.data.Row;
 import com.winter.mayawinterfox.data.cache.meta.GuildMeta;
 import com.winter.mayawinterfox.data.cache.meta.UserMeta;
 import com.winter.mayawinterfox.data.item.ItemProvider;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.util.Snowflake;
 
 import java.sql.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class Caches {
-	
+
 	//private static final Logger LOGGER = LoggerFactory.getLogger(Caches.class);
-	
+
 	//private static CacheManager manager = CacheManagerBuilder.newCacheManagerBuilder()
 	//		.withCache("guilds",
 	//				CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, GuildMeta.class, ResourcePoolsBuilder.heap(1000)))
@@ -23,14 +24,14 @@ public class Caches {
 	//				CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, UserMeta.class, ResourcePoolsBuilder.heap(5000))).build(true);
 	//private static Cache<Long, GuildMeta> GUILDS = manager.getCache("guilds", Long.class, GuildMeta.class);
 	//private static Cache<Long, UserMeta> USERS = manager.getCache("users", Long.class, UserMeta.class);
-	
+
 	/**
 	 * Get a guild from the cache, if the guild is not already in the cache the guild will be put into it
 	 *
 	 * @param guild The guild implementation to getGuild the meta for
 	 * @return The guild meta for the guild implementation
 	 */
-	public static GuildMeta getGuild(IGuild guild) {
+	public static GuildMeta getGuild(Guild guild) {
 		/*if (!GUILDS.containsKey(guild.getLongID())) {
 			Database.set("INSERT IGNORE INTO guild (id) VALUES (?);", guild.getLongID());
 			Map<String, List<Object>> settings = Database.getGuild("SELECT * FROM guild WHERE id=?", guild.getLongID());
@@ -40,23 +41,14 @@ public class Caches {
 			LOGGER.trace("Put guild meta for guild " + guild.getName() + " in the cache.");
 		}
 		return GUILDS.getGuild(guild.getLongID());*/
-		Database.set("INSERT IGNORE INTO guild (id) VALUES (?);", guild.getLongID());
-		List<Row> settings = Database.get("SELECT * FROM guild WHERE id=?", guild.getLongID());
-		List<Row> prefixes = Database.get("SELECT * FROM prefixes WHERE id=?", guild.getLongID());
-		List<Row> autoroles = Database.get("SELECT * FROM autoroles WHERE id=?", guild.getLongID());
-		return new GuildMeta(guild.getShard(),
-				guild.getName() != null ? guild.getName() : "",
-				guild.getLongID(),
-				guild.getIcon() != null ? guild.getIcon() : "",
-				guild.getOwnerLongID(),
-				guild.getAFKChannel() != null ? guild.getAFKChannel().getLongID() : 0L,
-				guild.getAFKTimeout(),
-				guild.getRegion() != null ? guild.getRegion().getID() : "error",
-				guild.getVerificationLevel() != null ? guild.getVerificationLevel().ordinal() : 0,
-				guild.getSystemChannel() != null ? guild.getSystemChannel().getLongID() : 0L,
+		Database.set("INSERT IGNORE INTO guild (id) VALUES (?);", guild.getId().asLong());
+		List<Row> settings = Database.get("SELECT * FROM guild WHERE id=?", guild.getId().asLong());
+		List<Row> prefixes = Database.get("SELECT * FROM prefixes WHERE id=?", guild.getId().asLong());
+		List<Row> autoroles = Database.get("SELECT * FROM autoroles WHERE id=?", guild.getId().asLong());
+		return new GuildMeta(guild,
 				prefixes.stream().map(v -> (String) v.get("prefix")).collect(Collectors.toSet()),
 				autoroles.stream().map(v -> (Long) v.get("role")).collect(Collectors.toSet()),
-				guild.getChannelByID((Long) settings.get(0).get("welcomeChannel")),
+				guild.getChannelById(Snowflake.of((Long) settings.get(0).get("welcomeChannel"))).block(),
 				(String) settings.get(0).get("language"),
 				(String) settings.get(0).get("welcome"),
 				(String) settings.get(0).get("pm"),
@@ -80,14 +72,14 @@ public class Caches {
 		boolean welcomeEnabled,
 		boolean welcomeEmbed*/
 	}
-	
+
 	/**
 	 * Get a user from the cache, if the user is not already in the cache the user will be put into it
 	 *
 	 * @param user The user implementation to getGuild the meta for
 	 * @return The user meta for the user implementation
 	 */
-	public static UserMeta getUser(IUser user) {
+	public static UserMeta getUser(User user) {
 		/*if (!USERS.containsKey(user.getLongID())) {
 			Database.set("INSERT IGNORE INTO user (id) VALUES (?);", user.getLongID());
 			HashMap<String, List<Object>> result = Database.getGuild("SELECT * FROM user WHERE id=?;", user.getLongID());
@@ -95,11 +87,22 @@ public class Caches {
 			LOGGER.trace("Put user meta for user " + user.getName() + " in the cache.");
 		}
 		return USERS.getGuild(user.getLongID());*/
-		Database.set("INSERT IGNORE INTO user (id) VALUES (?);", user.getLongID());
-		List<Row> result = Database.get("SELECT * FROM user WHERE id=?;", user.getLongID());
-		return new UserMeta(user.getShard(), user.getName(), user.getLongID(), user.getDiscriminator(), user.getAvatar(), user.getPresence(), user.isBot(), (String) result.get(0).get("description"), (int) result.get(0).get("level"), (int) result.get(0).get("xp"), (int) result.get(0).get("maxxp"), (long) result.get(0).get("totalxp"), (int) result.get(0).get("coins"), (int) result.get(0).get("gems"), ItemProvider.getItemById((int) result.get(0).get("background")), (boolean) result.get(0).get("notifications"), (boolean) result.get(0).get("premium"), (Date) result.get(0).get("premiumexpiry"));
+		Database.set("INSERT IGNORE INTO user (id) VALUES (?);", user.getId().asLong());
+		List<Row> result = Database.get("SELECT * FROM user WHERE id=?;", user.getId().asLong());
+		return new UserMeta(user,
+				(String) result.get(0).get("description"),
+				(int) result.get(0).get("level"),
+				(int) result.get(0).get("xp"),
+				(int) result.get(0).get("maxxp"),
+				(long) result.get(0).get("totalxp"),
+				(int) result.get(0).get("coins"),
+				(int) result.get(0).get("gems"),
+				ItemProvider.getItemById((int) result.get(0).get("background")),
+				(boolean) result.get(0).get("notifications"),
+				(boolean) result.get(0).get("premium"),
+				(Date) result.get(0).get("premiumexpiry"));
 	}
-	
+
 	/**
 	 * Get the guild cache
 	 * @return The guild cache
@@ -107,7 +110,7 @@ public class Caches {
 	//public static Cache<Long, GuildMeta> getGuildCache() {
 	//	return GUILDS;
 	//}
-	
+
 	/**
 	 * Get the user cache
 	 * @return The user cache
@@ -115,7 +118,7 @@ public class Caches {
 	//public static Cache<Long, UserMeta> getUserCache() {
 	//	return USERS;
 	//}
-	
+
 	//public static CacheManager getManager() {
 	//	return manager;
 	//}

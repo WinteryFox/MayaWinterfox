@@ -1,52 +1,49 @@
 package com.winter.mayawinterfox.util;
 
-import com.vdurmont.emoji.Emoji;
-import com.winter.mayawinterfox.Main;
 import com.winter.mayawinterfox.data.cache.Caches;
 import com.winter.mayawinterfox.data.locale.Localisation;
 import com.winter.mayawinterfox.exceptions.ErrorHandler;
-import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.handle.impl.obj.ReactionEmoji;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.util.MessageBuilder;
-import sx.blah.discord.util.RequestBuffer;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.core.spec.MessageCreateSpec;
+import discord4j.rest.json.request.EmbedRequest;
+import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.function.Consumer;
 
 public class MessageUtil {
 
-	public static String[] argsArray(IMessage m) {
-		Optional<String> o = Caches.getGuild(m.getGuild()).getPrefixes().stream().filter(m.getContent()::startsWith).findAny();
-		return o.map(s -> m.getContent().substring(s.length())).orElseGet(m::getContent).split("\\s+");
+	public static String[] argsArray(Message m) {
+		Optional<String> o = Caches.getGuild(Objects.requireNonNull(m.getGuild().block())).getPrefixes().stream().filter(m.getContent().get()::startsWith).findAny();
+		return o.map(s -> m.getContent().get().substring(s.length())).orElseGet(m.getContent()::toString).split("\\s+");
 	}
 
-	public static String[] argsArray(IGuild g, String m) {
+	public static String[] argsArray(Guild g, String m) {
 		Optional<String> o = Caches.getGuild(g).getPrefixes().stream().filter(m::startsWith).findAny();
 		return o.map(s -> m.substring(s.length())).orElse(m).split("\\s+");
 	}
 
-	public static String args(IMessage m) {
-		return Arrays.stream(argsArray(m)).collect(Collectors.joining(" "));
+	public static String args(Message m) {
+		return String.join(" ", argsArray(m));
 	}
 
-	public static IMessage sendMessage(IChannel channel, String messageKey, Object... params) {
-		return RequestBuffer.request(() -> { return channel.sendMessage(Localisation.getMessage(channel.getGuild(), messageKey, params)); }).get();
+	public static Mono<Message> sendMessage(TextChannel channel, String messageKey, Object... params) {
+		return channel.createMessage(Localisation.getMessage(channel.getGuild().block(), messageKey, params)).single();
 	}
 
-	public static IMessage sendMessage(IChannel channel, String messageKey, EmbedObject embed, InputStream file, String fileName, Object... params) {
+	public static Message sendMessage(TextChannel channel, String messageKey, Consumer<EmbedCreateSpec> embed, InputStream file, String fileName, Object... params) {
 		try {
-			return new MessageBuilder(Main.getClient())
-					.withChannel(channel)
-					.withContent(Localisation.getMessage(channel.getGuild(), messageKey, params))
-					.withEmbed(embed)
-					.withFile(file, fileName)
-					.send();
+			return new MessageCreateSpec()
+					.setContent(Localisation.getMessage(channel.getGuild().block(), messageKey, params))
+					.setEmbed(embed)
+					.setFile(fileName, file)
+					.setTts(false);
 		} catch (Exception e) {
 			ErrorHandler.log(e, channel, "error");
 		} finally {
@@ -61,7 +58,7 @@ public class MessageUtil {
 		return null;
 	}
 
-	public static IMessage sendMessage(IChannel channel, EmbedObject embed, InputStream file, String fileName) {
+	public static Message sendMessage(IChannel channel, EmbedObject embed, InputStream file, String fileName) {
 		try {
 			return RequestBuffer.request(() -> {
 				return channel.sendFile(embed, file, fileName);
@@ -85,7 +82,7 @@ public class MessageUtil {
 	 * @param channel The channel to send the message in
 	 * @param embed The embed object to send
 	 */
-	public static IMessage sendMessage(IChannel channel, EmbedObject embed) {
+	public static Message sendMessage(IChannel channel, EmbedObject embed) {
 		return RequestBuffer.request(() -> {
 			return channel.sendMessage(embed);
 		}).get();

@@ -2,7 +2,7 @@ package com.winter.mayawinterfox.data.locale;
 
 import com.winter.mayawinterfox.data.cache.Caches;
 import com.winter.mayawinterfox.exceptions.impl.UpdateFailedException;
-import sx.blah.discord.handle.obj.IGuild;
+import discord4j.core.object.entity.Guild;
 
 import java.util.ResourceBundle;
 
@@ -20,7 +20,7 @@ public class Localisation {
 	 * @param guild The guild to check the language of
 	 * @return Returns the 2 letter code for the language
 	 */
-	private static String checkLanguage(IGuild guild) {
+	private static String checkLanguage(Guild guild) {
 		return Caches.getGuild(guild).getLanguage();
 	}
 
@@ -30,7 +30,7 @@ public class Localisation {
 	 * @param language The language to change to
 	 * @return true on success, false on failure
 	 */
-	public static boolean changeLanguage(IGuild guild, String language) {
+	public static boolean changeLanguage(Guild guild, String language) {
 		try {
 			switch (language) {
 				case "en":
@@ -55,7 +55,7 @@ public class Localisation {
 	 * @param guild The guild to update
 	 * @param language The language to update to
 	 */
-	private static void updateGuildLanguage(IGuild guild, String language) throws UpdateFailedException {
+	private static void updateGuildLanguage(Guild guild, String language) throws UpdateFailedException {
 		Caches.getGuild(guild).setLanguage(language);
 	}
 
@@ -66,7 +66,7 @@ public class Localisation {
 	 * @param params The params to replace in the message
 	 * @return Returns a localised message
 	 */
-	public static String getMessage(IGuild guild, String messageKey, Object... params) {
+	public static String getMessage(Guild guild, String messageKey, Object... params) {
 		String lang = checkLanguage(guild);
 		switch (lang) {
 			case "en":
@@ -87,7 +87,7 @@ public class Localisation {
 	 * @param params The params to replace in the message
 	 * @return localised message
 	 */
-	public static String of(IGuild guild, String messageKey, Object... params) {
+	public static String of(Guild guild, String messageKey, Object... params) {
 		return getMessage(guild, messageKey, params);
 	}
 

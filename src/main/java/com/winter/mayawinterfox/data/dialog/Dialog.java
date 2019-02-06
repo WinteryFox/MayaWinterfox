@@ -1,18 +1,17 @@
 package com.winter.mayawinterfox.data.dialog;
 
-import com.vdurmont.emoji.EmojiManager;
 import com.winter.mayawinterfox.Main;
 import com.winter.mayawinterfox.data.locale.Localisation;
 import com.winter.mayawinterfox.exceptions.ErrorHandler;
 import com.winter.mayawinterfox.util.MessageUtil;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.impl.events.guild.channel.message.reaction.ReactionAddEvent;
-import sx.blah.discord.handle.impl.obj.ReactionEmoji;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IMessage;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.util.EmbedBuilder;
+import discord4j.core.event.domain.message.MessageEvent;
+import discord4j.core.event.domain.message.ReactionAddEvent;
+import discord4j.core.object.entity.*;
+import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.spec.EmbedCreateSpec;
+import discord4j.rest.json.request.EmbedFooterRequest;
+import discord4j.rest.json.request.EmbedRequest;
+import discord4j.rest.json.request.EmbedThumbnailRequest;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -22,8 +21,8 @@ import java.util.function.Function;
 
 public class Dialog<T> {
 	private DialogType type;
-	private IChannel channel;
-	private IUser user;
+	private TextChannel channel;
+	private User user;
 	private String thumbnail;
 	private String title;
 	private Object[] titleReplacements;
@@ -35,7 +34,7 @@ public class Dialog<T> {
 	private TimeUnit timeUnit = TimeUnit.MINUTES;
 	private Function<String, T> function;
 
-	public Dialog(DialogType type, IChannel channel, IUser user, String thumbnail, String title, Object[] titleReplacements, String description, Object[] descriptionReplacements, Map<String, T> choices, Color color, Long timeout, TimeUnit timeUnit, Function<String, T> function) {
+	public Dialog(DialogType type, TextChannel channel, User user, String thumbnail, String title, Object[] titleReplacements, String description, Object[] descriptionReplacements, Map<String, T> choices, Color color, Long timeout, TimeUnit timeUnit, Function<String, T> function) {
 		this.type = type;
 		this.channel = channel;
 		this.user = user;
@@ -55,11 +54,11 @@ public class Dialog<T> {
 		return type;
 	}
 
-	private IChannel getChannel() {
+	private TextChannel getChannel() {
 		return channel;
 	}
 
-	private IUser getUser() {
+	private User getUser() {
 		return user;
 	}
 
@@ -111,16 +110,13 @@ public class Dialog<T> {
 				list.append("**").append(n).append(".**").append(" ").append(entry.getKey()).append("\n");
 				n++;
 			}
-			IMessage message = MessageUtil.sendMessage(this.getChannel(), new EmbedBuilder()
-					.withThumbnail(this.getThumbnail())
-					.withTitle(Localisation.getMessage(this.getChannel().getGuild(), this.getTitle()))
-					.withTitle(Localisation.getMessage(this.getChannel().getGuild(), this.getTitle()))
-					.appendDescription(Localisation.getMessage(this.getChannel().getGuild(), this.getDescription()))
-					.appendDescription("\n\n")
-					.appendDescription(list.toString())
-					.withFooterText(Localisation.getMessage(this.getChannel().getGuild(), "pick-reaction"))
-					.withColor(this.getColor())
-					.build());
+			Message message = MessageUtil.sendMessage(this.getChannel(), new EmbedCreateSpec()
+					.setThumbnail(this.getThumbnail())
+					.setTitle(Localisation.getMessage(this.getChannel().getGuild().block(), this.getTitle()))
+					.setDescription(Localisation.getMessage(this.getChannel().getGuild().block(), this.getDescription()) + "\n\n" + list.toString())
+					.setFooter(Localisation.getMessage(this.getChannel().getGuild().block(), "pick-reaction"), null)
+					.setColor(this.getColor())
+					.asRequest());
 			MessageUtil.addReaction(message, EmojiManager.getForAlias("x"));
 			HashMap<String, T> c = new HashMap<>();
 			int i = 1;

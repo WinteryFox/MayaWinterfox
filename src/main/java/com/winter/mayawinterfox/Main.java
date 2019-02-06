@@ -3,15 +3,14 @@ package com.winter.mayawinterfox;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
-import com.winter.mayawinterfox.command.Commands;
 import com.winter.mayawinterfox.data.Database;
 import com.winter.mayawinterfox.data.item.ItemProvider;
 import com.winter.mayawinterfox.data.music.GuildMusicManager;
+import discord4j.core.DiscordClient;
+import discord4j.core.DiscordClientBuilder;
+import discord4j.core.object.entity.Guild;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sx.blah.discord.api.ClientBuilder;
-import sx.blah.discord.api.IDiscordClient;
-import sx.blah.discord.handle.obj.IGuild;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,12 +18,12 @@ import java.util.*;
 
 public class Main {
 
-	public static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(Main.class);
 	public static Map<ConfigValue, String> config = new EnumMap<>(ConfigValue.class);
-	private static IDiscordClient client = null;
+	private static DiscordClient client = null;
 
 	public static AudioPlayerManager playerManager;
-	public static Map<IGuild, GuildMusicManager> musicManagers;
+	public static Map<Guild, GuildMusicManager> musicManagers;
 
 	/**
 	 * Main method, guh!
@@ -38,20 +37,18 @@ public class Main {
 		configProperties.close();
 		p.keySet().forEach(k -> config.put(ConfigValue.from(k.toString()), p.getProperty(k.toString())));
 
-		ClientBuilder b = new ClientBuilder();
-		b.setMaxReconnectAttempts(0);
+		DiscordClientBuilder b = new DiscordClientBuilder("");
 		if(config.get(ConfigValue.DEBUG).equalsIgnoreCase("false")) {
-			b.withToken(config.get(ConfigValue.TOKEN));
+			b.setToken(config.get(ConfigValue.TOKEN));
 		} else if (config.get(ConfigValue.DEBUG).equalsIgnoreCase("true")) {
-			b.withToken(config.get(ConfigValue.DEBUG_TOKEN));
+			b.setToken(config.get(ConfigValue.DEBUG_TOKEN));
 		} else {
 			LOGGER.error("Invalid debug value, it must be 'true' or 'false'");
 			System.exit(1);
 		}
-		b.withRecommendedShardCount();
-		
-		b.registerListener(new Commands());
-		b.registerListener(new EventListener());
+		b.setShardCount(10);
+
+		// TODO: init command and even listeners
 
 		Database.connect();
 		if (!Database.setup()) {
@@ -68,14 +65,15 @@ public class Main {
 		AudioSourceManagers.registerRemoteSources(playerManager);
 		AudioSourceManagers.registerLocalSource(playerManager);
 
-		client = b.login();
+		client = b.build();
+		client.login().block();
 	}
 
 	/**
 	 * Get the discord client
 	 * @return Returns the IDiscordClient instance
 	 */
-	public static IDiscordClient getClient() {
+	public static DiscordClient getClient() {
 		return client;
 	}
 

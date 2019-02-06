@@ -3,19 +3,18 @@ package com.winter.mayawinterfox.data.cache.meta;
 import com.winter.mayawinterfox.Main;
 import com.winter.mayawinterfox.data.Database;
 import com.winter.mayawinterfox.exceptions.impl.UpdateFailedException;
-import sx.blah.discord.api.IShard;
-import sx.blah.discord.handle.impl.obj.Guild;
-import sx.blah.discord.handle.obj.IChannel;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.GuildChannel;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.Set;
 
-public class GuildMeta extends Guild implements Serializable {
+public class GuildMeta {
 
+	private final Guild guild;
 	private Set<String> prefixes;
 	private Set<Long> autoroles;
-	private IChannel welcomeChannel;
+	private GuildChannel welcomeChannel;
 	private String language;
 	private String welcome;
 	private String pm;
@@ -26,19 +25,10 @@ public class GuildMeta extends Guild implements Serializable {
 	private boolean welcomeEnabled;
 	private boolean welcomeEmbed;
 
-	public GuildMeta(IShard shard,
-	                 String name,
-	                 long id,
-	                 String icon,
-	                 long ownerID,
-	                 long afkChannel,
-	                 int afkTimeout,
-	                 String region,
-	                 int verification,
-	                 long systemChannelId,
+	public GuildMeta(Guild guild,
 	                 Set<String> prefixes,
 	                 Set<Long> autoroles,
-	                 IChannel welcomeChannel,
+	                 GuildChannel welcomeChannel,
 	                 String language,
 	                 String welcome,
 	                 String pm,
@@ -48,7 +38,7 @@ public class GuildMeta extends Guild implements Serializable {
 	                 boolean permissions,
 	                 boolean welcomeEnabled,
 	                 boolean welcomeEmbed) {
-		super(shard, name, id, icon, ownerID, afkChannel, afkTimeout, region, verification, systemChannelId);
+		this.guild = guild;
 		this.prefixes = prefixes;
 		this.autoroles = autoroles;
 		this.welcomeChannel = welcomeChannel;
@@ -74,14 +64,14 @@ public class GuildMeta extends Guild implements Serializable {
 	}
 
 	public void addPrefix(String prefix) {
-		if (!Database.set("INSERT IGNORE INTO prefixes (id, prefix) VALUES (?, ?);", id, prefix))
+		if (!Database.set("INSERT IGNORE INTO prefixes (id, prefix) VALUES (?, ?);", guild.getId().asLong(), prefix))
 			throw new UpdateFailedException("Failed to update guild in database.");
 		this.prefixes.add(prefix);
 	}
 
 	public void removePrefix(String prefix) {
 		if (this.prefixes.contains(prefix)) {
-			if (!Database.set("DELETE FROM prefixes WHERE id=? AND prefix=?", id, prefix))
+			if (!Database.set("DELETE FROM prefixes WHERE id=? AND prefix=?", guild.getId().asLong(), prefix))
 				throw new UpdateFailedException("Failed to update guild in database.");
 			this.prefixes.remove(prefix);
 		}
@@ -91,12 +81,12 @@ public class GuildMeta extends Guild implements Serializable {
 		return autoroles;
 	}
 
-	public IChannel getWelcomeChannel() {
+	public GuildChannel getWelcomeChannel() {
 		return welcomeChannel;
 	}
 
-	public void setWelcomeChannel(IChannel channel) {
-		if (!Database.set("UPDATE guild SET welcomeChannel=? WHERE id=?;", channel.getLongID(), id))
+	public void setWelcomeChannel(GuildChannel channel) {
+		if (!Database.set("UPDATE guild SET welcomeChannel=? WHERE id=?;", channel.getId().asLong(), channel.getGuildId().asLong()))
 			throw new UpdateFailedException("Failed to update guild in database.");
 		this.welcomeChannel = channel;
 	}
@@ -106,7 +96,7 @@ public class GuildMeta extends Guild implements Serializable {
 	}
 
 	public void setLanguage(String language) {
-		if (!Database.set("UPDATE guild SET language=? WHERE id=?;", language, id))
+		if (!Database.set("UPDATE guild SET language=? WHERE id=?;", language, guild.getId().asLong()))
 			throw new UpdateFailedException("Failed to update guild in database.");
 		this.language = language;
 	}
@@ -116,7 +106,7 @@ public class GuildMeta extends Guild implements Serializable {
 	}
 
 	public void setWelcome(String welcome) {
-		if (!Database.set("UPDATE guild SET welcome=? WHERE id=?;", welcome, id))
+		if (!Database.set("UPDATE guild SET welcome=? WHERE id=?;", welcome, guild.getId().asLong()))
 			throw new UpdateFailedException("Failed to update guild in database.");
 		this.welcome = welcome;
 	}
@@ -126,7 +116,7 @@ public class GuildMeta extends Guild implements Serializable {
 	}
 
 	public void setPm(String pm) {
-		if (!Database.set("UPDATE guild SET pm=? WHERE id=?;", pm, id))
+		if (!Database.set("UPDATE guild SET pm=? WHERE id=?;", pm, guild.getId().asLong()))
 			throw new UpdateFailedException("Failed to update guild in database.");
 		this.pm = pm;
 	}
@@ -136,7 +126,7 @@ public class GuildMeta extends Guild implements Serializable {
 	}
 
 	public void setLevelupNotifications(boolean levelupNotifications) {
-		if (!Database.set("UPDATE lvlup SET pm=? WHERE id=?;", levelupNotifications, id))
+		if (!Database.set("UPDATE lvlup SET pm=? WHERE id=?;", levelupNotifications, guild.getId().asLong()))
 			throw new UpdateFailedException("Failed to update guild in database.");
 		this.levelupNotifications = levelupNotifications;
 	}
@@ -146,7 +136,7 @@ public class GuildMeta extends Guild implements Serializable {
 	}
 
 	public void setPremium(boolean premium) {
-		if (!Database.set("UPDATE guild SET premium=? WHERE id=?;", premium, id))
+		if (!Database.set("UPDATE guild SET premium=? WHERE id=?;", premium, guild.getId().asLong()))
 			throw new UpdateFailedException("Failed to update guild in database.");
 		this.premium = premium;
 	}
@@ -156,7 +146,7 @@ public class GuildMeta extends Guild implements Serializable {
 	}
 
 	public void setNewGuild(boolean newGuild) {
-		if (!Database.set("UPDATE guild SET newguild=? WHERE id=?;", newGuild, id))
+		if (!Database.set("UPDATE guild SET newguild=? WHERE id=?;", newGuild, guild.getId().asLong()))
 			throw new UpdateFailedException("Failed to update guild in database.");
 		this.newGuild = newGuild;
 	}
@@ -166,7 +156,7 @@ public class GuildMeta extends Guild implements Serializable {
 	}
 
 	public void setCustomPermissions(boolean permissions) {
-		if (!Database.set("UPDATE guild SET permission=? WHERE id=?", permissions, id))
+		if (!Database.set("UPDATE guild SET permission=? WHERE id=?", permissions, guild.getId().asLong()))
 			throw new UpdateFailedException("Failed to update guild in database.");
 		this.permissions = permissions;
 	}
@@ -176,7 +166,7 @@ public class GuildMeta extends Guild implements Serializable {
 	}
 	
 	public boolean toggleWelcomeEnabled() {
-		if (!Database.set("UPDATE guild SET welcomeEnabled=? WHERE id=?", !welcomeEnabled, id))
+		if (!Database.set("UPDATE guild SET welcomeEnabled=? WHERE id=?", !welcomeEnabled, guild.getId().asLong()))
 			throw new UpdateFailedException("Failed to update guild in database.");
 		return welcomeEnabled = !welcomeEnabled;
 	}
@@ -186,7 +176,7 @@ public class GuildMeta extends Guild implements Serializable {
 	}
 	
 	public boolean toggleWelcomeEmbed() {
-		if (!Database.set("UPDATE guild SET welcomeEmbed=? WHERE id=?", !welcomeEmbed, id))
+		if (!Database.set("UPDATE guild SET welcomeEmbed=? WHERE id=?", !welcomeEmbed, guild.getId().asLong()))
 			throw new UpdateFailedException("Failed to update guild in database.");
 		return welcomeEmbed = !welcomeEmbed;
 	}
