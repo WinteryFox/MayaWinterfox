@@ -2,17 +2,17 @@ package com.winter.mayawinterfox.data.music;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.VoiceChannel;
 
 public class GuildMusicManager {
 
-	private final IGuild guild;
+	private final Guild guild;
 	private final AudioPlayer player;
 	private final TrackScheduler scheduler;
-	private IChannel boundChannel;
+	private VoiceChannel boundChannel;
 
-	public GuildMusicManager(IGuild guild, AudioPlayerManager manager) {
+	public GuildMusicManager(Guild guild, AudioPlayerManager manager) {
 		this.player = manager.createPlayer();
 		this.scheduler = new TrackScheduler(player, guild);
 		this.player.addListener(scheduler);
@@ -31,15 +31,15 @@ public class GuildMusicManager {
 		return this.scheduler;
 	}
 
-	public IChannel getBoundChannel() {
+	public VoiceChannel getBoundChannel() {
 		return this.boundChannel;
 	}
 
-	public void setBoundChannel(IChannel boundChannel) {
+	public void setBoundChannel(VoiceChannel boundChannel) {
 		this.boundChannel = boundChannel;
 	}
 
-	public IGuild getGuild() {
+	public Guild getGuild() {
 		return this.guild;
 	}
 }

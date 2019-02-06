@@ -24,11 +24,11 @@ public class CommandEightball extends Node<Command> {
 					if (args.length > 1) {
 						question = MessageUtil.args(e.getMessage()).substring("urban ".length());
 					} else
-						question = new InputDialog(e.getChannel(), e.getAuthor(), "input-question").open();
+						question = new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-question").open();
 					if (question == null)
 						return false;
 
-					MessageUtil.sendMessage(e.getChannel(), EmbedUtil.successEmbed(e.getGuild(), "8ball-" + new Random().nextInt(20)));
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "8ball-" + new Random().nextInt(20)));
 					return true;
 				}
 		), Collections.emptyList());

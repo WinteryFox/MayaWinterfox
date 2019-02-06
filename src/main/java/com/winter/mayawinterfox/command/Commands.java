@@ -23,30 +23,30 @@ import com.winter.mayawinterfox.data.locale.Localisation;
 import com.winter.mayawinterfox.exceptions.ErrorHandler;
 import com.winter.mayawinterfox.util.ColorUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
-import org.apache.commons.lang3.text.WordUtils;
+import discord4j.core.DiscordClient;
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.MessageChannel;
+import discord4j.core.object.reaction.ReactionEmoji;
+import discord4j.core.spec.EmbedCreateSpec;
+import org.apache.commons.text.WordUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sx.blah.discord.api.events.IListener;
-import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.impl.obj.ReactionEmoji;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.util.DiscordException;
-import sx.blah.discord.util.EmbedBuilder;
-import sx.blah.discord.util.RequestBuffer;
+import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class Commands implements IListener<MessageReceivedEvent> {
+public class Commands {
 
-	public static final List<Node<Command>> COMMANDS = new ArrayList<>();
-	private static final Logger LOGGER = LoggerFactory.getLogger(Commands.class);
+	private static final List<Node<Command>> COMMANDS = new ArrayList<>();
+	private final Logger LOGGER = LoggerFactory.getLogger(Commands.class);
 	public static final Map<Category, List<Node<Command>>> COMMAND_MAP = new EnumMap<>(Category.class);
 
-	static {
+	public Commands(DiscordClient client) {
 		COMMAND_MAP.put(Category.DEV, new ArrayList<>(Arrays.asList(new CommandSet())));
 		COMMAND_MAP.put(Category.STATUS, new ArrayList<>(Arrays.asList(new CommandPing(), new CommandHi())));
 		COMMAND_MAP.put(Category.FUN, new ArrayList<>(Arrays.asList(new CommandColor(), new CommandCoinFlip(), new CommandEightball(), new CommandHug(), /*new CommandKiss(), new CommandPat(),*/ new CommandCookie(), new CommandKawaii(), new CommandPornstar(), new CommandRate(), new CommandShoot(), new CommandWoop(), new CommandSay(), new CommandUrban(), new CommandSilentSay(), new CommandAnime())));
@@ -59,6 +59,8 @@ public class Commands implements IListener<MessageReceivedEvent> {
 		COMMAND_MAP.put(Category.IMAGE, new ArrayList<>(Arrays.asList(new CommandImgur(), new CommandCat(), new CommandKona(), new CommandDanbooru(), new CommandYandere(), new CommandGelbooru(), new CommandRule34())));
 
 		COMMAND_MAP.values().forEach(COMMANDS::addAll);
+
+		client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(this::messageCreateEvent);
 	}
 
 	public static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
@@ -69,27 +71,28 @@ public class Commands implements IListener<MessageReceivedEvent> {
 	 * @param e The event that triggered it
 	 * @return True on success, false on failure
 	 */
-	public static boolean sendHelp(MessageReceivedEvent e) {
+	public boolean sendHelp(MessageCreateEvent e) {
 		try {
-			EmbedBuilder eb = new EmbedBuilder();
-			eb.withColor(ColorUtil.withinTwoHues(0.3f, 0.8f));
-			eb.withTitle(Localisation.getMessage(e.getGuild(), "command-list"));
-			eb.withDescription(Localisation.getMessage(e.getGuild(), "command-list-desc"));
-			for (Map.Entry<Category, List<Node<Command>>> c : COMMAND_MAP.entrySet()) {
-				StringBuilder desc = new StringBuilder();
-				for (Node<Command> n : c.getValue()) {
-					desc.append("**").append(n.getData().getName()).append("**, ");
+			Consumer<EmbedCreateSpec> embed = spec -> {
+				spec.setColor(ColorUtil.withinTwoHues(0.3f, 0.8f));
+				spec.setTitle(Localisation.getMessage(e.getGuild().block().block(), "command-list"));
+				spec.setDescription(Localisation.getMessage(e.getGuild().block().block(), "command-list-desc"));
+				for (Map.Entry<Category, List<Node<Command>>> c : COMMAND_MAP.entrySet()) {
+					StringBuilder desc = new StringBuilder();
+					for (Node<Command> n : c.getValue()) {
+						desc.append("**").append(n.getData().getName()).append("**, ");
+					}
+					spec.addField(WordUtils.capitalize(c.getKey().getName()), desc.toString().substring(0, desc.toString().length() - 2), false);
 				}
-				eb.appendField(WordUtils.capitalize(c.getKey().getName()), desc.toString().substring(0, desc.toString().length() - 2), false);
-			}
-			MessageUtil.sendMessage(e.getChannel(), eb.build());
+			};
+			MessageUtil.sendMessage((MessageChannel) Objects.requireNonNull(e.getMessage().getChannel().block()), embed);
 			return true;
-		} catch (DiscordException de) {
+		} catch (Exception de) {
 			return false;
 		}
 	}
 
-	public static Node<Command> getCommand(Node<Command> n, String lookingFor) {
+	private static Node<Command> getCommand(Node<Command> n, String lookingFor) {
 		return n.traverseThis(node -> node.getData().getAliases().stream().map(s -> {
 			if (node.getParent() != null) {
 				return node.getParent().compileTopDown(Command::getName, (s1, s2) -> s1 + " " + s2) + " " + s;
@@ -99,9 +102,9 @@ public class Commands implements IListener<MessageReceivedEvent> {
 		}).collect(Collectors.toSet()), lookingFor, (t, m) -> m.startsWith(t + " "), false);
 	}
 
-	private static void getHelp(IGuild guild, EmbedBuilder builder, List<Node<Command>> children) {
+	private static void getHelp(Guild guild, Consumer<EmbedCreateSpec> builder, List<Node<Command>> children) {
 		for (Node<Command> command : children) {
-			builder.appendField("**.maya" + command.compileTopDown(Command::getName, (a, b) -> a + " " + b) + "**", Localisation.getMessage(guild, command.getData().getHelp()), false);
+			builder.andThen(spec -> spec.addField("**.maya" + command.compileTopDown(Command::getName, (a, b) -> a + " " + b) + "**", Localisation.getMessage(guild, command.getData().getHelp()), false));
 			if (!command.getChildren().isEmpty())
 				getHelp(guild, builder, command.getChildren());
 		}
@@ -113,27 +116,27 @@ public class Commands implements IListener<MessageReceivedEvent> {
 	 * @param lookingFor The command to look for in the command tree
 	 * @return The help for the command or null if that command doesn't exist
 	 */
-	public static EmbedObject getHelp(IGuild guild, String lookingFor) {
-		for (Node<Command> n : Commands.COMMANDS) {
+	public static Consumer<EmbedCreateSpec> getHelp(Guild guild, String lookingFor) {
+		for (Node<Command> n : COMMANDS) {
 			Node<Command> command = getCommand(n, lookingFor + " ");
 			if (command != null && command.getData().getName().equalsIgnoreCase(lookingFor)) {
-				EmbedBuilder builder = new EmbedBuilder()
-						.withColor(ColorUtil.withinTwoHues(0.33333333f, 0.888888888f))
-						.withTitle("Help for " + command.getData().getName())
-						.withTimestamp(Instant.now());
-				builder.appendField("**.maya" + command.getData().getName() + "**", Localisation.getMessage(guild, command.getData().getHelp()), false);
+				Consumer<EmbedCreateSpec> builder = spec -> spec
+						.setColor(ColorUtil.withinTwoHues(0.33333333f, 0.888888888f))
+						.setTitle("Help for " + command.getData().getName())
+						.setTimestamp(Instant.now())
+						.addField("**.maya" + command.getData().getName() + "**", Localisation.getMessage(guild, command.getData().getHelp()), false);
 				getHelp(guild, builder, command.getChildren());
 
 				if (command.getData().getAliases().size() > 0)
-					builder.appendField(Localisation.getMessage(guild, "aliases"), Arrays.toString(command.getData().getAliases().toArray()).replace("[", "").replace("]", ""), false);
-				builder.appendField(Localisation.getMessage(guild, "permission"), getPermission(command), false);
-				return builder.build();
+					builder.andThen(spec -> spec.addField(Localisation.getMessage(guild, "aliases"), Arrays.toString(command.getData().getAliases().toArray()).replace("[", "").replace("]", ""), false));
+				builder.andThen(spec -> spec.addField(Localisation.getMessage(guild, "permission"), getPermission(command), false));
+				return builder;
 			}
 		}
 		return null;
 	}
 
-	public static String getCategory(Node<Command> command) throws IllegalArgumentException {
+	private static String getCategory(Node<Command> command) throws IllegalArgumentException {
 		while (command.getParent() != null) {
 			command = command.getParent();
 		}
@@ -159,55 +162,48 @@ public class Commands implements IListener<MessageReceivedEvent> {
 	 *
 	 * @param e The event
 	 */
-	@Override
-	public void handle(MessageReceivedEvent e) {
-		if (e.getClient().isReady() && !e.getAuthor().isBot()) {
-			GuildMeta guild = Caches.getGuild(e.getGuild());
-			Optional<String> o = guild.getPrefixes().stream().filter(e.getMessage().getContent()::startsWith).findFirst();
+	private void messageCreateEvent(@org.jetbrains.annotations.NotNull MessageCreateEvent e) {
+		if (!e.getMember().get().isBot()) {
+			GuildMeta guild = Caches.getGuild(e.getGuild().block().block());
+			Optional<String> o = guild.getPrefixes().stream().filter(e.getMessage().getContent().get()::startsWith).findFirst();
 			if (o.isPresent()) {
 				try {
 					THREAD_POOL.submit(() -> {
 						try {
-							String lookingFor = Arrays.stream(e.getMessage().getContent().substring(o.get().length()).split("\\s+")).collect(Collectors.joining(" "));
+							String lookingFor = String.join(" ", e.getMessage().getContent().get().substring(o.get().length()).split("\\s+"));
 							for (Node<Command> n : COMMANDS) {
 								Node<Command> gotten = getCommand(n, lookingFor + " ");
 								if (gotten != null) {
 									LOGGER.debug(String.format("Found `%s`", gotten.getData().getName()));
-									if (Caches.getGuild(e.getGuild()).hasCustomPermissions()) {
+									if (Caches.getGuild(e.getGuild().block().block()).hasCustomPermissions()) {
 										/*String perm = getPermission(gotten);
 										if (PermissionChecks.hasPermission(perm).test(e)) {
-											e.getChannel().setTypingStatus(true);
+											e.getMessage().getChannel().block().setTypingStatus(true);
 											gotten.getData().call(e);
-											e.getChannel().setTypingStatus(false);
+											e.getMessage().getChannel().block().setTypingStatus(false);
 										} else {
 											RequestBuffer.request(() -> e.getMessage().addReaction(ReactionEmoji.of("\uD83D\uDEAB")));
 										}*/
 									} else {
 										if (gotten.getData().getCheck().test(e)) {
-											e.getChannel().setTypingStatus(true);
-											gotten.getData().call(e);
-											e.getChannel().setTypingStatus(false);
+											Objects.requireNonNull(e.getMessage().getChannel().block()).typeUntil(Mono.fromRunnable(() -> gotten.getData().call(e)));
 										} else {
-											RequestBuffer.request(() -> e.getMessage().addReaction(ReactionEmoji.of("\uD83D\uDEAB")));
+											e.getMessage().addReaction(ReactionEmoji.unicode("\uD83D\uDEAB"));
 										}
 									}
 									break;
 								}
 							}
 						} catch (Exception ex) {
-							ErrorHandler.log(ex, e.getChannel());
-							e.getChannel().setTypingStatus(false);
+							ErrorHandler.log(ex, (MessageChannel) e.getMessage().getChannel().block());
 						}
 					}).get(120, TimeUnit.SECONDS);
 				} catch (TimeoutException ex) {
 					ErrorHandler.log(ex, "thread-timeout");
-					e.getChannel().setTypingStatus(false);
 				} catch (InterruptedException ex) {
 					ErrorHandler.log(ex, "thread-interrupted");
-					e.getChannel().setTypingStatus(false);
 				} catch (ExecutionException ex) {
 					ErrorHandler.log(ex, "thread-execution");
-					e.getChannel().setTypingStatus(false);
 				}
 			}
 		}

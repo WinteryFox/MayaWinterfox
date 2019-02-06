@@ -16,7 +16,7 @@ public class CommandHi extends Node<Command> {
 				"hi-help",
 				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
 				e -> {
-					MessageUtil.sendMessage(e.getChannel(), "hello");
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), "hello");
 					return true;
 				}
 		), Collections.emptyList());

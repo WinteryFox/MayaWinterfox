@@ -32,12 +32,12 @@ public class CommandPermission extends Node<Command> {
 				e -> {
 					EmbedBuilder builder = new EmbedBuilder()
 							.withColor(ColorUtil.withinTwoHues(0.333f, 0.8888f))
-							.withTitle(Localisation.getMessage(e.getGuild(), "permissions-list"));
+							.withTitle(Localisation.getMessage(e.getGuild().block(), "permissions-list"));
 					for (Map.Entry<Commands.Category, List<Node<Command>>> entry : Commands.COMMAND_MAP.entrySet()) {
 						List<String> permissions = entry.getValue().stream().map(Commands::getPermission).collect(Collectors.toList());
 						builder.appendField(WordUtils.capitalizeFully(entry.getKey().getName()), Arrays.toString(permissions.toArray()).replace("[", "").replace("]", ""), false);
 					}
-					MessageUtil.sendMessage(e.getChannel(), builder.build());
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), builder.build());
 					return true;
 				}
 		), Arrays.asList(
@@ -50,23 +50,23 @@ public class CommandPermission extends Node<Command> {
 							String permission;
 							IUser target;
 							if (args.length <= 2) {
-								permission = new InputDialog(e.getChannel(), e.getAuthor(), "input-permission").open();
+								permission = new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-permission").open();
 								if (!Commands.getPermissions().contains(permission)) {
-									MessageUtil.sendMessage(e.getChannel(), "invalid-permission", permission);
+									MessageUtil.sendMessage(e.getMessage().getChannel().block(), "invalid-permission", permission);
 									return false;
 								}
-								target = new TargetDialog(e.getChannel(), e.getAuthor()).open();
+								target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
 							} else if (args.length == 3) {
 								permission = args[2];
 								if (!Commands.getPermissions().contains(permission)) {
-									MessageUtil.sendMessage(e.getChannel(), "invalid-permission", permission);
+									MessageUtil.sendMessage(e.getMessage().getChannel().block(), "invalid-permission", permission);
 									return false;
 								}
-								target = new TargetDialog(e.getChannel(), e.getAuthor()).open();
+								target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
 							} else {
 								permission = args[2];
 								if (!Commands.getPermissions().contains(permission)) {
-									MessageUtil.sendMessage(e.getChannel(), "invalid-permission", permission);
+									MessageUtil.sendMessage(e.getMessage().getChannel().block(), "invalid-permission", permission);
 									return false;
 								}
 								target = ParsingUtil.getUser(MessageUtil.args(e.getMessage()).substring(("permission add " + permission + " ").length()));
@@ -75,8 +75,8 @@ public class CommandPermission extends Node<Command> {
 								return false;
 							permission = permission.toLowerCase();
 
-							new Guild(e.getGuild()).getUser(target).addPermission(permission);
-							MessageUtil.sendMessage(e.getChannel(), EmbedUtil.successEmbed(e.getGuild(), "added-permission", permission, target.getName()));
+							new Guild(e.getGuild().block()).getUser(target).addPermission(permission);
+							MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "added-permission", permission, target.getName()));
 							return true;
 						}
 				), Collections.emptyList()),
@@ -89,23 +89,23 @@ public class CommandPermission extends Node<Command> {
 							String permission = null;
 							IUser target = null;
 							if (args.length <= 2) {
-								permission = new InputDialog(e.getChannel(), e.getAuthor(), "input-permission").open();
+								permission = new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-permission").open();
 								if (!Commands.getPermissions().contains(permission)) {
-									MessageUtil.sendMessage(e.getChannel(), "invalid-permission", permission);
+									MessageUtil.sendMessage(e.getMessage().getChannel().block(), "invalid-permission", permission);
 									return false;
 								}
-								target = new TargetDialog(e.getChannel(), e.getAuthor()).open();
+								target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
 							} else if (args.length == 3) {
 								permission = args[2];
 								if (!Commands.getPermissions().contains(permission)) {
-									MessageUtil.sendMessage(e.getChannel(), "invalid-permission", permission);
+									MessageUtil.sendMessage(e.getMessage().getChannel().block(), "invalid-permission", permission);
 									return false;
 								}
-								target = new TargetDialog(e.getChannel(), e.getAuthor()).open();
+								target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
 							} else {
 								permission = args[2];
 								if (!Commands.getPermissions().contains(permission)) {
-									MessageUtil.sendMessage(e.getChannel(), "invalid-permission", permission);
+									MessageUtil.sendMessage(e.getMessage().getChannel().block(), "invalid-permission", permission);
 									return false;
 								}
 								target = ParsingUtil.getUser(MessageUtil.args(e.getMessage()).substring(("permission remove " + permission + " ").length()));
@@ -114,8 +114,8 @@ public class CommandPermission extends Node<Command> {
 								return false;
 							permission = permission.toLowerCase();
 
-							new Guild(e.getGuild()).getUser(target).removePermission(permission);
-							MessageUtil.sendMessage(e.getChannel(), EmbedUtil.successEmbed(e.getGuild(), "removed-permission", permission, target.getName()));
+							new Guild(e.getGuild().block()).getUser(target).removePermission(permission);
+							MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "removed-permission", permission, target.getName()));
 							return true;
 						}
 				), Collections.emptyList()),
@@ -130,38 +130,38 @@ public class CommandPermission extends Node<Command> {
 								target = MessageUtil.args(e.getMessage()).substring("permission group ".length());
 
 							if (target == null) {
-								Set<Group> groups = new Guild(e.getGuild()).getGroups();
+								Set<Group> groups = new Guild(e.getGuild().block()).getGroups();
 								if (groups.isEmpty()) {
-									MessageUtil.sendMessage(e.getChannel(), new EmbedBuilder()
+									MessageUtil.sendMessage(e.getMessage().getChannel().block(), new EmbedBuilder()
 											.withColor(ColorUtil.withinTwoHues(0.333f, 0.888f))
-											.withTitle(Localisation.getMessage(e.getGuild(), "groups"))
-											.withDescription(Localisation.getMessage(e.getGuild(), "no-results"))
+											.withTitle(Localisation.getMessage(e.getGuild().block(), "groups"))
+											.withDescription(Localisation.getMessage(e.getGuild().block(), "no-results"))
 											.build());
 								} else {
 									String list = Arrays.toString(groups.stream().map(Group::getName).collect(Collectors.toSet()).toArray()).replace("[", "").replace("]", "");
-									MessageUtil.sendMessage(e.getChannel(), new EmbedBuilder()
+									MessageUtil.sendMessage(e.getMessage().getChannel().block(), new EmbedBuilder()
 											.withColor(ColorUtil.withinTwoHues(0.333f, 0.888f))
-											.withTitle(Localisation.getMessage(e.getGuild(), "groups"))
+											.withTitle(Localisation.getMessage(e.getGuild().block(), "groups"))
 											.withDescription(list)
 											.build());
 								}
 								return true;
 							} else {
-								Guild guild = new Guild(e.getGuild());
+								Guild guild = new Guild(e.getGuild().block());
 								Group group = guild.getGroup(target);
 								if (group == null) {
-									MessageUtil.sendMessage(e.getChannel(), "no-results");
+									MessageUtil.sendMessage(e.getMessage().getChannel().block(), "no-results");
 									return false;
 								}
 								Set<IUser> members = group.getMembers();
 								IRole role = group.getRole();
 
-								MessageUtil.sendMessage(e.getChannel(), new EmbedBuilder()
+								MessageUtil.sendMessage(e.getMessage().getChannel().block(), new EmbedBuilder()
 										.withColor(ColorUtil.withinTwoHues(0.333f, 0.888f))
 										.withTitle(group.getName())
-										.appendField(Localisation.getMessage(e.getGuild(), "permissions"), Arrays.toString(group.getPermissions().toArray()).replace("[", "").replace("]", ""), false)
-										.appendField(Localisation.getMessage(e.getGuild(), "members"), !members.isEmpty() ? Arrays.toString(members.toArray()).replace("[", "").replace("]", "") : Localisation.getMessage(e.getGuild(), "no-results"), false)
-										.appendField(Localisation.getMessage(e.getGuild(), "bound-role"), role != null ? role.getName() : Localisation.getMessage(e.getGuild(), "link-a-role"), false)
+										.appendField(Localisation.getMessage(e.getGuild().block(), "permissions"), Arrays.toString(group.getPermissions().toArray()).replace("[", "").replace("]", ""), false)
+										.appendField(Localisation.getMessage(e.getGuild().block(), "members"), !members.isEmpty() ? Arrays.toString(members.toArray()).replace("[", "").replace("]", "") : Localisation.getMessage(e.getGuild().block(), "no-results"), false)
+										.appendField(Localisation.getMessage(e.getGuild().block(), "bound-role"), role != null ? role.getName() : Localisation.getMessage(e.getGuild().block(), "link-a-role"), false)
 										.build());
 								return true;
 							}
@@ -172,29 +172,29 @@ public class CommandPermission extends Node<Command> {
 								"permission-group-add-help",
 								PermissionChecks.hasPermission(Permissions.MANAGE_ROLES),
 								e -> {
-									Guild guild = new Guild(e.getGuild());
+									Guild guild = new Guild(e.getGuild().block());
 									String[] args = MessageUtil.argsArray(e.getMessage());
 									String permission = null;
 									Group group = null;
 									if (args.length <= 3) {
-										permission = new InputDialog(e.getChannel(), e.getAuthor(), "input-permission").open();
+										permission = new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-permission").open();
 										if (!Commands.getPermissions().contains(permission)) {
-											MessageUtil.sendMessage(e.getChannel(), "invalid-permission", permission);
+											MessageUtil.sendMessage(e.getMessage().getChannel().block(), "invalid-permission", permission);
 											return false;
 										}
-										group = guild.getGroup(new InputDialog(e.getChannel(), e.getAuthor(), "input-group").open());
+										group = guild.getGroup(new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-group").open());
 									} else if (args.length == 4) {
 										permission = args[3];
 										if (!Commands.getPermissions().contains(permission)) {
-											MessageUtil.sendMessage(e.getChannel(), "invalid-permission", permission);
+											MessageUtil.sendMessage(e.getMessage().getChannel().block(), "invalid-permission", permission);
 											return false;
 										}
-										group = guild.getGroup(new InputDialog(e.getChannel(), e.getAuthor(), "input-group").open());
+										group = guild.getGroup(new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-group").open());
 									} else {
 										permission = args[3];
 										System.out.println(permission);
 										if (!Commands.getPermissions().contains(permission)) {
-											MessageUtil.sendMessage(e.getChannel(), "invalid-permission", permission);
+											MessageUtil.sendMessage(e.getMessage().getChannel().block(), "invalid-permission", permission);
 											return false;
 										}
 										group = guild.getGroup(MessageUtil.args(e.getMessage()).substring(("permission group add " + permission + " ").length()));
@@ -204,7 +204,7 @@ public class CommandPermission extends Node<Command> {
 									permission = permission.toLowerCase();
 
 									group.addPermission(permission);
-									MessageUtil.sendMessage(e.getChannel(), EmbedUtil.successEmbed(e.getGuild(), "added-permission", permission, group.getName()));
+									MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "added-permission", permission, group.getName()));
 									return true;
 								}
 						), Collections.emptyList()),
@@ -213,28 +213,28 @@ public class CommandPermission extends Node<Command> {
 								"permission-group-remove-help",
 								PermissionChecks.hasPermission(Permissions.MANAGE_ROLES),
 								e -> {
-									Guild guild = new Guild(e.getGuild());
+									Guild guild = new Guild(e.getGuild().block());
 									String[] args = MessageUtil.argsArray(e.getMessage());
 									String permission = null;
 									Group group = null;
 									if (args.length <= 3) {
-										permission = new InputDialog(e.getChannel(), e.getAuthor(), "input-permission").open();
+										permission = new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-permission").open();
 										if (!Commands.getPermissions().contains(permission)) {
-											MessageUtil.sendMessage(e.getChannel(), "invalid-permission", permission);
+											MessageUtil.sendMessage(e.getMessage().getChannel().block(), "invalid-permission", permission);
 											return false;
 										}
-										group = guild.getGroup(new InputDialog(e.getChannel(), e.getAuthor(), "input-group").open());
+										group = guild.getGroup(new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-group").open());
 									} else if (args.length == 4) {
 										permission = MessageUtil.args(e.getMessage()).substring("permission group remove ".length());
 										if (!Commands.getPermissions().contains(permission)) {
-											MessageUtil.sendMessage(e.getChannel(), "invalid-permission", permission);
+											MessageUtil.sendMessage(e.getMessage().getChannel().block(), "invalid-permission", permission);
 											return false;
 										}
-										group = guild.getGroup(new InputDialog(e.getChannel(), e.getAuthor(), "input-group").open());
+										group = guild.getGroup(new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-group").open());
 									} else {
 										permission = MessageUtil.args(e.getMessage()).substring("permission group remove ".length());
 										if (!Commands.getPermissions().contains(permission)) {
-											MessageUtil.sendMessage(e.getChannel(), "invalid-permission", permission);
+											MessageUtil.sendMessage(e.getMessage().getChannel().block(), "invalid-permission", permission);
 											return false;
 										}
 										group = guild.getGroup(MessageUtil.args(e.getMessage()).substring(("permission group remove " + permission + " ").length()));
@@ -244,7 +244,7 @@ public class CommandPermission extends Node<Command> {
 									permission = permission.toLowerCase();
 
 									group.removePermission(permission);
-									MessageUtil.sendMessage(e.getChannel(), EmbedUtil.successEmbed(e.getGuild(), "removed-permission", permission, group.getName()));
+									MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "removed-permission", permission, group.getName()));
 									return true;
 								}
 						), Collections.emptyList()),
@@ -253,28 +253,28 @@ public class CommandPermission extends Node<Command> {
 								"permission-group-adduser-help",
 								PermissionChecks.hasPermission(Permissions.MANAGE_ROLES),
 								e -> {
-									Guild guild = new Guild(e.getGuild());
+									Guild guild = new Guild(e.getGuild().block());
 									String[] args = MessageUtil.argsArray(e.getMessage());
 									Group group = null;
 									IUser target = null;
 									if (args.length <= 3) {
-										group = guild.getGroup(new InputDialog(e.getChannel(), e.getAuthor(), "input-group").open());
+										group = guild.getGroup(new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-group").open());
 										if (group == null) {
-											MessageUtil.sendMessage(e.getChannel(), "no-group");
+											MessageUtil.sendMessage(e.getMessage().getChannel().block(), "no-group");
 											return false;
 										}
-										target = new TargetDialog(e.getChannel(), e.getAuthor()).open();
+										target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
 									} else if (args.length == 4) {
 										group = guild.getGroup(args[3]);
 										if (group == null) {
-											MessageUtil.sendMessage(e.getChannel(), "no-group");
+											MessageUtil.sendMessage(e.getMessage().getChannel().block(), "no-group");
 											return false;
 										}
-										target = new TargetDialog(e.getChannel(), e.getAuthor()).open();
+										target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
 									} else {
 										group = guild.getGroup(args[3]);
 										if (group == null) {
-											MessageUtil.sendMessage(e.getChannel(), "no-group");
+											MessageUtil.sendMessage(e.getMessage().getChannel().block(), "no-group");
 											return false;
 										}
 										target = ParsingUtil.getUser(MessageUtil.args(e.getMessage()).substring(("permission group adduser " + group.getName() + " ").length()));
@@ -283,7 +283,7 @@ public class CommandPermission extends Node<Command> {
 										return false;
 
 									group.addMember(target);
-									MessageUtil.sendMessage(e.getChannel(), EmbedUtil.successEmbed(e.getGuild(), "member-added", target.getName(), group.getName()));
+									MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "member-added", target.getName(), group.getName()));
 									return true;
 								}
 						), Collections.emptyList()),
@@ -292,28 +292,28 @@ public class CommandPermission extends Node<Command> {
 								"permission-group-removeuser-help",
 								PermissionChecks.hasPermission(Permissions.MANAGE_ROLES),
 								e -> {
-									Guild guild = new Guild(e.getGuild());
+									Guild guild = new Guild(e.getGuild().block());
 									String[] args = MessageUtil.argsArray(e.getMessage());
 									Group group = null;
 									IUser target = null;
 									if (args.length <= 3) {
-										group = guild.getGroup(new InputDialog(e.getChannel(), e.getAuthor(), "input-group").open());
+										group = guild.getGroup(new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-group").open());
 										if (group == null) {
-											MessageUtil.sendMessage(e.getChannel(), "no-group");
+											MessageUtil.sendMessage(e.getMessage().getChannel().block(), "no-group");
 											return false;
 										}
-										target = new TargetDialog(e.getChannel(), e.getAuthor()).open();
+										target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
 									} else if (args.length == 4) {
 										group = guild.getGroup(args[3]);
 										if (group == null) {
-											MessageUtil.sendMessage(e.getChannel(), "no-group");
+											MessageUtil.sendMessage(e.getMessage().getChannel().block(), "no-group");
 											return false;
 										}
-										target = new TargetDialog(e.getChannel(), e.getAuthor()).open();
+										target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
 									} else {
 										group = guild.getGroup(args[3]);
 										if (group == null) {
-											MessageUtil.sendMessage(e.getChannel(), "no-group");
+											MessageUtil.sendMessage(e.getMessage().getChannel().block(), "no-group");
 											return false;
 										}
 										target = ParsingUtil.getUser(MessageUtil.args(e.getMessage()).substring(("permission group removeuser " + group.getName() + " ").length()));
@@ -322,7 +322,7 @@ public class CommandPermission extends Node<Command> {
 										return false;
 
 									group.removeMember(target);
-									MessageUtil.sendMessage(e.getChannel(), EmbedUtil.successEmbed(e.getGuild(), "member-removed", target.getName(), group.getName()));
+									MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "member-removed", target.getName(), group.getName()));
 									return true;
 								}
 						), Collections.emptyList())))

@@ -1,6 +1,6 @@
 package com.winter.mayawinterfox.data.schedule;
 
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Member;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -14,8 +14,8 @@ public class Cooldowns {
 	 * @param bucket The unique bucket
 	 * @return True if still on cool-down, false if not
 	 */
-	public static boolean onCooldown(IUser user, String bucket) {
-		ConcurrentHashMap<String, Long> bket = COOLDOWNS.computeIfAbsent(user.getLongID(), d -> new ConcurrentHashMap<>());
+	public static boolean onCooldown(Member user, String bucket) {
+		ConcurrentHashMap<String, Long> bket = COOLDOWNS.computeIfAbsent(user.getId().asLong(), d -> new ConcurrentHashMap<>());
 		return bket.getOrDefault(bucket, 0L) > System.currentTimeMillis();
 	}
 
@@ -25,7 +25,7 @@ public class Cooldowns {
 	 * @param bucket The unique bucket
 	 * @return The remaining time for a cool-down
 	 */
-	public static long getRemaining(IUser user, String bucket) {
+	public static long getRemaining(Member user, String bucket) {
 		return getCooldownEndTime(user, bucket) - System.currentTimeMillis();
 	}
 
@@ -35,8 +35,8 @@ public class Cooldowns {
 	 * @param user The user to getGuild the bucket for
 	 * @return The end time in system time
 	 */
-	private static long getCooldownEndTime(IUser user, String bucket) {
-		ConcurrentHashMap<String, Long> bket = COOLDOWNS.computeIfAbsent(user.getLongID(), d -> new ConcurrentHashMap<>());
+	private static long getCooldownEndTime(Member user, String bucket) {
+		ConcurrentHashMap<String, Long> bket = COOLDOWNS.computeIfAbsent(user.getId().asLong(), d -> new ConcurrentHashMap<>());
 		return bket.getOrDefault(bucket, 0L);
 	}
 
@@ -46,8 +46,8 @@ public class Cooldowns {
 	 * @param user The user to getGuild the bucket for
 	 * @param cooldown The cool-down length
 	 */
-	public static void putOnCooldown(IUser user, String bucket, long cooldown) {
-		ConcurrentHashMap<String, Long> bket = COOLDOWNS.computeIfAbsent(user.getLongID(), d -> new ConcurrentHashMap<>());
+	public static void putOnCooldown(Member user, String bucket, long cooldown) {
+		ConcurrentHashMap<String, Long> bket = COOLDOWNS.computeIfAbsent(user.getId().asLong(), d -> new ConcurrentHashMap<>());
 		bket.put(bucket, System.currentTimeMillis() + cooldown);
 	}
 }

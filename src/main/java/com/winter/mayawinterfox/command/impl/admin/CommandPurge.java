@@ -33,10 +33,10 @@ public class CommandPurge extends Node<Command> {
 					if (args.length > 1) {
 						amount = Integer.parseUnsignedInt(args[1]);
 						if (amount == 0)
-							throw new NumberFormatException(Localisation.getMessage(e.getGuild(), "wrong-amount-dialog", 1, 100));
+							throw new NumberFormatException(Localisation.getMessage(e.getGuild().block(), "wrong-amount-dialog", 1, 100));
 					} else {
 						try {
-							amount = (int) new AmountDialog(e.getChannel(), e.getAuthor(), 1, 100).open();
+							amount = (int) new AmountDialog(e.getMessage().getChannel().block(), e.getMember().get(), 1, 100).open();
 						} catch (NullPointerException ex) {
 							return false;
 						}
@@ -46,14 +46,14 @@ public class CommandPurge extends Node<Command> {
 					if (args.length > 2)
 						target = ParsingUtil.getUser(args[2]);
 					else
-						target = (IUser) new TargetDialog(e.getChannel(), e.getAuthor()).open();
+						target = (IUser) new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
 					List<IMessage> history;
 					if (target != null)
-						history = e.getChannel().getMessageHistory(amount).stream().filter(m -> m.getAuthor().equals(target)).collect(Collectors.toList());
+						history = e.getMessage().getChannel().block().getMessageHistory(amount).stream().filter(m -> m.getAuthor().equals(target)).collect(Collectors.toList());
 					else
-						history = e.getChannel().getMessageHistory(amount);
-					GuildUtil.bulkDelete(e.getChannel(), history);
-					MessageUtil.sendMessage(e.getChannel(), EmbedUtil.successEmbed(e.getGuild(), "purged-messages", history.size()));
+						history = e.getMessage().getChannel().block().getMessageHistory(amount);
+					GuildUtil.bulkDelete(e.getMessage().getChannel().block(), history);
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "purged-messages", history.size()));
 					return true;
 				},
 				new HashSet<>(Collections.singletonList("prune"))

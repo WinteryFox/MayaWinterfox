@@ -8,6 +8,10 @@ import com.winter.mayawinterfox.Main;
 import com.winter.mayawinterfox.command.Commands;
 import com.winter.mayawinterfox.data.music.GuildMusicManager;
 import com.winter.mayawinterfox.exceptions.ErrorHandler;
+import discord4j.core.object.VoiceState;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.VoiceChannel;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.handle.obj.IUser;
@@ -15,10 +19,15 @@ import sx.blah.discord.handle.obj.IVoiceChannel;
 
 public class MusicUtils {
 
-	public static synchronized void join(IChannel c, IUser u) {
-		IVoiceChannel v = u.getVoiceStateForGuild(c.getGuild()).getChannel();
+	public static synchronized void join(VoiceChannel c, Member u) {
+		VoiceState state =  u.getVoiceState().block();
+		if (state == null) {
+			MessageUtil.sendMessage(c, Commands.getHelp(c.getGuild(), "no-voice"));
+			return;
+		}
+		VoiceChannel v = state.getChannel().block();
 		if (v != null) {
-			v.join();
+			v.join(null);
 			MusicUtils.getGuildMusicManager(c.getGuild()).setBoundChannel(c);
 			MessageUtil.sendMessage(c, EmbedUtil.successEmbed(c.getGuild(), "joined-voice", v.getName(), c.getName()));
 		} else {
@@ -34,7 +43,7 @@ public class MusicUtils {
 		MessageUtil.sendMessage(c, "left-voice");
 	}
 
-	public static synchronized GuildMusicManager getGuildMusicManager(IGuild guild) {
+	public static synchronized GuildMusicManager getGuildMusicManager(Guild guild) {
 		GuildMusicManager musicManager = null;
 		try {
 			musicManager = Main.musicManagers.get(guild);

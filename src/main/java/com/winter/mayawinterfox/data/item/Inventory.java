@@ -4,22 +4,22 @@ import com.winter.mayawinterfox.data.Database;
 import com.winter.mayawinterfox.data.Row;
 import com.winter.mayawinterfox.exceptions.impl.ItemNotOwnedException;
 import com.winter.mayawinterfox.exceptions.impl.UpdateFailedException;
-import org.tritonus.share.ArraySet;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.User;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Inventory {
 
-	private IUser user;
+	private User user;
 	private Set<Item> items;
 
-	public Inventory(IUser user) {
+	public Inventory(User user) {
 		this.user = user;
-		this.items = new ArraySet<>();
-		List<Row> map = Database.get("SELECT item FROM item WHERE id=?", user.getLongID());
+		this.items = new HashSet<>();
+		List<Row> map = Database.get("SELECT item FROM item WHERE id=?", user.getId().asLong());
 		this.items = map.stream().map(v -> ItemProvider.getItemById((int) v.get("item"))).collect(Collectors.toSet());
 	}
 
@@ -28,7 +28,7 @@ public class Inventory {
 	 *
 	 * @return The user the inventory belongs to
 	 */
-	public IUser getUser() {
+	public User getUser() {
 		return user;
 	}
 
@@ -38,7 +38,7 @@ public class Inventory {
 	 * @return True on success false on failure
 	 */
 	public boolean addItem(Item item) {
-		if (!Database.set("INSERT IGNORE INTO item (id, item) VALUES (?, ?);", user.getLongID(), item.getId()))
+		if (!Database.set("INSERT IGNORE INTO item (id, item) VALUES (?, ?);", user.getId().asLong(), item.getId()))
 			throw new UpdateFailedException("Failed to update inventory metadata");
 		return items.add(item);
 	}
@@ -49,7 +49,7 @@ public class Inventory {
 	 * @return True on success false on failure
 	 */
 	public boolean removeItem(Item item) {
-		if (!Database.set("DELETE IGNORE FROM item WHERE id=? AND item=?;", user.getLongID(), item.getId()))
+		if (!Database.set("DELETE IGNORE FROM item WHERE id=? AND item=?;", user.getId().asLong(), item.getId()))
 			throw new UpdateFailedException("Failed to update inventory metadata");
 		return items.remove(item);
 	}

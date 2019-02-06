@@ -24,13 +24,13 @@ public class CommandUrban extends Node<Command> {
 					if (args.length > 1) {
 						q = MessageUtil.args(e.getMessage()).substring("urban ".length());
 					} else
-						q = new InputDialog(e.getChannel(), e.getAuthor(), "search-for").open();
+						q = new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "search-for").open();
 					if (q == null)
 						return false;
 					try {
-						MessageUtil.sendMessage(e.getChannel(), HTTPHandler.requestUrban(e.getGuild(), q));
+						MessageUtil.sendMessage(e.getMessage().getChannel().block(), HTTPHandler.requestUrban(e.getGuild().block(), q));
 					} catch (Exception ex) {
-						ErrorHandler.log(ex, e.getChannel());
+						ErrorHandler.log(ex, e.getMessage().getChannel().block());
 					}
 					return true;
 				}

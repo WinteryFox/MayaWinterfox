@@ -17,7 +17,7 @@ public class CommandWoop extends Node<Command> {
 				"woop-help",
 				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
 				e -> {
-					MessageUtil.sendMessage(e.getChannel(), EmbedUtil.imageEmbed(e.getGuild(), "https://i.imgur.com/oVvHXXS.gif"));
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.imageEmbed(e.getGuild().block(), "https://i.imgur.com/oVvHXXS.gif"));
 					return true;
 				}
 		), Collections.emptyList());

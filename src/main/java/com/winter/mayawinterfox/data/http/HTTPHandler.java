@@ -14,7 +14,7 @@ import org.json.JSONObject;
 import org.json.XML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sx.blah.discord.api.internal.json.objects.EmbedObject;
+import sx.blah.discord.api.internal.json.objects.Consumer<EmbedCreateSpec>;
 import sx.blah.discord.handle.obj.IGuild;
 import sx.blah.discord.util.EmbedBuilder;
 
@@ -106,7 +106,7 @@ public class HTTPHandler {
 	 * @throws UnirestException             Upon failure of the getGuild request
 	 * @throws UnsupportedEncodingException When there's an unknown encoding type
 	 */
-	public static EmbedObject requestUrban(IGuild guild, String query) throws UnirestException, UnsupportedEncodingException {
+	public static Consumer<EmbedCreateSpec> requestUrban(IGuild guild, String query) throws UnirestException, UnsupportedEncodingException {
 		HttpResponse<JsonNode> response = Unirest.get("https://mashape-community-urban-dictionary.p.mashape.com/define?term=" + URLEncoder.encode(query, "UTF-8"))
 				.header("X-Mashape-Key", Main.config.get(Main.ConfigValue.MASHAPE_KEY))
 				.header("Accept", "text/plain")

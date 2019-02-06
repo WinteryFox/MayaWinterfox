@@ -27,12 +27,12 @@ public class CommandWolf extends Node<Command> {
 				"wolf-help",
 				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
 				e -> {
-					Wolf wolf = new Wolf(e.getAuthor());
+					Wolf wolf = new Wolf(e.getMember().get());
 					wolf.update();
 					if (wolf.getBackground().getPath().endsWith(".gif"))
-						MessageUtil.sendMessage(e.getChannel(), EmbedUtil.wolfEmbed(e.getAuthor()), wolf.render(), "wolf.gif");
+						MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.wolfEmbed(e.getMember().get()), wolf.render(), "wolf.gif");
 					else
-						MessageUtil.sendMessage(e.getChannel(), EmbedUtil.wolfEmbed(e.getAuthor()), wolf.render(), "wolf.png");
+						MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.wolfEmbed(e.getMember().get()), wolf.render(), "wolf.png");
 					return true;
 				}
 		), Arrays.asList(
@@ -46,23 +46,23 @@ public class CommandWolf extends Node<Command> {
 							if (args.length > 1)
 								i = MessageUtil.args(e.getMessage()).substring("wolf feed ".length());
 							else
-								i = new InputDialog(e.getChannel(), e.getAuthor(), "input-food").open();
+								i = new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-food").open();
 							if (i == null)
 								return false;
 
-							if (!Cooldowns.onCooldown(e.getAuthor(), "wolf-feed")) {
+							if (!Cooldowns.onCooldown(e.getMember().get(), "wolf-feed")) {
 								Food food = ItemProvider.getFood(i);
-								Cooldowns.putOnCooldown(e.getAuthor(), "wolf-feed", food.getCooldown());
+								Cooldowns.putOnCooldown(e.getMember().get(), "wolf-feed", food.getCooldown());
 
-								Wolf wolf = new Wolf(e.getAuthor());
+								Wolf wolf = new Wolf(e.getMember().get());
 								wolf.update();
 								wolf.feed(food);
 								if (wolf.getBackground().getPath().endsWith(".gif"))
-									MessageUtil.sendMessage(e.getChannel(), "feed", EmbedUtil.wolfEmbed(e.getAuthor()), wolf.render(), "wolf.gif", food.getName());
+									MessageUtil.sendMessage(e.getMessage().getChannel().block(), "feed", EmbedUtil.wolfEmbed(e.getMember().get()), wolf.render(), "wolf.gif", food.getName());
 								else
-									MessageUtil.sendMessage(e.getChannel(), "feed", EmbedUtil.wolfEmbed(e.getAuthor()), wolf.render(), "wolf.png", food.getName());
+									MessageUtil.sendMessage(e.getMessage().getChannel().block(), "feed", EmbedUtil.wolfEmbed(e.getMember().get()), wolf.render(), "wolf.png", food.getName());
 							} else {
-								MessageUtil.sendMessage(e.getChannel(), "wolf-cooldown", ParsingUtil.formatTime(Cooldowns.getRemaining(e.getAuthor(), "wolf-feed")));
+								MessageUtil.sendMessage(e.getMessage().getChannel().block(), "wolf-cooldown", ParsingUtil.formatTime(Cooldowns.getRemaining(e.getMember().get(), "wolf-feed")));
 							}
 							return true;
 						}
@@ -72,13 +72,13 @@ public class CommandWolf extends Node<Command> {
 						"wolf-play-help",
 						PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
 						e -> {
-							Wolf wolf = new Wolf(e.getAuthor());
+							Wolf wolf = new Wolf(e.getMember().get());
 							wolf.update();
 							wolf.play();
 							if (wolf.getBackground().getPath().endsWith(".gif"))
-								MessageUtil.sendMessage(e.getChannel(), EmbedUtil.wolfEmbed(e.getAuthor()), wolf.render(), "wolf.gif");
+								MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.wolfEmbed(e.getMember().get()), wolf.render(), "wolf.gif");
 							else
-								MessageUtil.sendMessage(e.getChannel(), EmbedUtil.wolfEmbed(e.getAuthor()), wolf.render(), "wolf.png");
+								MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.wolfEmbed(e.getMember().get()), wolf.render(), "wolf.png");
 							return true;
 						}
 				), Collections.emptyList()),*/
@@ -92,16 +92,16 @@ public class CommandWolf extends Node<Command> {
 							if (args.length > 1)
 								i = MessageUtil.args(e.getMessage()).substring("wolf equip ".length());
 							else
-								i = new InputDialog(e.getChannel(), e.getAuthor(), "input-item").open();
+								i = new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-item").open();
 							if (i == null)
 								return false;
 
-							Wolf wolf = new Wolf(e.getAuthor());
+							Wolf wolf = new Wolf(e.getMember().get());
 							wolf.update();
 							Item item = wolf.getInventory().getItem(i);
 							if (item != null) {
 								wolf.equip(item);
-								MessageUtil.sendMessage(e.getChannel(), EmbedUtil.successEmbed(e.getGuild(), "equipped-item", item.getName()));
+								MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "equipped-item", item.getName()));
 							}
 							return true;
 						}
@@ -116,16 +116,16 @@ public class CommandWolf extends Node<Command> {
 							if (args.length > 1)
 								i = MessageUtil.args(e.getMessage()).substring("wolf equip ".length());
 							else
-								i = new InputDialog(e.getChannel(), e.getAuthor(), "input-item").open();
+								i = new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-item").open();
 							if (i == null)
 								return false;
 
 							if (i.length() > 24)
 								throw new IllegalArgumentException("Name cannot be longer than 24 characters.");
 
-							Wolf wolf = new Wolf(e.getAuthor());
+							Wolf wolf = new Wolf(e.getMember().get());
 							wolf.setName(i);
-							MessageUtil.sendMessage(e.getChannel(), EmbedUtil.successEmbed(e.getGuild(), "changed-name", i));
+							MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "changed-name", i));
 							return true;
 						}
 				), Collections.emptyList()),
@@ -138,7 +138,7 @@ public class CommandWolf extends Node<Command> {
 									.withColor(ColorUtil.withinTwoHues(0.333333f, 0.88888f));
 							for (Food food : ItemProvider.foods)
 								builder.appendField(food.getName(), "Value: " + food.getValue() + "\nCooldown: " + ParsingUtil.formatTime(food.getCooldown()), true);
-							MessageUtil.sendMessage(e.getChannel(), builder.build());
+							MessageUtil.sendMessage(e.getMessage().getChannel().block(), builder.build());
 							return true;
 						}
 				), Collections.emptyList())));

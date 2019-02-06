@@ -23,9 +23,9 @@ public class CommandCat extends Node<Command> {
 				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
 				e -> {
 					try {
-						MessageUtil.sendMessage(e.getChannel(), EmbedUtil.imageEmbed(e.getGuild(), HTTPHandler.requestCat()));
+						MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.imageEmbed(e.getGuild().block(), HTTPHandler.requestCat()));
 					} catch (MalformedURLException | UnirestException ex) {
-						ErrorHandler.log(ex, e.getChannel());
+						ErrorHandler.log(ex, e.getMessage().getChannel().block());
 					}
 					return true;
 				},

@@ -5,7 +5,7 @@ import com.winter.mayawinterfox.data.locale.Localisation;
 import com.winter.mayawinterfox.exceptions.impl.UpdateFailedException;
 import com.winter.mayawinterfox.util.ColorUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.MessageChannel;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.util.EmbedBuilder;
 
@@ -36,7 +36,7 @@ public class ErrorHandler {
 	 * @param t The throwable that caused the error
 	 * @param channel The channel to notify the user in
 	 */
-	public static void log(Throwable t, IChannel channel) {
+	public static void log(Throwable t, MessageChannel channel) {
 		if (!(t instanceof UpdateFailedException) && !(t instanceof NumberFormatException)) {
 			MessageUtil.sendMessage(Main.getClient().getChannelByID(Long.parseLong(Main.config.get(Main.ConfigValue.ERROR_CHANNEL))),
 					new EmbedBuilder()
@@ -66,7 +66,7 @@ public class ErrorHandler {
 	 * @param channel    The channel to notify the user in
 	 * @param messageKey The error message to put into the channel
 	 */
-	public static void log(Throwable t, TextChannel channel, String messageKey) {
+	public static void log(Throwable t, MessageChannel channel, String messageKey) {
 		if (!(t instanceof UpdateFailedException) && !(t instanceof NumberFormatException)) {
 			MessageUtil.sendMessage(Main.getClient().getChannelByID(Long.parseLong(Main.config.get(Main.ConfigValue.ERROR_CHANNEL))),
 							builder -> builder

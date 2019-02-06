@@ -23,8 +23,8 @@ public class CommandWelcome extends Node<Command> {
 				"welcome-help",
 				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
 				e -> {
-					GuildMeta guild = Caches.getGuild(e.getGuild());
-					MessageUtil.sendMessage(e.getChannel(), "welcome-message", guild.getWelcome(), guild.isWelcomeEnabled() ? "ENABLED" : "DISABLED", guild.getWelcomeChannel() != null ? guild.getWelcomeChannel().mention() : "NOT SET");
+					GuildMeta guild = Caches.getGuild(e.getGuild().block());
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), "welcome-message", guild.getWelcome(), guild.isWelcomeEnabled() ? "ENABLED" : "DISABLED", guild.getWelcomeChannel() != null ? guild.getWelcomeChannel().mention() : "NOT SET");
 					return true;
 				}
 		), Arrays.asList(new Node<>(new Command(
@@ -37,13 +37,13 @@ public class CommandWelcome extends Node<Command> {
 							if (args.length > 1)
 								welcome = MessageUtil.args(e.getMessage()).substring("welcome set ".length());
 							else
-								welcome = new InputDialog(e.getChannel(), e.getAuthor(), "input-item").open();
+								welcome = new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-item").open();
 							if (welcome == null)
 								return false;
 
-							Caches.getGuild(e.getGuild())
+							Caches.getGuild(e.getGuild().block())
 							      .setWelcome(welcome);
-							MessageUtil.sendMessage(e.getChannel(), "welcome-set", welcome);
+							MessageUtil.sendMessage(e.getMessage().getChannel().block(), "welcome-set", welcome);
 							return true;
 						}
 				), Collections.emptyList()),
@@ -55,15 +55,15 @@ public class CommandWelcome extends Node<Command> {
 							String[] args = MessageUtil.argsArray(e.getMessage());
 							IChannel channel;
 							if (args.length > 1)
-								channel = ParsingUtil.getChannel(e.getGuild(), MessageUtil.args(e.getMessage())
+								channel = ParsingUtil.getChannel(e.getGuild().block(), MessageUtil.args(e.getMessage())
 										.substring("welcome channel ".length()));
 							else
-								channel = new ChannelDialog(e.getChannel(), e.getAuthor()).open();
+								channel = new ChannelDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
 							if (channel == null)
 								return false;
 							
-							Caches.getGuild(e.getGuild()).setWelcomeChannel(channel);
-							MessageUtil.sendMessage(e.getChannel(), "welcome-channel-set", channel.mention());
+							Caches.getGuild(e.getGuild().block()).setWelcomeChannel(channel);
+							MessageUtil.sendMessage(e.getMessage().getChannel().block(), "welcome-channel-set", channel.mention());
 							return true;
 						}
 				), Collections.emptyList()),
@@ -72,11 +72,11 @@ public class CommandWelcome extends Node<Command> {
 						"welcome-toggle-help",
 						PermissionChecks.hasPermission(Permissions.MANAGE_SERVER),
 						e -> {
-							boolean enabled = Caches.getGuild(e.getGuild()).toggleWelcomeEnabled();
+							boolean enabled = Caches.getGuild(e.getGuild().block()).toggleWelcomeEnabled();
 							if (enabled)
-								MessageUtil.sendMessage(e.getChannel(), "welcome-enabled");
+								MessageUtil.sendMessage(e.getMessage().getChannel().block(), "welcome-enabled");
 							else
-								MessageUtil.sendMessage(e.getChannel(), "welcome-disabled");
+								MessageUtil.sendMessage(e.getMessage().getChannel().block(), "welcome-disabled");
 							return true;
 						}
 				), Collections.emptyList()),
@@ -85,11 +85,11 @@ public class CommandWelcome extends Node<Command> {
 						"welcome-embed-help",
 						PermissionChecks.hasPermission(Permissions.MANAGE_SERVER),
 						e -> {
-							boolean enabled = Caches.getGuild(e.getGuild()).toggleWelcomeEmbed();
+							boolean enabled = Caches.getGuild(e.getGuild().block()).toggleWelcomeEmbed();
 							if (enabled)
-								MessageUtil.sendMessage(e.getChannel(), "embed-enabled");
+								MessageUtil.sendMessage(e.getMessage().getChannel().block(), "embed-enabled");
 							else
-								MessageUtil.sendMessage(e.getChannel(), "embed-disabled");
+								MessageUtil.sendMessage(e.getMessage().getChannel().block(), "embed-disabled");
 							return true;
 						}
 				), Collections.emptyList())));

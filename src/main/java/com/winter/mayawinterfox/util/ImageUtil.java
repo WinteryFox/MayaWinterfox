@@ -1,7 +1,7 @@
 package com.winter.mayawinterfox.util;
 
 import com.madgag.gif.fmsware.GifDecoder;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.User;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -93,18 +93,8 @@ public class ImageUtil {
 	 * @param user The user to getGuild the avatar for
 	 * @return The avatar for the user
 	 */
-	public static String getAvatar(IUser user) {
-		return user.getAvatar() != null ? user.getAvatarURL() : getDefaultAvatar(user);
-	}
-
-	/**
-	 * Get the default avatar for a user
-	 * @param user The user to getGuild the default avatar for
-	 * @return The default avatar for the user
-	 */
-	public static String getDefaultAvatar(IUser user) {
-		int discrim = Integer.parseInt(user.getDiscriminator());
-		return "https://discordapp.com/assets/" + defaults[discrim % defaults.length] + ".png";
+	public static String getAvatar(User user) {
+		return user.getAvatarUrl();
 	}
 
 	/**

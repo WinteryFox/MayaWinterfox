@@ -26,7 +26,7 @@ public class CommandPrefix extends Node<Command> {
 				"prefix-help",
 				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
 				e -> {
-					MessageUtil.sendMessage(e.getChannel(), "prefixes", Arrays.toString(Caches.getGuild(e.getGuild()).getPrefixes().toArray()).replace("[", "").replace("]", ""));
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), "prefixes", Arrays.toString(Caches.getGuild(e.getGuild().block()).getPrefixes().toArray()).replace("[", "").replace("]", ""));
 					return true;
 				}
 		), Arrays.asList(
@@ -42,26 +42,26 @@ public class CommandPrefix extends Node<Command> {
 									try {
 										prefix = MessageUtil.args(e.getMessage()).substring("prefix add ".length());
 									} catch (StringIndexOutOfBoundsException ex) {
-										prefix = new InputDialog(e.getChannel(), e.getAuthor(), "input-prefix").open();
+										prefix = new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-prefix").open();
 									}
 								} else
-									prefix = new InputDialog(e.getChannel(), e.getAuthor(), "input-prefix").open();
+									prefix = new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-prefix").open();
 								if (prefix == null)
 									return false;
 								if (prefix.equalsIgnoreCase(Main.config.get(Main.ConfigValue.PREFIX)))
-									throw new UpdateFailedException(Localisation.getMessage(e.getGuild(), "default-prefix"));
-								GuildMeta guild = Caches.getGuild(e.getGuild());
-								if (GuildUtil.hasPrefixesLeft(e.getGuild(), e.getAuthor())) {
+									throw new UpdateFailedException(Localisation.getMessage(e.getGuild().block(), "default-prefix"));
+								GuildMeta guild = Caches.getGuild(e.getGuild().block());
+								if (GuildUtil.hasPrefixesLeft(e.getGuild().block(), e.getMember().get())) {
 									guild.addPrefix(prefix);
-									MessageUtil.sendMessage(e.getChannel(), EmbedUtil.successEmbed(e.getGuild(), "added-prefix", prefix));
+									MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "added-prefix", prefix));
 								} else {
-									if (!GuildUtil.isPremium(e.getGuild(), e.getAuthor()))
-										MessageUtil.sendMessage(e.getChannel(), EmbedUtil.premiumEmbed(e.getGuild(), "max-prefixes"));
+									if (GuildUtil.isPremium(e.getGuild().block(), e.getMember().get()))
+										MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.premiumEmbed(e.getGuild().block(), "max-prefixes"));
 									else
-										MessageUtil.sendMessage(e.getChannel(), EmbedUtil.premiumEmbed(e.getGuild(), "max-prefixes-premium"));
+										MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.premiumEmbed(e.getGuild().block(), "max-prefixes-premium"));
 								}
 							} catch (UpdateFailedException ex) {
-								ErrorHandler.log(ex, e.getChannel());
+								ErrorHandler.log(ex, e.getMessage().getChannel().block());
 								return false;
 							}
 							return true;
@@ -79,19 +79,19 @@ public class CommandPrefix extends Node<Command> {
 									try {
 										prefix = MessageUtil.args(e.getMessage()).substring("prefix remove ".length());
 									} catch (StringIndexOutOfBoundsException ex) {
-										prefix = new InputDialog(e.getChannel(), e.getAuthor(), "input-prefix").open();
+										prefix = new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-prefix").open();
 									}
 								else
-									prefix = new InputDialog(e.getChannel(), e.getAuthor(), "input-prefix").open();
+									prefix = new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-prefix").open();
 								if (prefix == null)
 									return false;
 								if (prefix.equalsIgnoreCase(Main.config.get(Main.ConfigValue.PREFIX)))
-									throw new UpdateFailedException(Localisation.getMessage(e.getGuild(), "default-prefix"));
-								GuildMeta guild = Caches.getGuild(e.getGuild());
+									throw new UpdateFailedException(Localisation.getMessage(e.getGuild().block(), "default-prefix"));
+								GuildMeta guild = Caches.getGuild(e.getGuild().block());
 								guild.removePrefix(prefix);
-								MessageUtil.sendMessage(e.getChannel(), EmbedUtil.successEmbed(e.getGuild(), "removed-prefix", prefix));
+								MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "removed-prefix", prefix));
 							} catch (UpdateFailedException ex) {
-								ErrorHandler.log(ex, e.getChannel());
+								ErrorHandler.log(ex, e.getMessage().getChannel().block());
 								return false;
 							}
 							return true;

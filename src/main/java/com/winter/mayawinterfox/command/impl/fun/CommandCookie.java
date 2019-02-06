@@ -7,7 +7,7 @@ import com.winter.mayawinterfox.data.dialog.impl.TargetDialog;
 import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
 import com.winter.mayawinterfox.util.ParsingUtil;
-import sx.blah.discord.api.internal.json.objects.EmbedObject;
+import sx.blah.discord.api.internal.json.objects.Consumer<EmbedCreateSpec>;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Permissions;
 
@@ -27,7 +27,7 @@ public class CommandCookie extends Node<Command> {
                     if (args.length == 2)
                         target = ParsingUtil.getUser(MessageUtil.args(e.getMessage()).substring("cookie ".length()));
                     else
-                        target = new TargetDialog(e.getChannel(), e.getAuthor()).open();
+                        target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
                     if (target == null)
                         return false;
                     String[] images = {
@@ -37,12 +37,12 @@ public class CommandCookie extends Node<Command> {
                             "https://i.imgur.com/0XhuZwt.jpg"
                     };
 
-                    EmbedObject embed = EmbedUtil.imageEmbed(e.getGuild(), images[new Random().nextInt(images.length)]);
+                    Consumer<EmbedCreateSpec> embed = EmbedUtil.imageEmbed(e.getGuild().block(), images[new Random().nextInt(images.length)]);
 
-                    if (e.getAuthor().equals(target))
-                        MessageUtil.sendMessage(e.getChannel(), embed, "cookie-from-yourself", e.getAuthor().getName());
+                    if (e.getMember().get().equals(target))
+                        MessageUtil.sendMessage(e.getMessage().getChannel().block(), embed, "cookie-from-yourself", e.getMember().get().getName());
                     else
-                        MessageUtil.sendMessage(e.getChannel(), embed, "cookie-from", target.getName(), e.getAuthor().getName());
+                        MessageUtil.sendMessage(e.getMessage().getChannel().block(), embed, "cookie-from", target.getName(), e.getMember().get().getName());
                     return true;
                 }
         ), Collections.emptyList());

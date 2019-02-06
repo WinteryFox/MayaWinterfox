@@ -7,7 +7,7 @@ import com.winter.mayawinterfox.data.dialog.impl.TargetDialog;
 import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
 import com.winter.mayawinterfox.util.ParsingUtil;
-import sx.blah.discord.api.internal.json.objects.EmbedObject;
+import sx.blah.discord.api.internal.json.objects.Consumer<EmbedCreateSpec>;
 import sx.blah.discord.handle.obj.IUser;
 import sx.blah.discord.handle.obj.Permissions;
 
@@ -27,19 +27,19 @@ public class CommandKiss extends Node<Command> {
 					if (args.length == 2)
 						target = ParsingUtil.getUser(MessageUtil.args(e.getMessage()).substring("kiss ".length()));
 					else
-						target = (IUser) new TargetDialog(e.getChannel(), e.getAuthor()).open();
+						target = (IUser) new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
 					if (target == null)
 						return false;
 					String[] images = {
 							""
 					};
 
-					EmbedObject embed = EmbedUtil.imageEmbed(e.getGuild(), images[new Random().nextInt(images.length)]);
+					Consumer<EmbedCreateSpec> embed = EmbedUtil.imageEmbed(e.getGuild().block(), images[new Random().nextInt(images.length)]);
 
-					if (e.getAuthor().equals(target))
-						MessageUtil.sendMessage(e.getChannel(), embed, "kiss-from-yourself", e.getAuthor().getName());
+					if (e.getMember().get().equals(target))
+						MessageUtil.sendMessage(e.getMessage().getChannel().block(), embed, "kiss-from-yourself", e.getMember().get().getName());
 					else
-						MessageUtil.sendMessage(e.getChannel(), embed, "kiss-from", target, e.getAuthor().getName());
+						MessageUtil.sendMessage(e.getMessage().getChannel().block(), embed, "kiss-from", target, e.getMember().get().getName());
 					return true;
 				}
 		), Collections.emptyList());

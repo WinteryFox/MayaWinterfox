@@ -16,7 +16,7 @@ public class CommandShop extends Node<Command> {
 				"shop-help",
 				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
 				e -> {
-					MessageUtil.sendMessage(e.getChannel(), "visit-shop");
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), "visit-shop");
 					return true;
 				}
 		), Collections.emptyList());

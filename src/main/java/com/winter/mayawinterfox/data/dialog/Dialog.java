@@ -9,9 +9,6 @@ import discord4j.core.event.domain.message.ReactionAddEvent;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.spec.EmbedCreateSpec;
-import discord4j.rest.json.request.EmbedFooterRequest;
-import discord4j.rest.json.request.EmbedRequest;
-import discord4j.rest.json.request.EmbedThumbnailRequest;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -21,7 +18,7 @@ import java.util.function.Function;
 
 public class Dialog<T> {
 	private DialogType type;
-	private TextChannel channel;
+	private MessageChannel channel;
 	private User user;
 	private String thumbnail;
 	private String title;
@@ -34,7 +31,7 @@ public class Dialog<T> {
 	private TimeUnit timeUnit = TimeUnit.MINUTES;
 	private Function<String, T> function;
 
-	public Dialog(DialogType type, TextChannel channel, User user, String thumbnail, String title, Object[] titleReplacements, String description, Object[] descriptionReplacements, Map<String, T> choices, Color color, Long timeout, TimeUnit timeUnit, Function<String, T> function) {
+	public Dialog(DialogType type, MessageChannel channel, User user, String thumbnail, String title, Object[] titleReplacements, String description, Object[] descriptionReplacements, Map<String, T> choices, Color color, Long timeout, TimeUnit timeUnit, Function<String, T> function) {
 		this.type = type;
 		this.channel = channel;
 		this.user = user;
@@ -54,7 +51,7 @@ public class Dialog<T> {
 		return type;
 	}
 
-	private TextChannel getChannel() {
+	private MessageChannel getChannel() {
 		return channel;
 	}
 
@@ -130,9 +127,9 @@ public class Dialog<T> {
 			try {
 				response = Main.getClient().getDispatcher().waitFor((MessageEvent e) -> {
 					if (e instanceof ReactionAddEvent) {
-						return ((ReactionAddEvent) e).getUser().equals(user) && e.getChannel().equals(channel);
+						return ((ReactionAddEvent) e).getUser().equals(user) && e.getMessage().getChannel().block().equals(channel);
 					} else if (e instanceof MessageReceivedEvent) {
-						return e.getAuthor().equals(user) && e.getChannel().equals(channel);
+						return e.getMember().get().equals(user) && e.getMessage().getChannel().block().equals(channel);
 					}
 					return false;
 				}, timeout, timeUnit);
@@ -168,7 +165,7 @@ public class Dialog<T> {
 					.build());
 			IMessage response = null;
 			try {
-				response = Main.getClient().getDispatcher().waitFor((MessageReceivedEvent e) -> e.getChannel().equals(this.getChannel()) && e.getAuthor().equals(this.getUser()), timeout, timeUnit).getMessage();
+				response = Main.getClient().getDispatcher().waitFor((MessageReceivedEvent e) -> e.getMessage().getChannel().block().equals(this.getChannel()) && e.getMember().get().equals(this.getUser()), timeout, timeUnit).getMessage();
 			} catch (InterruptedException e) {
 				ErrorHandler.log(e, this.getChannel());
 			}

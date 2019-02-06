@@ -4,7 +4,7 @@ import com.winter.mayawinterfox.Main;
 import com.winter.mayawinterfox.data.Database;
 import com.winter.mayawinterfox.exceptions.impl.UpdateFailedException;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.GuildChannel;
+import discord4j.core.object.entity.TextChannel;
 
 import java.util.Collections;
 import java.util.Set;
@@ -14,7 +14,7 @@ public class GuildMeta {
 	private final Guild guild;
 	private Set<String> prefixes;
 	private Set<Long> autoroles;
-	private GuildChannel welcomeChannel;
+	private TextChannel welcomeChannel;
 	private String language;
 	private String welcome;
 	private String pm;
@@ -28,7 +28,7 @@ public class GuildMeta {
 	public GuildMeta(Guild guild,
 	                 Set<String> prefixes,
 	                 Set<Long> autoroles,
-	                 GuildChannel welcomeChannel,
+	                 TextChannel welcomeChannel,
 	                 String language,
 	                 String welcome,
 	                 String pm,
@@ -51,6 +51,10 @@ public class GuildMeta {
 		this.permissions = permissions;
 		this.welcomeEnabled = welcomeEnabled;
 		this.welcomeEmbed = welcomeEmbed;
+	}
+
+	public Guild getGuild() {
+		return guild;
 	}
 
 	public Set<String> getPrefixes() {
@@ -81,11 +85,11 @@ public class GuildMeta {
 		return autoroles;
 	}
 
-	public GuildChannel getWelcomeChannel() {
+	public TextChannel getWelcomeChannel() {
 		return welcomeChannel;
 	}
 
-	public void setWelcomeChannel(GuildChannel channel) {
+	public void setWelcomeChannel(TextChannel channel) {
 		if (!Database.set("UPDATE guild SET welcomeChannel=? WHERE id=?;", channel.getId().asLong(), channel.getGuildId().asLong()))
 			throw new UpdateFailedException("Failed to update guild in database.");
 		this.welcomeChannel = channel;

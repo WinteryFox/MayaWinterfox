@@ -29,23 +29,23 @@ public class CommandAnime extends Node<Command> {
 					if (args.length > 1)
 						tags = MessageUtil.args(e.getMessage()).substring("anime ".length());
 					else
-						tags = new InputDialog(e.getChannel(), e.getAuthor(), "input-anime").open();
+						tags = new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-anime").open();
 
 					JSONArray animes = HTTPHandler.requestAnime(tags);
 					if (animes == null) {
-						MessageUtil.sendMessage(e.getChannel(), "no-results");
+						MessageUtil.sendMessage(e.getMessage().getChannel().block(), "no-results");
 						return true;
 					}
 					if (animes.length() > 1) {
 						Map<String, JSONObject> choices = new HashMap<>();
 						for (int i = 0; i < 3 || i > animes.length(); i++)
 							choices.put(animes.getJSONObject(i).getString("title") + " (" + animes.getJSONObject(i).getString("english") + ")", animes.getJSONObject(i));
-						JSONObject anime = new AnimeDialog(e.getChannel(), e.getAuthor(), choices).open();
+						JSONObject anime = new AnimeDialog(e.getMessage().getChannel().block(), e.getMember().get(), choices).open();
 						if (anime == null)
 							return true;
-						MessageUtil.sendMessage(e.getChannel(), EmbedUtil.animeEmbed(e.getGuild(), anime));
+						MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.animeEmbed(e.getGuild().block(), anime));
 					} else {
-						MessageUtil.sendMessage(e.getChannel(), EmbedUtil.animeEmbed(e.getGuild(), animes.getJSONObject(0)));
+						MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.animeEmbed(e.getGuild().block(), animes.getJSONObject(0)));
 					}
 					return true;
 				}

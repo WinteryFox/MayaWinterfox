@@ -31,25 +31,25 @@ public class CommandUser extends Node<Command> {
 					if (args.length > 1)
 						target = ParsingUtil.getUser(args[1]);
 					else
-						target = new TargetDialog(e.getChannel(), e.getAuthor()).open();
+						target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
 					if (target == null)
 						return false;
 
 					EmbedBuilder builder = new EmbedBuilder()
-							.withColor(target.getColorForGuild(e.getGuild()))
+							.withColor(target.getColorForGuild(e.getGuild().block()))
 							.withTitle(target.getName() + "#" + target.getDiscriminator())
 							.withThumbnail(ImageUtil.getAvatar(target))
 							.withTimestamp(Instant.now())
-							.appendField(Localisation.getMessage(e.getGuild(), "id"), target.getStringID(), false)
-							.appendField(Localisation.getMessage(e.getGuild(), "creation"), target.getCreationDate().toString(), false);
+							.appendField(Localisation.getMessage(e.getGuild().block(), "id"), target.getStringID(), false)
+							.appendField(Localisation.getMessage(e.getGuild().block(), "creation"), target.getCreationDate().toString(), false);
 
-					if (e.getGuild().getUsers().contains(target)) {
-						String roles = Arrays.toString(target.getRolesForGuild(e.getGuild()).toArray()).replace("[", "").replace("]", "");
-						String perms = Arrays.toString(target.getPermissionsForGuild(e.getGuild()).toArray()).replace("[", "").replace("]", "");
-						builder.appendField(Localisation.getMessage(e.getGuild(), "roles"), StringUtils.abbreviate(roles, Math.min(roles.length(), 1024)), false);
-						builder.appendField(Localisation.getMessage(e.getGuild(), "perms"), StringUtils.abbreviate(perms, Math.min(perms.length(), 1024)), false);
+					if (e.getGuild().block().getUsers().contains(target)) {
+						String roles = Arrays.toString(target.getRolesForGuild(e.getGuild().block()).toArray()).replace("[", "").replace("]", "");
+						String perms = Arrays.toString(target.getPermissionsForGuild(e.getGuild().block()).toArray()).replace("[", "").replace("]", "");
+						builder.appendField(Localisation.getMessage(e.getGuild().block(), "roles"), StringUtils.abbreviate(roles, Math.min(roles.length(), 1024)), false);
+						builder.appendField(Localisation.getMessage(e.getGuild().block(), "perms"), StringUtils.abbreviate(perms, Math.min(perms.length(), 1024)), false);
 					}
-					MessageUtil.sendMessage(e.getChannel(), builder.build());
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), builder.build());
 					return true;
 				}), Collections.emptyList());
 	}

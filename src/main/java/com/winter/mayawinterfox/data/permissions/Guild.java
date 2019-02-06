@@ -1,10 +1,8 @@
-package com.winter.mayawinterfox.data.permissions;
+/*package com.winter.mayawinterfox.data.permissions;
 
 import com.winter.mayawinterfox.data.Database;
 import com.winter.mayawinterfox.data.Row;
 import com.winter.mayawinterfox.exceptions.impl.UpdateFailedException;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IUser;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,11 +11,11 @@ import java.util.Set;
 
 public class Guild {
 
-	private final IGuild guild;
+	private final Guild guild;
 	private final Map<String, Group> groups = new HashMap<>();
-	private final Map<IUser, User> users = new HashMap<>();
+	private final Map<User, User> users = new HashMap<>();
 
-	public Guild(IGuild guild) {
+	public Guild(Guild guild) {
 		this.guild = guild;
 		//Group d = new Group("maya.default");
 		//for (Map.Entry<Commands.Category, List<com.winter.mayawinterfox.data.Node<Command>>> entry : Commands.COMMAND_MAP.entrySet())
@@ -41,12 +39,12 @@ public class Guild {
 	}
 
 	public boolean hasPermission(IUser user, String permission) {
-		/*if (PermissionChecks.isGlobal(user))
-			return true;
-		if (guild.getOwner().equals(user))
-			return true;
-		if (user.getPermissionsForGuild(guild).contains(Permissions.ADMINISTRATOR))
-			return true;*/
+		//if (PermissionChecks.isGlobal(user))
+		//	return true;
+		//if (guild.getOwner().equals(user))
+		//	return true;
+		//if (user.getPermissionsForGuild(guild).contains(Permissions.ADMINISTRATOR))
+		//	return true;
 
 		Node node = new Node(permission);
 		for (Group g : groups.values()) {
@@ -61,7 +59,7 @@ public class Guild {
 		return getUser(user).hasPermission(node);
 	}
 
-	public User getUser(IUser user) {
+	public User getUser(discord4j.core.object.entity.User user) {
 		return users.computeIfAbsent(user, k -> new User(guild, user));
 	}
 
@@ -82,4 +80,4 @@ public class Guild {
 	public Set<Group> getGroups() {
 		return new HashSet<>(groups.values());
 	}
-}
+}*/

@@ -26,7 +26,7 @@ public class CommandServer extends Node<Command> {
 				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
 				e -> {
 					String[] args = MessageUtil.argsArray(e.getMessage());
-					IGuild target = e.getGuild();
+					IGuild target = e.getGuild().block();
 
 					String roles = Arrays.toString(target.getRoles().toArray()).replace("[", "").replace("]", "");
 					String bans = Arrays.toString(target.getBannedUsers().toArray()).replace("[", "").replace("]", "");
@@ -50,7 +50,7 @@ public class CommandServer extends Node<Command> {
 						builder.appendField(Localisation.getMessage(target, "bans"), StringUtils.abbreviate(bans, Math.min(bans.length(), 1024)), false);
 					if (!target.getEmojis().isEmpty())
 						builder.appendField(Localisation.getMessage(target, "emotes"), StringUtils.abbreviate(emotes, Math.min(emotes.length(), 1024)), false);
-					MessageUtil.sendMessage(e.getChannel(), builder.build());
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), builder.build());
 					return true;
 				},
 				new HashSet<>(Collections.singletonList("serverinfo"))

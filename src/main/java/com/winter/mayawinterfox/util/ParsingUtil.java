@@ -1,6 +1,9 @@
 package com.winter.mayawinterfox.util;
 
 import com.winter.mayawinterfox.Main;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.util.Snowflake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sx.blah.discord.handle.obj.IChannel;
@@ -18,16 +21,19 @@ public class ParsingUtil {
 	 * @return The user that was found
 	 * @throws IllegalArgumentException On failure
 	 */
-	public static IUser getUser(String s) {
+	public static User getUser(String s) {
 		LOGGER.debug(String.format("Passed in with `%s`...", s));
 		if (s.matches("<@!?\\d+>")) {
 			long id = Long.parseLong(s.replaceAll("<@!?(\\d+)>", "$1"));
-			return Main.getClient().fetchUser(id);
+			return Main.getClient().getUserById(Snowflake.of(id)).block();
 		} else if (s.matches("\\d+")) {
 			long id = Long.parseLong(s);
-			return Main.getClient().fetchUser(id);
+			return Main.getClient().getUserById(Snowflake.of(id)).block();
 		} else if (s.matches("[^#]+#\\d{4}")) {
-			return Main.getClient().getUsersByName(s.replaceAll("([^#]+)#\\d{4}", "$1")).parallelStream().filter(u -> u.getDiscriminator().equals(s.replaceAll(".+#(\\d{4})", "$1"))).findFirst().orElseThrow(() -> new IllegalArgumentException("No users found"));
+			//return Main.getClient().getUsersByName(s.replaceAll("([^#]+)#\\d{4}", "$1")).parallelStream().filter(u -> u.getDiscriminator().equals(s.replaceAll(".+#(\\d{4})", "$1"))).findFirst().orElseThrow(() -> new IllegalArgumentException("No users found"));
+			return Main.getClient().getUsers().filter(user -> {
+				//return user.getUsername().equals(s.replaceAll("([^#]+)#\\d{4}", "$1")) && user.getDiscriminator().equals(s.replace(".+#(\\d{4})", "$1"));
+			}).collectList().block().get(0);
 		}
 		throw new IllegalArgumentException("Not a valid user string!");
 	}

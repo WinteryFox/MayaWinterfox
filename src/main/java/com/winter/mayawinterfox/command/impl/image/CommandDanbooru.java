@@ -22,10 +22,10 @@ public class CommandDanbooru extends Node<Command> {
 					String[] args = MessageUtil.argsArray(e.getMessage());
 					String[] tags;
 					if (args.length <= 1) {
-						String temp = new InputDialog(e.getChannel(), e.getAuthor(), "input-tags").open();
+						String temp = new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-tags").open();
 						if (temp == null)
 							return false;
-						tags = MessageUtil.argsArray(e.getGuild(), temp);
+						tags = MessageUtil.argsArray(e.getGuild().block(), temp);
 					} else {
 						tags = new String[args.length - 1];
 						System.arraycopy(args, 1, tags, 0, args.length - 1);
@@ -35,10 +35,10 @@ public class CommandDanbooru extends Node<Command> {
 
 					URI url = new Danbooru.Builder().withTags(tags).build().randomURL();
 					if (url == null) {
-						MessageUtil.sendMessage(e.getChannel(), "no-results");
+						MessageUtil.sendMessage(e.getMessage().getChannel().block(), "no-results");
 						return false;
 					}
-					MessageUtil.sendMessage(e.getChannel(), EmbedUtil.imageEmbed(e.getGuild(), url.toASCIIString()));
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.imageEmbed(e.getGuild().block(), url.toASCIIString()));
 					return true;
 				}
 		), Collections.emptyList());

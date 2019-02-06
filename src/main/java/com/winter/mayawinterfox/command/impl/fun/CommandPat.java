@@ -26,17 +26,17 @@ public class CommandPat extends Node<Command> {
 					if (args.length == 2)
 						target = ParsingUtil.getUser(MessageUtil.args(e.getMessage()).substring("pat ".length()));
 					else
-						target = (IUser) new TargetDialog(e.getChannel(), e.getAuthor()).open();
+						target = (IUser) new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
 					if (target == null)
 						return false;
 					String[] images = {
 							""
 					};
 
-					if (e.getAuthor().equals(target))
-						MessageUtil.sendMessage(e.getChannel(), EmbedUtil.imageEmbed(e.getGuild(), images[new Random().nextInt(images.length)]), "pat-from", target, e.getAuthor());
+					if (e.getMember().get().equals(target))
+						MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.imageEmbed(e.getGuild().block(), images[new Random().nextInt(images.length)]), "pat-from", target, e.getMember().get());
 					else
-						MessageUtil.sendMessage(e.getChannel(), EmbedUtil.imageEmbed(e.getGuild(), images[new Random().nextInt(images.length)]), "pat-from-yourself", target);
+						MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.imageEmbed(e.getGuild().block(), images[new Random().nextInt(images.length)]), "pat-from-yourself", target);
 					return true;
 				}
 		), Collections.emptyList());

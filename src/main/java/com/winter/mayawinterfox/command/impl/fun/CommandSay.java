@@ -20,11 +20,11 @@ public class CommandSay extends Node<Command> {
 					String[] args = MessageUtil.argsArray(e.getMessage());
 					String i = null;
 					if (args.length <= 1)
-						i = new InputDialog(e.getChannel(), e.getAuthor(), "input-say").open();
+						i = new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-say").open();
 					if (args.length > 1)
 						i = MessageUtil.args(e.getMessage()).substring("say ".length());
 
-					MessageUtil.sendRawMessage(e.getChannel(), i);
+					MessageUtil.sendRawMessage(e.getMessage().getChannel().block(), i);
 					return true;
 				}
 		), Collections.emptyList());

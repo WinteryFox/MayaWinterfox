@@ -27,21 +27,21 @@ public class CommandRemove extends Node<Command> {
 					IUser target;
 					IRole role;
 					if (args.length > 1)
-						role = ParsingUtil.getRole(e.getGuild(), args[1]);
+						role = ParsingUtil.getRole(e.getGuild().block(), args[1]);
 					else
-						role = new RoleDialog(e.getChannel(), e.getAuthor()).open();
+						role = new RoleDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
 					if (role == null)
 						return false;
 
 					if (args.length > 2)
 						target = ParsingUtil.getUser(args[2]);
 					else
-						target = new TargetDialog(e.getChannel(), e.getAuthor()).open();
+						target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
 					if (target == null)
 						return false;
 
 					GuildUtil.removeRole(target, role);
-					MessageUtil.sendMessage(e.getChannel(), EmbedUtil.successEmbed(e.getGuild(), "removed-role", role.getName(), target.getName()));
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "removed-role", role.getName(), target.getName()));
 					return true;
 				}
 		), Collections.emptyList());

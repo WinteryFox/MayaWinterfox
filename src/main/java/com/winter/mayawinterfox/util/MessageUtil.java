@@ -5,7 +5,8 @@ import com.winter.mayawinterfox.data.locale.Localisation;
 import com.winter.mayawinterfox.exceptions.ErrorHandler;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.Message;
-import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.MessageChannel;
+import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
 import discord4j.rest.json.request.EmbedRequest;
@@ -33,13 +34,13 @@ public class MessageUtil {
 		return String.join(" ", argsArray(m));
 	}
 
-	public static Mono<Message> sendMessage(TextChannel channel, String messageKey, Object... params) {
+	public static Mono<Message> sendMessage(MessageChannel channel, String messageKey, Object... params) {
 		return channel.createMessage(Localisation.getMessage(channel.getGuild().block(), messageKey, params)).single();
 	}
 
-	public static Message sendMessage(TextChannel channel, String messageKey, Consumer<EmbedCreateSpec> embed, InputStream file, String fileName, Object... params) {
+	public static Message sendMessage(MessageChannel channel, String messageKey, Consumer<EmbedCreateSpec> embed, InputStream file, String fileName, Object... params) {
 		try {
-			channel.createMessage(spec -> spec
+			return channel.createMessage(spec -> spec
 					.setContent(Localisation.getMessage(channel.getGuild().block(), messageKey, params))
 					.setEmbed(embed)
 					.setFile(fileName, file)
@@ -58,9 +59,9 @@ public class MessageUtil {
 		return null;
 	}
 
-	public static Message sendMessage(TextChannel channel, Consumer<EmbedCreateSpec> embed, InputStream file, String fileName) {
+	public static Message sendMessage(MessageChannel channel, Consumer<EmbedCreateSpec> embed, InputStream file, String fileName) {
 		try {
-			channel.createMessage(spec -> spec
+			return channel.createMessage(spec -> spec
 					.setFile(fileName, file)
 					.setTts(false)).block();
 		} catch (Exception e) {
@@ -82,9 +83,8 @@ public class MessageUtil {
 	 * @param channel The channel to send the message in
 	 * @param embed The embed object to send
 	 */
-	public static Message sendMessage(TextChannel channel, Consumer<EmbedCreateSpec> embed) {
-		channel.createMessage(spec -> spec
-				.setEmbed(embed)).block();
+	public static Message sendMessage(MessageChannel channel, Consumer<EmbedCreateSpec> embed) {
+		return channel.createMessage(spec -> spec.setEmbed(embed)).block();
 	}
 
 	/**
@@ -94,8 +94,10 @@ public class MessageUtil {
 	 * @param messageKey The localisation key for the message
 	 * @param params The replacements for %s in the message
 	 */
-	public static IMessage sendMessage(IChannel channel, EmbedObject embed, String messageKey, Object... params) {
-		return RequestBuffer.request(() -> { return channel.sendMessage(Localisation.getMessage(channel.getGuild(), messageKey, params), embed); }).get();
+	public static Message sendMessage(MessageChannel channel, Consumer<EmbedCreateSpec> embed, String messageKey, Object... params) {
+		return channel.createMessage(spec ->
+				spec.setContent(Localisation.getMessage(channel.getGuild().block(), messageKey, params))
+				.setEmbed(embed)).block();
 	}
 
 	/**
@@ -103,8 +105,8 @@ public class MessageUtil {
 	 * @param channel The channel to send the message in
 	 * @param message The message to send
 	 */
-	public static IMessage sendRawMessage(IChannel channel, String message) {
-		return RequestBuffer.request(() -> { return channel.sendMessage(message); }).get();
+	public static Message sendRawMessage(MessageChannel channel, String message) {
+		return channel.createMessage(spec -> spec.setContent(message)).block();
 	}
 
 	/**
@@ -112,24 +114,15 @@ public class MessageUtil {
 	 * @param message The message to add the reaction to
 	 * @param emoji The emoji to react with
 	 */
-	public static void addReaction(IMessage message, Emoji emoji) {
-		RequestBuffer.request(() -> message.addReaction(emoji)).get();
-	}
-
-	/**
-	 * Adds a reaction to a message
-	 * @param message The message to add the reaction to
-	 * @param emoji The emoji to react with
-	 */
-	public static void addReaction(IMessage message, ReactionEmoji emoji) {
-		RequestBuffer.request(() -> message.addReaction(emoji)).get();
+	public static void addReaction(Message message, ReactionEmoji emoji) {
+		message.addReaction(emoji).block();
 	}
 
 	/**
 	 * Delete a message
 	 * @param message The message to delete
 	 */
-	public static void delete(IMessage message) {
-		RequestBuffer.request(message::delete).get();
+	public static void delete(Message message) {
+		message.delete().block();
 	}
 }

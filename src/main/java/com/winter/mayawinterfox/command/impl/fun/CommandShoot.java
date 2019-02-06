@@ -25,17 +25,17 @@ public class CommandShoot extends Node<Command> {
 					if (args.length > 1)
 						target = ParsingUtil.getUser(MessageUtil.args(e.getMessage()).substring("shoot ".length()));
 					else
-						target = new TargetDialog(e.getChannel(), e.getAuthor()).open();
+						target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
 					if (target == null)
 						return false;
 
-					if (e.getAuthor().equals(target))
-						MessageUtil.sendMessage(e.getChannel(), "shoot-at-yourself", e.getAuthor().getName());
+					if (e.getMember().get().equals(target))
+						MessageUtil.sendMessage(e.getMessage().getChannel().block(), "shoot-at-yourself", e.getMember().get().getName());
 					else
 						if (new Random().nextInt(2) == 1)
-							MessageUtil.sendMessage(e.getChannel(), "shoot-at", e.getAuthor().getName(), target.getName(), new Random().nextInt(1000));
+							MessageUtil.sendMessage(e.getMessage().getChannel().block(), "shoot-at", e.getMember().get().getName(), target.getName(), new Random().nextInt(1000));
 						else
-							MessageUtil.sendMessage(e.getChannel(), "shoot-at-miss", e.getAuthor().getName(), target.getName());
+							MessageUtil.sendMessage(e.getMessage().getChannel().block(), "shoot-at-miss", e.getMember().get().getName(), target.getName());
 					return true;
 				}
 		), Collections.emptyList());

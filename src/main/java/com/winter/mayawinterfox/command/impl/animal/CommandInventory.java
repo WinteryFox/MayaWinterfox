@@ -30,16 +30,16 @@ public class CommandInventory extends Node<Command> {
 
 					EmbedBuilder builder = new EmbedBuilder()
 							.withColor(ColorUtil.withinTwoHues(0.333333f, 0.88888f))
-							.withThumbnail(ImageUtil.getAvatar(e.getAuthor()))
-							.withTitle(Localisation.getMessage(e.getGuild(), "inventory", e.getAuthor().getName()));
+							.withThumbnail(ImageUtil.getAvatar(e.getMember().get()))
+							.withTitle(Localisation.getMessage(e.getGuild().block(), "inventory", e.getMember().get().getName()));
 					for (ItemProvider.ItemType type : ItemProvider.ItemType.values()) {
-						Set<Item> items = new Wolf(e.getAuthor()).getInventory().getItemsByType(type);
+						Set<Item> items = new Wolf(e.getMember().get()).getInventory().getItemsByType(type);
 						if (!items.isEmpty())
 							builder.appendField(StringUtils.capitalize(type.getTypeName()), Arrays.toString(items.stream().map(Item::getName).collect(Collectors.toList()).toArray()).replace("[", "").replace("]", ""), false);
 						if (builder.getFieldCount() == 0)
-							builder.withDescription(Localisation.getMessage(e.getGuild(), "empty-inventory"));
+							builder.withDescription(Localisation.getMessage(e.getGuild().block(), "empty-inventory"));
 					}
-					MessageUtil.sendMessage(e.getChannel(), builder.build());
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), builder.build());
 					return true;
 				}
 		), Collections.emptyList());

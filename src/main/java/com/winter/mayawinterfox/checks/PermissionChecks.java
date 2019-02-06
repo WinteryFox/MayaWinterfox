@@ -2,34 +2,43 @@ package com.winter.mayawinterfox.checks;
 
 import com.winter.mayawinterfox.Main;
 import com.winter.mayawinterfox.data.permissions.Guild;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.Permissions;
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.GuildChannel;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.util.Permission;
 
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class PermissionChecks {
 
-	public static Predicate<MessageReceivedEvent> hasPermission(Permissions p) {
-		return e -> (e.getChannel().getModifiedPermissions(e.getAuthor()).contains(p) || e.getAuthor().getPermissionsForGuild(e.getGuild()).contains(Permissions.ADMINISTRATOR) || e.getGuild().getOwner().equals(e.getAuthor()) || Main.config.get(Main.ConfigValue.GLOBALS).contains(e.getAuthor().getStringID())) && e.getChannel().getModifiedPermissions(e.getClient().getOurUser()).contains(p);
+	public static Predicate<MessageCreateEvent> hasPermission(Permission p) {
+		return event ->{
+			Set<Permission> permissions = ((GuildChannel) event.getMessage().getChannel().block()).getEffectivePermissions(event.getMember().get().getId()).block();
+			assert permissions != null;
+			if (permissions.contains(p))
+				return true;
+			else if (permissions.contains(Permission.ADMINISTRATOR))
+				return true;
+			else if (event.getMember().get() == event.getGuild().block().getOwner().block())
+				return true;
+			else return Main.config.get(Main.ConfigValue.GLOBALS).contains(event.getMember().get().getId().asString());
+		};
 	}
 
-	public static Predicate<MessageReceivedEvent> hasPermission(Permissions p, boolean botRequiresPerm) {
-		return e -> (!e.getChannel().getModifiedPermissions(e.getAuthor()).contains(p) && !e.getAuthor().getPermissionsForGuild(e.getGuild()).contains(Permissions.ADMINISTRATOR) && !e.getGuild().getOwner().equals(e.getAuthor()) && !Main.config.get(Main.ConfigValue.GLOBALS).contains(e.getAuthor().getStringID())) || !botRequiresPerm || e.getChannel().getModifiedPermissions(e.getClient().getOurUser()).contains(p);
+	public static Predicate<MessageCreateEvent> isGlobal() {
+		return e -> Main.config.get(Main.ConfigValue.GLOBALS).contains(e.getMember().get().getId().asString());
 	}
 
-	public static Predicate<MessageReceivedEvent> isGlobal() {
-		return e -> Main.config.get(Main.ConfigValue.GLOBALS).contains(e.getAuthor().getStringID());
+	public static boolean isGlobal(User user) {
+		return Main.config.get(Main.ConfigValue.GLOBALS).contains(user.getId().asString());
 	}
 
-	public static boolean isGlobal(IUser user) {
-		return Main.config.get(Main.ConfigValue.GLOBALS).contains(user.getStringID());
-	}
-
-	public static Predicate<MessageReceivedEvent> hasPermission(String permission) {
+	public static Predicate<MessageCreateEvent> hasPermission(String permission) {
 		return e -> {
-			Guild guild = new Guild(e.getGuild());
-			return guild.hasPermission(e.getAuthor(), permission);
+			Guild guild = new Guild(e.getGuild().block().block());
+			return guild.hasPermission(e.getMember().get(), permission);
 		};
 	}
 }

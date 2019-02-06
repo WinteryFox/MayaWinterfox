@@ -5,44 +5,49 @@ import com.winter.mayawinterfox.data.cache.Caches;
 import com.winter.mayawinterfox.data.cache.meta.GuildMeta;
 import com.winter.mayawinterfox.data.cache.meta.UserMeta;
 import com.winter.mayawinterfox.data.music.GuildMusicManager;
-import sx.blah.discord.handle.obj.*;
-import sx.blah.discord.util.RequestBuffer;
+import discord4j.core.object.entity.*;
+import discord4j.core.object.util.Permission;
+import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Flux;
 
 import java.util.List;
 
 public class GuildUtil {
 
-	public static IChannel getFirstChannel(IGuild guild) {
-		if (guild.getDefaultChannel().getModifiedPermissions(guild.getEveryoneRole()).contains(Permissions.SEND_MESSAGES))
-			return guild.getDefaultChannel();
+	public static TextChannel getFirstChannel(Guild guild) {
+		if (guild.getSystemChannel().block().getEffectivePermissions(guild.getEveryoneRole().block().getId()).block().contains(Permission.SEND_MESSAGES))
+			return guild.getSystemChannel().block();
 
-		for (IChannel channel : guild.getChannels())
-			if (channel.getModifiedPermissions(guild.getEveryoneRole()).contains(Permissions.SEND_MESSAGES))
-				return channel;
+		for (GuildChannel channel : guild.getChannels().collectList().block()) {
+			if (!(channel instanceof TextChannel))
+				continue;
 
+			if (channel.getGuild().block().getEveryoneRole().block().getPermissions().contains(Permission.SEND_MESSAGES))
+				return (TextChannel) channel;
+		}
 		return null;
 	}
 
-	public static boolean isPremium(IGuild guild, IUser user) {
-		return Caches.getGuild(guild).isPremium() || Caches.getUser(user).isPremium();
+	public static boolean isPremium(Member user) {
+		return Caches.getGuild(user.getGuild().block()).isPremium() || Caches.getUser(user).isPremium();
 	}
 
 	/**
 	 * Assign a role to a user
-	 * @param target The user to assign the role to
+	 * @param user The user to assign the role to
 	 * @param role The role to assign
 	 */
-	public static void addRole(IUser target, IRole role) {
-		RequestBuffer.request(() -> target.addRole(role));
+	public static void addRole(Member user, Role role) {
+		user.addRole(role.getId()).block();
 	}
 
 	/**
 	 * Remove a role from a user
-	 * @param target The user to remove the role from
+	 * @param user The user to remove the role from
 	 * @param role The role to remove
 	 */
-	public static void removeRole(IUser target, IRole role) {
-		RequestBuffer.request(() -> target.removeRole(role));
+	public static void removeRole(Member user, Role role) {
+		user.removeRole(role.getId()).block();
 	}
 
 	/**
@@ -50,21 +55,20 @@ public class GuildUtil {
 	 * @param channel The channel to bulk delete from
 	 * @param messages The messages to bulk delete
 	 */
-	public static void bulkDelete(IChannel channel, List<IMessage> messages) {
-		RequestBuffer.request(() -> channel.bulkDelete(messages));
+	public static void bulkDelete(TextChannel channel, List<Snowflake> messages) {
+		channel.bulkDelete(Flux.fromIterable(messages)).blockFirst();
 	}
 
 	/**
 	 * Checks if the guild has space left in the song queue
 	 *
-	 * @param guild The guild to check for
 	 * @param user  The user to check for
 	 * @return True if there is still space and false if there is not
 	 */
-	public static boolean hasQueueSpaceLeft(IGuild guild, IUser user) {
-		GuildMeta g = Caches.getGuild(guild);
+	public static boolean hasQueueSpaceLeft(Member user) {
+		GuildMeta g = Caches.getGuild(user.getGuild().block());
 		UserMeta u = Caches.getUser(user);
-		GuildMusicManager m = MusicUtils.getGuildMusicManager(guild);
+		GuildMusicManager m = MusicUtils.getGuildMusicManager(user.getGuild().block());
 		return g.isPremium() || u.isPremium() ? m.getScheduler().getQueueSize() < Integer.parseUnsignedInt(Main.config.get(Main.ConfigValue.MAX_SONG_QUEUE_PREMIUM)) : m.getScheduler().getQueueSize() < Integer.parseUnsignedInt(Main.config.get(Main.ConfigValue.MAX_SONG_QUEUE));
 	}
 
@@ -76,7 +80,7 @@ public class GuildUtil {
 	 * @return True if there is still space and false if there is not
 	 */
 	public static boolean hasQueueSpaceLeft(GuildMeta g, UserMeta u) {
-		GuildMusicManager m = MusicUtils.getGuildMusicManager(Main.getClient().getGuildByID(g.getLongID()));
+		GuildMusicManager m = MusicUtils.getGuildMusicManager(Main.getClient().getGuildById(g.getGuild().getId()).block());
 		return g.isPremium() || u.isPremium() ? m.getScheduler().getQueueSize() < Integer.parseUnsignedInt(Main.config.get(Main.ConfigValue.MAX_SONG_QUEUE_PREMIUM)) : m.getScheduler().getQueueSize() < Integer.parseUnsignedInt(Main.config.get(Main.ConfigValue.MAX_SONG_QUEUE));
 	}
 
@@ -87,7 +91,7 @@ public class GuildUtil {
 	 * @param user  The user to check for
 	 * @return True if they have prefixes left and false if they don't
 	 */
-	public static boolean hasPrefixesLeft(IGuild guild, IUser user) {
+	public static boolean hasPrefixesLeft(Guild guild, User user) {
 		GuildMeta g = Caches.getGuild(guild);
 		UserMeta u = Caches.getUser(user);
 		return g.isPremium() || u.isPremium() ? g.getPrefixes().size() < Integer.parseUnsignedInt(Main.config.get(Main.ConfigValue.MAX_PREFIXES_PREMIUM)) : g.getPrefixes().size() < Integer.parseUnsignedInt(Main.config.get(Main.ConfigValue.MAX_PREFIXES));

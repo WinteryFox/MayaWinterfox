@@ -1,7 +1,6 @@
 package com.winter.mayawinterfox.command;
 
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.impl.obj.ReactionEmoji;
+import discord4j.core.event.domain.message.MessageCreateEvent;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -11,8 +10,8 @@ public class Command {
 
 	private final String name;
 	private final String help;
-	private final Predicate<MessageReceivedEvent> check;
-	private final Predicate<MessageReceivedEvent> call;
+	private final Predicate<MessageCreateEvent> check;
+	private final Predicate<MessageCreateEvent> call;
 	private final Set<String> aliases;
 
 	/**
@@ -22,7 +21,7 @@ public class Command {
 	 * @param check Whether to run the call or not.
 	 * @param call  Run the call, false means show help message. Help is determined by <code>[name]-help</code>.
 	 */
-	public Command(String name, String help, Predicate<MessageReceivedEvent> check, Predicate<MessageReceivedEvent> call) {
+	public Command(String name, String help, Predicate<MessageCreateEvent> check, Predicate<MessageCreateEvent> call) {
 		this(name, help, check, call, new HashSet<>());
 	}
 
@@ -34,7 +33,7 @@ public class Command {
 	 * @param call  Run the call, false means show help message. Help is determined by <code>[name]-help</code>.
 	 * @param aliases The aliases for the command
 	 */
-	public Command(String name, String help, Predicate<MessageReceivedEvent> check, Predicate<MessageReceivedEvent> call, Set<String> aliases) {
+	public Command(String name, String help, Predicate<MessageCreateEvent> check, Predicate<MessageCreateEvent> call, Set<String> aliases) {
 		this.name = name;
 		this.help = help;
 		this.check = check;
@@ -43,7 +42,7 @@ public class Command {
 		this.aliases.add(name);
 	}
 
-	public void call(MessageReceivedEvent e) {
+	public void call(MessageCreateEvent e) {
 		call.test(e);
 	}
 
@@ -55,7 +54,7 @@ public class Command {
 		return help;
 	}
 
-	public Predicate<MessageReceivedEvent> getCheck() { return check; }
+	public Predicate<MessageCreateEvent> getCheck() { return check; }
 
 	public Set<String> getAliases() {
 		return aliases;

@@ -5,7 +5,7 @@ import com.winter.mayawinterfox.command.Command;
 import com.winter.mayawinterfox.command.Commands;
 import com.winter.mayawinterfox.data.Node;
 import com.winter.mayawinterfox.util.MessageUtil;
-import sx.blah.discord.api.internal.json.objects.EmbedObject;
+import sx.blah.discord.api.internal.json.objects.Consumer<EmbedCreateSpec>;
 import sx.blah.discord.handle.obj.Permissions;
 
 import java.util.Collections;
@@ -23,12 +23,12 @@ public class CommandHelp extends Node<Command> {
 					if (args.length == 1) {
 						return Commands.sendHelp(e);
 					} else if (args.length == 2) {
-						EmbedObject help = Commands.getHelp(e.getGuild(), args[1]);
+						Consumer<EmbedCreateSpec> help = Commands.getHelp(e.getGuild().block(), args[1]);
 						if (help != null) {
-							return MessageUtil.sendMessage(e.getChannel(), help) != null;
+							return MessageUtil.sendMessage(e.getMessage().getChannel().block(), help) != null;
 						}
 					}
-					MessageUtil.sendMessage(e.getChannel(), "unknown-command");
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), "unknown-command");
 					return false;
 				},
 				new HashSet<>(Collections.singletonList("halp"))

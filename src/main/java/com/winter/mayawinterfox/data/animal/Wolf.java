@@ -12,7 +12,7 @@ import com.winter.mayawinterfox.data.item.ItemProvider;
 import com.winter.mayawinterfox.exceptions.ErrorHandler;
 import com.winter.mayawinterfox.exceptions.impl.UpdateFailedException;
 import com.winter.mayawinterfox.util.ImageUtil;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.User;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -29,7 +29,7 @@ public class Wolf {
 
 	private final long hungerLossRate = 2700000L;
 
-	private IUser user;
+	private User user;
 	private String name;
 	private State state;
 	private int level;
@@ -51,12 +51,12 @@ public class Wolf {
 	private Item eye;
 	private Item neck;
 
-	public Wolf(IUser user) {
+	public Wolf(User user) {
 		this.user = user;
-		List<Row> stats = Database.get("SELECT * FROM wolf WHERE id=?;", user.getLongID());
+		List<Row> stats = Database.get("SELECT * FROM wolf WHERE id=?;", user.getId().asLong());
 		if (stats.size() == 0) {
-			Database.set("INSERT IGNORE INTO wolf (id) VALUES (?);", user.getLongID());
-			stats = Database.get("SELECT * FROM wolf WHERE id=?;", user.getLongID());
+			Database.set("INSERT IGNORE INTO wolf (id) VALUES (?);", user.getId().asLong());
+			stats = Database.get("SELECT * FROM wolf WHERE id=?;", user.getId().asLong());
 		}
 		this.name = (String) stats.get(0).get("name");
 		this.level = (int) stats.get(0).get("level");
@@ -110,7 +110,7 @@ public class Wolf {
 
 	}
 
-	public IUser getUser() {
+	public User getUser() {
 		return user;
 	}
 
@@ -119,7 +119,7 @@ public class Wolf {
 	}
 
 	public synchronized void setName(String name) {
-		if (!Database.set("UPDATE wolf SET name = ? WHERE id = ?", name, user.getLongID()))
+		if (!Database.set("UPDATE wolf SET name = ? WHERE id = ?", name, user.getId().asLong()))
 			throw new UpdateFailedException("Failed to update animal metadata.");
 		this.name = name;
 	}
@@ -129,13 +129,13 @@ public class Wolf {
 	}
 
 	public synchronized void setLevel(int level) {
-		if (!Database.set("UPDATE wolf SET level = ? WHERE id = ?", level, user.getLongID()))
+		if (!Database.set("UPDATE wolf SET level = ? WHERE id = ?", level, user.getId().asLong()))
 			throw new UpdateFailedException("Failed to update animal metadata.");
 		this.level = level;
 	}
 
 	public synchronized void incrementLevel() {
-		if (!Database.set("UPDATE wolf SET level = ? WHERE id = ?", level + 1, user.getLongID()))
+		if (!Database.set("UPDATE wolf SET level = ? WHERE id = ?", level + 1, user.getId().asLong()))
 			throw new UpdateFailedException("Failed to update animal metadata.");
 		this.level += 1;
 	}
@@ -145,7 +145,7 @@ public class Wolf {
 	}
 
 	public synchronized void setHunger(int hunger) {
-		if (!Database.set("UPDATE wolf SET hunger = ? WHERE id = ?", hunger, user.getLongID()))
+		if (!Database.set("UPDATE wolf SET hunger = ? WHERE id = ?", hunger, user.getId().asLong()))
 			throw new UpdateFailedException("Failed to update animal metadata.");
 		this.hunger = hunger;
 	}
@@ -155,7 +155,7 @@ public class Wolf {
 	}
 
 	public synchronized void setLastFedTime(long lastFedTime) {
-		if (!Database.set("UPDATE wolf SET lastfedtime = ? WHERE id = ?", lastFedTime, user.getLongID())) ;
+		if (!Database.set("UPDATE wolf SET lastfedtime = ? WHERE id = ?", lastFedTime, user.getId().asLong())) ;
 	}
 
 	public State getState() {
@@ -163,7 +163,7 @@ public class Wolf {
 	}
 
 	public synchronized void setState(State state) {
-		if (!Database.set("UPDATE wolf SET state = ? WHERE id = ?", state.ordinal(), user.getLongID()))
+		if (!Database.set("UPDATE wolf SET state = ? WHERE id = ?", state.ordinal(), user.getId().asLong()))
 			throw new UpdateFailedException("Failed to update animal metadata.");
 		this.state = state;
 	}
@@ -173,7 +173,7 @@ public class Wolf {
 	}
 
 	public synchronized void setHappiness(int happiness) {
-		if (!Database.set("UPDATE wolf SET happiness = ? WHERE id = ?", happiness, user.getLongID()))
+		if (!Database.set("UPDATE wolf SET happiness = ? WHERE id = ?", happiness, user.getId().asLong()))
 			throw new UpdateFailedException("Failed to update animal metadata.");
 		this.happiness = happiness;
 	}
@@ -183,7 +183,7 @@ public class Wolf {
 	}
 
 	public synchronized void setEnergy(int energy) {
-		if (!Database.set("UPDATE wolf SET energy = ? WHERE id = ?", energy, user.getLongID()))
+		if (!Database.set("UPDATE wolf SET energy = ? WHERE id = ?", energy, user.getId().asLong()))
 			throw new UpdateFailedException("Failed to update animal metadata.");
 		this.energy = energy;
 	}
@@ -193,7 +193,7 @@ public class Wolf {
 	}
 
 	public synchronized void setXp(int xp) {
-		if (!Database.set("UPDATE wolf SET xp = ? WHERE id = ?", xp, user.getLongID()))
+		if (!Database.set("UPDATE wolf SET xp = ? WHERE id = ?", xp, user.getId().asLong()))
 			throw new UpdateFailedException("Failed to update animal metadata.");
 		this.xp = xp;
 	}
@@ -203,7 +203,7 @@ public class Wolf {
 	}
 
 	public synchronized void setMaxXp(int maxXp) {
-		if (!Database.set("UPDATE wolf SET maxXp = ? WHERE id = ?", maxXp, user.getLongID()))
+		if (!Database.set("UPDATE wolf SET maxXp = ? WHERE id = ?", maxXp, user.getId().asLong()))
 			throw new UpdateFailedException("Failed to update animal metadata.");
 		this.maxXp = maxXp;
 	}
@@ -213,7 +213,7 @@ public class Wolf {
 	}
 
 	public synchronized void setFedTimes(int fedTimes) {
-		if (!Database.set("UPDATE wolf SET fedtimes = ? WHERE id = ?", fedTimes, user.getLongID()))
+		if (!Database.set("UPDATE wolf SET fedtimes = ? WHERE id = ?", fedTimes, user.getId().asLong()))
 			throw new UpdateFailedException("Failed to update animal metadata.");
 		this.fedTimes = fedTimes;
 	}
@@ -259,7 +259,7 @@ public class Wolf {
 	}
 
 	public synchronized void setBackground(Item background) {
-		if (!Database.set("UPDATE wolf SET background = ? WHERE id = ?", background.getId(), user.getLongID()))
+		if (!Database.set("UPDATE wolf SET background = ? WHERE id = ?", background.getId(), user.getId().asLong()))
 			throw new UpdateFailedException("Failed to update animal metadata.");
 		this.background = background;
 	}
@@ -269,7 +269,7 @@ public class Wolf {
 	}
 
 	public synchronized void setHat(Item hat) {
-		if (!Database.set("UPDATE wolf SET hat = ? WHERE id = ?", hat.getId(), user.getLongID()))
+		if (!Database.set("UPDATE wolf SET hat = ? WHERE id = ?", hat.getId(), user.getId().asLong()))
 			throw new UpdateFailedException("Failed to update animal metadata.");
 		this.hat = hat;
 	}
@@ -279,7 +279,7 @@ public class Wolf {
 	}
 
 	public synchronized void setBody(Item body) {
-		if (!Database.set("UPDATE wolf SET body = ? WHERE id = ?", body.getId(), user.getLongID()))
+		if (!Database.set("UPDATE wolf SET body = ? WHERE id = ?", body.getId(), user.getId().asLong()))
 			throw new UpdateFailedException("Failed to update animal metadata.");
 		this.body = body;
 	}
@@ -289,7 +289,7 @@ public class Wolf {
 	}
 
 	public synchronized void setPaws(Item paws) {
-		if (!Database.set("UPDATE wolf SET paws = ? WHERE id = ?", paws.getId(), user.getLongID()))
+		if (!Database.set("UPDATE wolf SET paws = ? WHERE id = ?", paws.getId(), user.getId().asLong()))
 			throw new UpdateFailedException("Failed to update animal metadata.");
 		this.paws = paws;
 	}
@@ -299,7 +299,7 @@ public class Wolf {
 	}
 
 	public synchronized void setTail(Item tail) {
-		if (!Database.set("UPDATE wolf SET tail = ? WHERE id = ?", tail.getId(), user.getLongID()))
+		if (!Database.set("UPDATE wolf SET tail = ? WHERE id = ?", tail.getId(), user.getId().asLong()))
 			throw new UpdateFailedException("Failed to update animal metadata.");
 		this.tail = tail;
 	}
@@ -309,7 +309,7 @@ public class Wolf {
 	}
 
 	public synchronized void setShirt(Item shirt) {
-		if (!Database.set("UPDATE wolf SET shirt = ? WHERE id = ?", shirt.getId(), user.getLongID()))
+		if (!Database.set("UPDATE wolf SET shirt = ? WHERE id = ?", shirt.getId(), user.getId().asLong()))
 			throw new UpdateFailedException("Failed to update animal metadata.");
 		this.shirt = shirt;
 	}
@@ -319,7 +319,7 @@ public class Wolf {
 	}
 
 	public synchronized void setNose(Item nose) {
-		if (!Database.set("UPDATE wolf SET nose = ? WHERE id = ?", nose.getId(), user.getLongID()))
+		if (!Database.set("UPDATE wolf SET nose = ? WHERE id = ?", nose.getId(), user.getId().asLong()))
 			throw new UpdateFailedException("Failed to update animal metadata.");
 		this.nose = nose;
 	}
@@ -329,7 +329,7 @@ public class Wolf {
 	}
 
 	public synchronized void setEye(Item eye) {
-		if (!Database.set("UPDATE wolf SET eye = ? WHERE id = ?", eye.getId(), user.getLongID()))
+		if (!Database.set("UPDATE wolf SET eye = ? WHERE id = ?", eye.getId(), user.getId().asLong()))
 			throw new UpdateFailedException("Failed to update animal metadata.");
 		this.eye = eye;
 	}
@@ -339,7 +339,7 @@ public class Wolf {
 	}
 
 	public synchronized void setNeck(Item neck) {
-		if (!Database.set("UPDATE wolf SET neck = ? WHERE id = ?", neck.getId(), user.getLongID()))
+		if (!Database.set("UPDATE wolf SET neck = ? WHERE id = ?", neck.getId(), user.getId().asLong()))
 			throw new UpdateFailedException("Failed to update animal metadata.");
 		this.neck = neck;
 	}

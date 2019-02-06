@@ -25,13 +25,13 @@ public class CommandLanguage extends Node<Command> {
 					if (args.length > 1)
 						lang = args[1];
 					else
-						lang = new InputDialog(e.getChannel(), e.getAuthor(), "input-language").open();
+						lang = new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-language").open();
 					if (lang == null)
 						return false;
 
-					if (!Localisation.changeLanguage(e.getGuild(), lang))
-						throw new IllegalArgumentException(Localisation.getMessage(e.getGuild(), "invalid-language"));
-					MessageUtil.sendMessage(e.getChannel(), EmbedUtil.successEmbed(e.getGuild(), "changed-language", lang));
+					if (!Localisation.changeLanguage(e.getGuild().block(), lang))
+						throw new IllegalArgumentException(Localisation.getMessage(e.getGuild().block(), "invalid-language"));
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "changed-language", lang));
 					return true;
 				},
 				new HashSet<>(Collections.singletonList("lang"))

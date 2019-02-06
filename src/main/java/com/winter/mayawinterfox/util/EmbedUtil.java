@@ -7,17 +7,17 @@ import com.winter.mayawinterfox.data.animal.Wolf;
 import com.winter.mayawinterfox.data.cache.Caches;
 import com.winter.mayawinterfox.data.cache.meta.UserMeta;
 import com.winter.mayawinterfox.data.locale.Localisation;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.User;
+import discord4j.core.spec.EmbedCreateSpec;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
-import sx.blah.discord.api.internal.json.objects.EmbedObject;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.util.EmbedBuilder;
 
 import java.awt.*;
 import java.net.URL;
 import java.time.Instant;
-import java.time.LocalDateTime;
+import java.util.function.Consumer;
 
 public class EmbedUtil {
 
@@ -28,13 +28,12 @@ public class EmbedUtil {
 	 * @param replacements The replacements for the message
 	 * @return A success embed
 	 */
-	public static EmbedObject successEmbed(IGuild guild, String description, Object... replacements) {
-		return new EmbedBuilder()
-				.withColor(ColorUtil.withinTwoHues(0.333333333f, 0.8333333333f))
-				.withTitle(Localisation.getMessage(guild, "success"))
-				.withDescription(Localisation.getMessage(guild, description, replacements))
-				.withTimestamp(Instant.now())
-				.build();
+	public static Consumer<EmbedCreateSpec> successEmbed(Guild guild, String description, Object... replacements) {
+		return embed -> embed
+				.setColor(ColorUtil.withinTwoHues(0.333333333f, 0.8333333333f))
+				.setTitle(Localisation.getMessage(guild, "success"))
+				.setDescription(Localisation.getMessage(guild, description, replacements))
+				.setTimestamp(Instant.now());
 	}
 
 	/**
@@ -43,21 +42,21 @@ public class EmbedUtil {
 	 * @param target The target user
 	 * @param by The user who initiated the kick
 	 * @param reason The reason given by the initiator
-	 * @return EmbedObject containing the kick information
+	 * @return Consumer<EmbedCreateSpec> containing the kick information
 	 */
-	public static EmbedObject kickEmbed(IGuild guild, IUser target, IUser by, String reason) {
-		EmbedBuilder eb = new EmbedBuilder()
-				.withColor(ColorUtil.withinTwoHues(0.0f, 1.5f / 15.0f))
-				.withTitle(Localisation.getMessage(guild, "user-kicked", target.getName(), target.getDiscriminator()))
-				.withThumbnail(ImageUtil.getAvatar(target))
-				.appendField(Localisation.getMessage(guild, "name"), target.getName(), true)
-				.appendField("ID", target.getStringID(), true)
-				.appendField(Localisation.getMessage(guild, "by"), by.getName(), true)
-				.appendField("ID", by.getStringID(), true)
-				.withTimestamp(Instant.now());
+	public static Consumer<EmbedCreateSpec> kickEmbed(Guild guild, Member target, Member by, String reason) {
+		Consumer<EmbedCreateSpec> builder = embed -> embed
+				.setColor(ColorUtil.withinTwoHues(0.0f, 1.5f / 15.0f))
+				.setTitle(Localisation.getMessage(guild, "user-kicked", target.getDisplayName(), target.getDiscriminator()))
+				.setThumbnail(ImageUtil.getAvatar(target))
+				.addField(Localisation.getMessage(guild, "name"), target.getDisplayName(), true)
+				.addField("ID", target.getId().asString(), true)
+				.addField(Localisation.getMessage(guild, "by"), by.getDisplayName(), true)
+				.addField("ID", by.getId().asString(), true)
+				.setTimestamp(Instant.now());
 		if (reason != null)
-			eb.appendField(Localisation.getMessage(guild, "reason"), reason, false);
-		return eb.build();
+			builder.andThen(embed -> embed.addField(Localisation.getMessage(guild, "reason"), reason, false));
+		return builder;
 	}
 
 	/**
@@ -66,36 +65,35 @@ public class EmbedUtil {
 	 * @param target The target user
 	 * @param by The user who initiated the ban
 	 * @param reason The reason given by the initiator
-	 * @return EmbedObject containing the ban information
+	 * @return Consumer<EmbedCreateSpec> containing the ban information
 	 */
-	public static EmbedObject banEmbed(IGuild guild, IUser target, IUser by, String reason) {
-		EmbedBuilder eb = new EmbedBuilder()
-				.withColor(ColorUtil.withinTwoHues(0.0f, 1.5f / 15.0f))
-				.withTitle(Localisation.getMessage(guild, "user-banned", target.getName(), target.getDiscriminator()))
-				.withThumbnail(ImageUtil.getAvatar(target))
-				.appendField(Localisation.getMessage(guild, "name"), target.getName(), true)
-				.appendField("ID", target.getStringID(), true)
-				.appendField(Localisation.getMessage(guild, "by"), by.getName(), true)
-				.appendField("ID", by.getStringID(), true)
-				.withTimestamp(Instant.now());
+	public static Consumer<EmbedCreateSpec> banEmbed(Guild guild, Member target, Member by, String reason) {
+		Consumer<EmbedCreateSpec> builder = embed -> embed
+				.setColor(ColorUtil.withinTwoHues(0.0f, 1.5f / 15.0f))
+				.setTitle(Localisation.getMessage(guild, "user-banned", target.getDisplayName(), target.getDiscriminator()))
+				.setThumbnail(ImageUtil.getAvatar(target))
+				.addField(Localisation.getMessage(guild, "name"), target.getDisplayName(), true)
+				.addField("ID", target.getId().asString(), true)
+				.addField(Localisation.getMessage(guild, "by"), by.getDisplayName(), true)
+				.addField("ID", by.getId().asString(), true)
+				.setTimestamp(Instant.now());
 		if (reason != null)
-			eb.appendField(Localisation.getMessage(guild, "reason"), reason, false);
-		return eb.build();
+			builder.andThen(embed -> embed.addField(Localisation.getMessage(guild, "reason"), reason, false));
+		return builder;
 	}
 
 	/**
 	 * Generate an image embed
 	 * @param guild The guild
 	 * @param image The image link
-	 * @return EmbedObject with the image
+	 * @return Consumer<EmbedCreateSpec> with the image
 	 */
-	public static EmbedObject imageEmbed(IGuild guild, String image) {
-		return new EmbedBuilder()
-				.withColor(ColorUtil.withinTwoHues(0.333333333f, 0.8333333333f))
-				.withDescription("[" + Localisation.getMessage(guild, "source") + "](" + image + ")")
-				.withImage(image)
-				.withTimestamp(Instant.now())
-				.build();
+	public static Consumer<EmbedCreateSpec> imageEmbed(Guild guild, String image) {
+		return embed -> embed
+				.setColor(ColorUtil.withinTwoHues(0.333333333f, 0.8333333333f))
+				.setDescription("[" + Localisation.getMessage(guild, "source") + "](" + image + ")")
+				.setImage(image)
+				.setTimestamp(Instant.now());
 	}
 
 	/**
@@ -103,137 +101,106 @@ public class EmbedUtil {
 	 *
 	 * @param guild The guild
 	 * @param image The image link
-	 * @return EmbedObject with the image
+	 * @return Consumer<EmbedCreateSpec> with the image
 	 */
-	public static EmbedObject imageEmbed(IGuild guild, URL image) {
-		return new EmbedBuilder()
-				.withColor(ColorUtil.withinTwoHues(0.333333333f, 0.8333333333f))
-				.withDescription("[" + Localisation.getMessage(guild, "source") + "](" + image + ")")
-				.withImage(image.toExternalForm())
-				.withTimestamp(Instant.now())
-				.build();
+	public static Consumer<EmbedCreateSpec> imageEmbed(Guild guild, URL image) {
+		return embed -> embed
+				.setColor(ColorUtil.withinTwoHues(0.333333333f, 0.8333333333f))
+				.setDescription("[" + Localisation.getMessage(guild, "source") + "](" + image + ")")
+				.setImage(image.toExternalForm())
+				.setTimestamp(Instant.now());
 	}
 
 	/**
 	 * I gotta advertise premium someway :shrug:
 	 * @param guild       The guild wew
 	 * @param description The description
-	 * @return EmbedObject advertising premium and making me money
+	 * @return Consumer<EmbedCreateSpec> advertising premium and making me money
 	 */
-	public static EmbedObject premiumEmbed(IGuild guild, String description) {
-		return new EmbedBuilder()
-				.withColor(Color.ORANGE)
-				.withTitle(Localisation.getMessage(guild, "purchase-premium-you-cheap-fuck"))
-				.withDescription(Localisation.getMessage(guild, description))
-				.withUrl("https://mayawinterfox.com/premium")
-				.withThumbnail("https://i.imgur.com/VFM8cBu.png")
-				.build();
+	public static Consumer<EmbedCreateSpec> premiumEmbed(Guild guild, String description) {
+		return embed -> embed
+				.setColor(Color.ORANGE)
+				.setTitle(Localisation.getMessage(guild, "purchase-premium-you-cheap-fuck"))
+				.setDescription(Localisation.getMessage(guild, description))
+				.setUrl("https://mayawinterfox.com/premium")
+				.setThumbnail("https://i.imgur.com/VFM8cBu.png");
 	}
 
 	/**
 	 * Display the song that is playing
 	 * @param guild The guild to display the song for
 	 * @param track The track to display
-	 * @return EmbedObject with the track info
+	 * @return Consumer<EmbedCreateSpec> with the track info
 	 */
-	public static EmbedObject playEmbed(IGuild guild, AudioTrack track) {
+	public static Consumer<EmbedCreateSpec> playEmbed(Guild guild, AudioTrack track) {
 		AudioTrackInfo t = track.getInfo();
 		StringBuilder time = new StringBuilder("----------");
 		time.setCharAt((int) (track.getPosition() / track.getDuration() * (long) 10), 'x');
 
-		return new EmbedBuilder()
-				.withColor(ColorUtil.withinTwoHues(0.333333f, 0.888888f))
-				.withUrl(t.uri)
-				.withTitle(Localisation.getMessage(guild, "now-playing", t.title, ParsingUtil.formatTime(t.length)))
-				.appendDescription(ParsingUtil.formatTime(track.getPosition()) + " **" + time.toString().replace("x", ":radio_button:") + "** " + ParsingUtil.formatTime(t.length))
-				.build();
+		return embed -> embed
+				.setColor(ColorUtil.withinTwoHues(0.333333f, 0.888888f))
+				.setUrl(t.uri)
+				.setTitle(Localisation.getMessage(guild, "now-playing", t.title, ParsingUtil.formatTime(t.length)))
+				.setDescription(ParsingUtil.formatTime(track.getPosition()) + " **" + time.toString().replace("x", ":radio_button:") + "** " + ParsingUtil.formatTime(t.length));
 	}
 
-	/**
-	 * Display the embed that gets shown once upon Maya joining the server
-	 * @return EmbedObject with the welcoming message
-	 */
-	public static EmbedObject mayaEmbed() {
-		return new EmbedBuilder()
-				.withColor(ColorUtil.withinTwoHues(0.33333f, 0.88888f))
-				.withTitle("Say hello to Maya!")
-				.appendField("Maya Winterfox replaces HoroBot", "What does this mean for HoroBot? HoroBot is gone and is no longer a thing, in her place is Maya Winterfox, a new bot written from scratch that has the same commands and functionality as HoroBot did but with improved performance and a dialog system. Maya will be at your service from now on.", false)
-				.appendField("Default Prefix Change", "The prefix changed from **.horo** to **.maya** so that means **.horo**ping is now **.maya**ping, the same goes for all other commands. You can set a custom prefix by doing **.mayaprefix add <prefix>**, you can now also set multiple prefixes instead of just 1, you can remove them by doing **.mayaprefix remove <prefix>**.", false)
-				.appendField("Functionality Changes", "All commands remain the same however the wolf did see some changes. Your wolf no longer levels up by feeding it x times, instead there is an XP system. XP can be gained through feeding and playing. There are a couple of factors that determine how fast you gain XP, such as happiness, how hungry your wolf is and when the last time you played with your wolf was.", false)
-				.appendField("Data", "All data has been wiped, meaning that your level, wolf, items and guild settings have been reset. This is irreversible and universal for everyone. Everyone gets a clean start with Maya.", false)
-				.appendField("New Website and New Domain", "There is a new [website](https://mayawinterfox.com/) that will replace the old one, all traffic coming in from https://mayawinterfox.pw/ will now be redirected to https://mayawinterfox.com/ . You can find information about Maya and Coco, her companion, on there and a short story about Maya and Coco's lives and adventures.", false)
-				.appendField("Premium", "There is also a new premium service which you can find information on [here](https://mayawinterfox.com/premium). It is a subscription based service that offers a range of things and new premium-only commands and other exclusives. Premium can be bought using gems, a new currency that can only be bought with real world money. Gems can be used to buy premium and wolf items at a much cheaper and faster rate than coins. Visit https://mayawinterfox.com/store if you are interested.", false)
-				.appendField("Maya Winterfox, About The Character", "Maya Winterfox and Coco, her companion, are original characters designed by [Ava](https://zizi-arts.deviantart.com/) and [Le Winter-y Fox](https://github.com/WinteryFox/). The [story](https://mayawinterfox.com/story) was written by [Tawink](https://www.patreon.com/tawink).", false)
-				.appendField("More Help and Commands", "Type **.mayaahelp** for a list of commands and type **.mayahelp <command>** e.g. **.mayahelp ping** for more information on a command.", false)
-				.appendField("Questions?", "Visit the [guild](https://discord.gg/MCUTSZz) to getGuild any questions answered that you may have.", false)
-				.build();
+	public static Consumer<EmbedCreateSpec> welcomeEmbed() {
+		return embed -> embed
+				.setColor(ColorUtil.withinTwoHues(0.333333f, 0.88888f))
+				.setThumbnail(Main.getClient().getSelf().block().getAvatarUrl())
+				.setTitle("Hello, I'm Maya!")
+				.setDescription("Thank you for inviting me to this cozy server!\nYou can type **.mayahelp** to see a list of commands and type **.mayahelp <command>** e.g. **.mayahelp wolf** to get more information on a specific command.\n\nVisit the [website](https://mayawinterfox.com/) for more information on me and my story, there is also an admin dashboard and a shop on there too!\n\nJoin the [Maya Discord](https://discord.gg/MCUTSZz) server for regular updates on new features and changes or to get any questions answered.\n\nEnjoy using me!");
 	}
 
-	public static EmbedObject welcomeEmbed() {
-		return new EmbedBuilder()
-				.withColor(ColorUtil.withinTwoHues(0.333333f, 0.88888f))
-				.withThumbnail(Main.getClient().getOurUser().getAvatarURL())
-				.withTitle("Hello, I'm Maya!")
-				.withDescription("Thank you for inviting me to this cozy server!\nYou can type **.mayahelp** to see a list of commands and type **.mayahelp <command>** e.g. **.mayahelp wolf** to getGuild more information on a specific command.\n\nVisit the [website](https://mayawinterfox.com/) for more information on me and my story, there is also an admin dashboard and a shop on there too!\n\nJoin the [Maya Discord](https://discord.gg/MCUTSZz) server for regular updates on new features and changes or to getGuild any questions answered.\n\nEnjoy using me!")
-				.build();
-	}
-
-	public static EmbedObject levelEmbed(IUser user) {
+	public static Consumer<EmbedCreateSpec> levelEmbed(User user) {
 		UserMeta u = Caches.getUser(user);
 		if (u.getBackground().getPath().endsWith(".gif")) {
-			return new EmbedBuilder()
-					.withImage("attachment://levelup.gif")
-					.withColor(ColorUtil.withinTwoHues(0.33333f, 0.88888f))
-					.build();
+			return embed -> embed
+					.setImage("attachment://levelup.gif")
+					.setColor(ColorUtil.withinTwoHues(0.33333f, 0.88888f));
 		} else {
-			return new EmbedBuilder()
-					.withImage("attachment://levelup.png")
-					.withColor(ColorUtil.withinTwoHues(0.3333f, 0.88888f))
-					.build();
+			return embed -> embed
+					.setImage("attachment://levelup.png")
+					.setColor(ColorUtil.withinTwoHues(0.3333f, 0.88888f));
 		}
 	}
 
-	public static EmbedObject wolfEmbed(IUser user) {
+	public static Consumer<EmbedCreateSpec> wolfEmbed(User user) {
 		Wolf wolf = new Wolf(user);
 		if (wolf.getBackground().getPath().endsWith(".gif")) {
-			return new EmbedBuilder()
-					.withImage("attachment://wolf.gif")
-					.withColor(ColorUtil.withinTwoHues(0.33333f, 0.88888f))
-					.build();
+			return embed -> embed
+					.setImage("attachment://wolf.gif")
+					.setColor(ColorUtil.withinTwoHues(0.33333f, 0.88888f));
 		} else {
-			return new EmbedBuilder()
-					.withImage("attachment://wolf.png")
-					.withColor(ColorUtil.withinTwoHues(0.3333f, 0.88888f))
-					.build();
+			return embed -> embed
+					.setImage("attachment://wolf.png")
+					.setColor(ColorUtil.withinTwoHues(0.3333f, 0.88888f));
 		}
 	}
 
-	public static EmbedObject profileEmbed(IUser user) {
+	public static Consumer<EmbedCreateSpec> profileEmbed(User user) {
 		UserMeta u = Caches.getUser(user);
 		if (u.getBackground().getPath().endsWith(".gif")) {
-			return new EmbedBuilder()
-					.withImage("attachment://profile.gif")
-					.withColor(ColorUtil.withinTwoHues(0.33333f, 0.88888f))
-					.build();
+			return embed -> embed
+					.setImage("attachment://profile.gif")
+					.setColor(ColorUtil.withinTwoHues(0.33333f, 0.88888f));
 		} else {
-			return new EmbedBuilder()
-					.withImage("attachment://profile.png")
-					.withColor(ColorUtil.withinTwoHues(0.3333f, 0.88888f))
-					.build();
+			return embed -> embed
+					.setImage("attachment://profile.png")
+					.setColor(ColorUtil.withinTwoHues(0.3333f, 0.88888f));
 		}
 	}
 
-	public static EmbedObject animeEmbed(IGuild guild, JSONObject anime) {
-		return new EmbedBuilder()
-				.withColor(ColorUtil.withinTwoHues(0.33333f, 0.88888f))
-				.withThumbnail(anime.getString("image"))
-				.withUrl("https://myanimelist.net/anime/" + anime.getInt("id"))
-				.withTitle(anime.getString("title") + " (" + anime.getString("english") + ")")
-				.appendField(Localisation.getMessage(guild, "score"), String.valueOf(anime.getDouble("score")), false)
-				.appendField(Localisation.getMessage(guild, "type"), anime.getString("type"), false)
-				.appendField(Localisation.getMessage(guild, "episodes"), String.valueOf(anime.getInt("episodes")), false)
-				.appendField(Localisation.getMessage(guild, "status"), anime.getString("status"), false)
-				.appendField(Localisation.getMessage(guild, "synopsis"), StringUtils.abbreviate(anime.getString("synopsis").replaceAll("<.*?>", "").replaceAll("[.*?]", ""), 1024), false)
-				.build();
+	public static Consumer<EmbedCreateSpec> animeEmbed(Guild guild, JSONObject anime) {
+		return embed -> embed
+				.setColor(ColorUtil.withinTwoHues(0.33333f, 0.88888f))
+				.setThumbnail(anime.getString("image"))
+				.setUrl("https://myanimelist.net/anime/" + anime.getInt("id"))
+				.setTitle(anime.getString("title") + " (" + anime.getString("english") + ")")
+				.addField(Localisation.getMessage(guild, "score"), String.valueOf(anime.getDouble("score")), false)
+				.addField(Localisation.getMessage(guild, "type"), anime.getString("type"), false)
+				.addField(Localisation.getMessage(guild, "episodes"), String.valueOf(anime.getInt("episodes")), false)
+				.addField(Localisation.getMessage(guild, "status"), anime.getString("status"), false)
+				.addField(Localisation.getMessage(guild, "synopsis"), StringUtils.abbreviate(anime.getString("synopsis").replaceAll("<.*?>", "").replaceAll("[.*?]", ""), 1024), false);
 	}
 }

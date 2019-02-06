@@ -25,11 +25,11 @@ public class CommandRate extends Node<Command> {
 					if (args.length == 2)
 						target = ParsingUtil.getUser(MessageUtil.args(e.getMessage()).substring("rate ".length()));
 					else
-						target = new TargetDialog(e.getChannel(), e.getAuthor()).open();
+						target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
 					if (target == null)
 						return false;
 
-					MessageUtil.sendMessage(e.getChannel(), "rate-you", target.getName(), new Random().nextInt(100));
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), "rate-you", target.getName(), new Random().nextInt(100));
 					return true;
 				}
 		), Collections.emptyList());

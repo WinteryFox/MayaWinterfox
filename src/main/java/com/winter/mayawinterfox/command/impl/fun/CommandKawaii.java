@@ -26,11 +26,11 @@ public class CommandKawaii extends Node<Command> {
 					if (args.length == 2)
 						target = ParsingUtil.getUser(MessageUtil.args(e.getMessage()).substring("kawaii ".length()));
 					else
-						target = new TargetDialog(e.getChannel(), e.getAuthor()).open();
+						target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
 					if (target == null)
 						return false;
 
-					MessageUtil.sendMessage(e.getChannel(), EmbedUtil.successEmbed(e.getGuild(), "is-kawaii", target.getName(), new Random(target.getLongID()).nextInt(100)));
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "is-kawaii", target.getName(), new Random(target.getLongID()).nextInt(100)));
 					return true;
 				}
 		), Collections.emptyList());

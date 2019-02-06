@@ -3,15 +3,15 @@ package com.winter.mayawinterfox.data.dialog.impl;
 import com.winter.mayawinterfox.data.dialog.Dialog;
 import com.winter.mayawinterfox.data.dialog.DialogType;
 import com.winter.mayawinterfox.util.ColorUtil;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.MessageChannel;
+import discord4j.core.object.entity.User;
 
 import java.util.concurrent.TimeUnit;
 
 
 public class InputDialog extends Dialog<String> {
 
-	public InputDialog(IChannel channel, IUser user, String description) {
+	public InputDialog(MessageChannel channel, User user, String description) {
 		super(DialogType.OPEN,
 				channel,
 				user,

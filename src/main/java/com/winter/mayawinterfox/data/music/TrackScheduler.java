@@ -7,7 +7,7 @@ import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
 import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
 import com.winter.mayawinterfox.util.MusicUtils;
-import sx.blah.discord.handle.obj.IGuild;
+import discord4j.core.object.VoiceState;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -20,13 +20,13 @@ public class TrackScheduler extends AudioEventAdapter {
 	private final Queue<AudioTrack> queue;
 	private boolean repeat;
 	private AudioTrack lastTrack;
-	private final IGuild guild;
+	private final VoiceState state;
 
-	public TrackScheduler(AudioPlayer player, IGuild guild) {
+	public TrackScheduler(AudioPlayer player, VoiceState state) {
 		this.player = player;
 		this.queue = new LinkedList<>();
 		this.repeat = false;
-		this.guild = guild;
+		this.state = state;
 	}
 
 	public void queue(AudioTrack track) {
@@ -74,11 +74,11 @@ public class TrackScheduler extends AudioEventAdapter {
 
 	@Override
 	public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
-		if (guild.getConnectedVoiceChannel() != null && guild.getConnectedVoiceChannel().getConnectedUsers().size() <= 1) {
+		if (state != null && state.getChannel().block() != null && state.getChannel().block().getVoiceStates().collectList().block().size() <= 1) {
 			queue.clear();
 			player.stopTrack();
-			guild.getConnectedVoiceChannel().leave();
-			MessageUtil.sendMessage(MusicUtils.getGuildMusicManager(guild).getBoundChannel(), "inactive-disconnected");
+
+			MessageUtil.sendMessage(MusicUtils.getGuildMusicManager(state.getGuild().block()).getBoundChannel(), "inactive-disconnected");
 			MusicUtils.getGuildMusicManager(guild).setBoundChannel(null);
 		}
 		this.lastTrack = track;

@@ -21,7 +21,7 @@ public class CommandLinks extends Node<Command> {
 				"links-help",
 				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
 				e -> {
-					MessageUtil.sendMessage(e.getChannel(), new EmbedBuilder()
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), new EmbedBuilder()
 							.withColor(ColorUtil.withinTwoHues(0.3333333f, 0.88888888f))
 							.withThumbnail(Main.getClient().getApplicationIconURL())
 							.withTimestamp(Instant.now())

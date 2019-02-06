@@ -3,6 +3,7 @@ package com.winter.mayawinterfox;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
+import com.winter.mayawinterfox.command.Commands;
 import com.winter.mayawinterfox.data.Database;
 import com.winter.mayawinterfox.data.item.ItemProvider;
 import com.winter.mayawinterfox.data.music.GuildMusicManager;
@@ -31,7 +32,7 @@ public class Main {
 	 * @throws IOException Upon failure to read the config
 	 */
 	public static void main(String[] args) throws IOException {
-		InputStream configProperties = Main.class.getResourceAsStream("/config.properties");
+		InputStream configProperties = Main.class.getResourceAsStream("../config.properties");
 		Properties p = new Properties();
 		p.load(configProperties);
 		configProperties.close();
@@ -47,8 +48,9 @@ public class Main {
 			System.exit(1);
 		}
 		b.setShardCount(10);
+		client = b.build();
 
-		// TODO: init command and even listeners
+		new Commands(client);
 
 		Database.connect();
 		if (!Database.setup()) {
@@ -65,7 +67,6 @@ public class Main {
 		AudioSourceManagers.registerRemoteSources(playerManager);
 		AudioSourceManagers.registerLocalSource(playerManager);
 
-		client = b.build();
 		client.login().block();
 	}
 
