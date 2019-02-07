@@ -7,7 +7,7 @@ import com.winter.mayawinterfox.data.cache.Caches;
 import com.winter.mayawinterfox.data.cache.meta.UserMeta;
 import com.winter.mayawinterfox.exceptions.ErrorHandler;
 import com.winter.mayawinterfox.util.ImageUtil;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Member;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -25,7 +25,7 @@ public class Profile {
 
 	private UserMeta user;
 
-	public Profile(IUser user) {
+	public Profile(Member user) {
 		this.user = Caches.getUser(user);
 	}
 
@@ -53,7 +53,7 @@ public class Profile {
 			     InputStream temp = Wolf.class.getResourceAsStream("/profile/template.png")) {
 				background = ImageIO.read(back);
 				template = ImageIO.read(temp);
-				avatar = ImageUtil.imageFromURL(new URL(ImageUtil.getAvatar(user).replace(".webp", ".png")));
+				avatar = ImageUtil.imageFromURL(new URL(ImageUtil.getAvatar(user.getUser()).replace(".webp", ".png")));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -87,7 +87,7 @@ public class Profile {
 
 			g.setFont(new Font("Roboto Black", Font.BOLD, 20));
 			g.setColor(new Color(186, 187, 189));
-			g.drawString(user.getName(), 193 - (int) g.getFontMetrics().getStringBounds(user.getName(), g).getWidth() / 2, 50);
+			g.drawString(user.getUser().getUsername(), 193 - (int) g.getFontMetrics().getStringBounds(user.getUser().getUsername(), g).getWidth() / 2, 50);
 
 			g.setColor(new Color(96, 115, 145));
 			g.fillRoundRect(122, 62, (int) (((float) user.getXP() / (float) user.getMaxXP()) * (float) 146), 18, 10, 10);
@@ -115,7 +115,7 @@ public class Profile {
 			for (String line : info)
 				g.drawString(line, 135, y += g.getFontMetrics().getHeight());
 
-			Wolf wolf = new Wolf(user);
+			Wolf wolf = new Wolf(user.getUser());
 			wolf.drawAnimal(g, 150, 185, 180, 120);
 
 			g.drawString(wolf.getXP() + " / " + wolf.getMaxXP() + " XP", 138, 240);
@@ -153,7 +153,7 @@ public class Profile {
 		     InputStream profileStream = Wolf.class.getResourceAsStream("/profile/template.png")) {
 			template = ImageIO.read(profileStream);
 			frames = ImageUtil.getGifFramesFromStream(stream);
-			avatar = ImageUtil.imageFromURL(new URL(ImageUtil.getAvatar(user).replace(".webp", ".png")));
+			avatar = ImageUtil.imageFromURL(new URL(ImageUtil.getAvatar(user.getUser()).replace(".webp", ".png")));
 		} catch (IOException ex) {
 			ErrorHandler.log(ex, "Failed to read background stream");
 		}
@@ -187,7 +187,7 @@ public class Profile {
 
 			g.setFont(new Font("Roboto Black", Font.BOLD, 20));
 			g.setColor(new Color(186, 187, 189));
-			g.drawString(user.getName(), 193 - (int) g.getFontMetrics().getStringBounds(user.getName(), g).getWidth() / 2, 50);
+			g.drawString(user.getUser().getUsername(), 193 - (int) g.getFontMetrics().getStringBounds(user.getUser().getUsername(), g).getWidth() / 2, 50);
 
 			g.setColor(new Color(96, 115, 145));
 			g.fillRoundRect(122, 62, (int) (((float) user.getXP() / (float) user.getMaxXP()) * (float) 146), 18, 10, 10);
@@ -215,7 +215,7 @@ public class Profile {
 			for (String line : info)
 				g.drawString(line, 135, y += g.getFontMetrics().getHeight());
 
-			Wolf wolf = new Wolf(user);
+			Wolf wolf = new Wolf(user.getUser());
 			wolf.drawAnimal(g, 150, 185, 180, 120);
 
 			g.drawString(wolf.getXP() + " / " + wolf.getMaxXP() + " XP", 138, 240);

@@ -7,12 +7,14 @@ import com.winter.mayawinterfox.data.dialog.impl.TargetDialog;
 import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
 import com.winter.mayawinterfox.util.ParsingUtil;
-import sx.blah.discord.api.internal.json.objects.Consumer<EmbedCreateSpec>;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.Permissions;
+import discord4j.core.object.entity.GuildChannel;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.util.Permission;
+import discord4j.core.spec.EmbedCreateSpec;
 
 import java.util.Collections;
 import java.util.Random;
+import java.util.function.Consumer;
 
 public class CommandKiss extends Node<Command> {
 
@@ -20,14 +22,14 @@ public class CommandKiss extends Node<Command> {
 		super(new Command(
 				"kiss",
 				"kiss-help",
-				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+				PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 				e -> {
 					String[] args = MessageUtil.argsArray(e.getMessage());
-					IUser target;
+					Member target;
 					if (args.length == 2)
-						target = ParsingUtil.getUser(MessageUtil.args(e.getMessage()).substring("kiss ".length()));
+						target = ParsingUtil.getUser(MessageUtil.args(e.getMessage()).substring("kiss ".length())).asMember(e.getGuildId().get()).block();
 					else
-						target = (IUser) new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
+						target = new TargetDialog((GuildChannel) e.getMessage().getChannel().block(), e.getMember().get()).open();
 					if (target == null)
 						return false;
 					String[] images = {
@@ -37,9 +39,9 @@ public class CommandKiss extends Node<Command> {
 					Consumer<EmbedCreateSpec> embed = EmbedUtil.imageEmbed(e.getGuild().block(), images[new Random().nextInt(images.length)]);
 
 					if (e.getMember().get().equals(target))
-						MessageUtil.sendMessage(e.getMessage().getChannel().block(), embed, "kiss-from-yourself", e.getMember().get().getName());
+						MessageUtil.sendMessage(e.getMessage().getChannel().block(), embed, "kiss-from-yourself", e.getMember().get().getDisplayName());
 					else
-						MessageUtil.sendMessage(e.getMessage().getChannel().block(), embed, "kiss-from", target, e.getMember().get().getName());
+						MessageUtil.sendMessage(e.getMessage().getChannel().block(), embed, "kiss-from", target, e.getMember().get().getDisplayName());
 					return true;
 				}
 		), Collections.emptyList());

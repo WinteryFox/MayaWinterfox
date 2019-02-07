@@ -7,8 +7,9 @@ import com.winter.mayawinterfox.data.dialog.impl.TargetDialog;
 import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
 import com.winter.mayawinterfox.util.ParsingUtil;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.Permissions;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.util.Permission;
 
 import java.util.Collections;
 import java.util.Random;
@@ -19,14 +20,14 @@ public class CommandPat extends Node<Command> {
 		super(new Command(
 				"pat",
 				"pat-help",
-				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+				PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 				e -> {
 					String[] args = MessageUtil.argsArray(e.getMessage());
-					IUser target;
+					Member target;
 					if (args.length == 2)
-						target = ParsingUtil.getUser(MessageUtil.args(e.getMessage()).substring("pat ".length()));
+						target = ParsingUtil.getUser(MessageUtil.args(e.getMessage()).substring("pat ".length())).asMember(e.getGuildId().get()).block();
 					else
-						target = (IUser) new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
+						target = (Member) new TargetDialog((TextChannel) e.getMessage().getChannel().block(), e.getMember().get()).open();
 					if (target == null)
 						return false;
 					String[] images = {

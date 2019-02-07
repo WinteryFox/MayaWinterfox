@@ -1,8 +1,8 @@
 package com.winter.mayawinterfox.checks;
 
 import com.winter.mayawinterfox.Main;
-import com.winter.mayawinterfox.data.permissions.Guild;
 import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.GuildChannel;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Permission;
@@ -37,8 +37,9 @@ public class PermissionChecks {
 
 	public static Predicate<MessageCreateEvent> hasPermission(String permission) {
 		return e -> {
-			Guild guild = new Guild(e.getGuild().block().block());
-			return guild.hasPermission(e.getMember().get(), permission);
+			//Guild guild = new Guild(e.getGuild().block().block());
+			//return guild.hasPermission(e.getMember().get(), permission);
+			return false;
 		};
 	}
 }

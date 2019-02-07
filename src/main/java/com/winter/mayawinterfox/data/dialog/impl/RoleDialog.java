@@ -4,15 +4,15 @@ import com.winter.mayawinterfox.data.dialog.Dialog;
 import com.winter.mayawinterfox.data.dialog.DialogType;
 import com.winter.mayawinterfox.util.ColorUtil;
 import com.winter.mayawinterfox.util.ParsingUtil;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Role;
+import discord4j.core.object.entity.TextChannel;
 
 import java.util.concurrent.TimeUnit;
 
-public class RoleDialog extends Dialog<IRole> {
+public class RoleDialog extends Dialog<Role> {
 
-	public RoleDialog(IChannel channel, IUser user) {
+	public RoleDialog(TextChannel channel, Member user) {
 		super(DialogType.OPEN,
 				channel,
 				user,
@@ -28,7 +28,7 @@ public class RoleDialog extends Dialog<IRole> {
 				o -> {
 					if (o == null)
 						return null;
-					return ParsingUtil.getRole(channel.getGuild(), o);
+					return ParsingUtil.getRole(channel.getGuild().block(), o);
 				});
 	}
 }

@@ -9,12 +9,12 @@ import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.GuildUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
 import com.winter.mayawinterfox.util.ParsingUtil;
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.Permissions;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Role;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.util.Permission;
 
 import java.util.Collections;
-
 
 public class CommandAssign extends Node<Command> {
 
@@ -22,27 +22,27 @@ public class CommandAssign extends Node<Command> {
 		super(new Command(
 				"assign",
 				"assign-help",
-				PermissionChecks.hasPermission(Permissions.MANAGE_ROLES),
+				PermissionChecks.hasPermission(Permission.MANAGE_ROLES),
 				e -> {
 					String[] args = MessageUtil.argsArray(e.getMessage());
-					IUser target;
-					IRole role;
+					Member target;
+					Role role;
 					if (args.length > 1)
 						role = ParsingUtil.getRole(e.getGuild().block(), args[1]);
 					else
-						role = new RoleDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
+						role = new RoleDialog((TextChannel) e.getMessage().getChannel().block(), e.getMember().get()).open();
 					if (role == null)
 						return false;
 
 					if (args.length > 2)
-						target = ParsingUtil.getUser(args[2]);
+						target = ParsingUtil.getUser(args[2]).asMember(e.getGuildId().get()).block();
 					else
-						target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
+						target = new TargetDialog((TextChannel) e.getMessage().getChannel().block(), e.getMember().get()).open();
 					if (target == null)
 						return false;
 
 					GuildUtil.addRole(target, role);
-					MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "assigned-role", role.getName(), target.getName()));
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "assigned-role", role.getName(), target.getUsername()));
 					return true;
 				}
 		), Collections.emptyList());

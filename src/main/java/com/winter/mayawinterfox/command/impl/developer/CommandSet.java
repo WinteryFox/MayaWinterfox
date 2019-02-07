@@ -1,4 +1,4 @@
-package com.winter.mayawinterfox.command.impl.developer;
+/*package com.winter.mayawinterfox.command.impl.developer;
 
 import com.winter.mayawinterfox.Main;
 import com.winter.mayawinterfox.checks.PermissionChecks;
@@ -53,4 +53,4 @@ public class CommandSet extends Node<Command> {
 				), Collections.emptyList())));
 	}
 
-}
+}*/

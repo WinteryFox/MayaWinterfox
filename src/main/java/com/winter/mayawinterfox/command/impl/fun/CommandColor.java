@@ -4,9 +4,10 @@ import com.winter.mayawinterfox.checks.PermissionChecks;
 import com.winter.mayawinterfox.command.Command;
 import com.winter.mayawinterfox.data.Node;
 import com.winter.mayawinterfox.exceptions.ErrorHandler;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.Permissions;
-import sx.blah.discord.util.RequestBuffer;
+import com.winter.mayawinterfox.util.MessageUtil;
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.util.Permission;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -22,13 +23,13 @@ public class CommandColor extends Node<Command> {
 		super(new Command(
 				"color",
 				"color-help",
-				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+				PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 				CommandColor::displayColor
 		), Collections.emptyList());
 	}
 
-	private static boolean displayColor(MessageReceivedEvent event) {
-		String cs = event.getMessage().getContent().substring(event.getMessage().getContent().lastIndexOf(' ')).replaceFirst("#", "").trim();
+	private static boolean displayColor(MessageCreateEvent event) {
+		String cs = event.getMessage().getContent().get().substring(event.getMessage().getContent().get().lastIndexOf(' ')).replaceFirst("#", "").trim();
 		Color c = new Color(Integer.parseInt(cs, 16));
 		BufferedImage bi = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
 		Graphics g = bi.getGraphics();
@@ -41,7 +42,7 @@ public class CommandColor extends Node<Command> {
 			ErrorHandler.log(e, "Writing color to OutputStream");
 		}
 		ByteArrayInputStream i = new ByteArrayInputStream(b.toByteArray());
-		RequestBuffer.request(() -> event.getChannel().sendFile("", i, "color.png")); // Make a method for buffering this
+		MessageUtil.sendMessage((TextChannel) event.getMessage().getChannel().block(), "color.png", i);
 		try {
 			b.close();
 			i.close();

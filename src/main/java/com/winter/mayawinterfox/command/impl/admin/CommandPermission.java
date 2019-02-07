@@ -1,4 +1,4 @@
-package com.winter.mayawinterfox.command.impl.admin;
+/*package com.winter.mayawinterfox.command.impl.admin;
 
 import com.winter.mayawinterfox.checks.PermissionChecks;
 import com.winter.mayawinterfox.command.Command;
@@ -8,16 +8,14 @@ import com.winter.mayawinterfox.data.dialog.impl.InputDialog;
 import com.winter.mayawinterfox.data.dialog.impl.TargetDialog;
 import com.winter.mayawinterfox.data.locale.Localisation;
 import com.winter.mayawinterfox.data.permissions.Group;
-import com.winter.mayawinterfox.data.permissions.Guild;
 import com.winter.mayawinterfox.util.ColorUtil;
 import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
 import com.winter.mayawinterfox.util.ParsingUtil;
-import org.apache.commons.lang3.text.WordUtils;
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.Permissions;
-import sx.blah.discord.util.EmbedBuilder;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.util.Permission;
+import org.apache.commons.text.WordUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -28,41 +26,42 @@ public class CommandPermission extends Node<Command> {
 		super(new Command(
 			"permission",
 			"permission-help",
-				PermissionChecks.hasPermission(Permissions.MANAGE_ROLES),
+				PermissionChecks.hasPermission(Permission.MANAGE_ROLES),
 				e -> {
-					EmbedBuilder builder = new EmbedBuilder()
-							.withColor(ColorUtil.withinTwoHues(0.333f, 0.8888f))
-							.withTitle(Localisation.getMessage(e.getGuild().block(), "permissions-list"));
-					for (Map.Entry<Commands.Category, List<Node<Command>>> entry : Commands.COMMAND_MAP.entrySet()) {
-						List<String> permissions = entry.getValue().stream().map(Commands::getPermission).collect(Collectors.toList());
-						builder.appendField(WordUtils.capitalizeFully(entry.getKey().getName()), Arrays.toString(permissions.toArray()).replace("[", "").replace("]", ""), false);
-					}
-					MessageUtil.sendMessage(e.getMessage().getChannel().block(), builder.build());
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), spec -> {
+						spec
+								.setColor(ColorUtil.withinTwoHues(0.333f, 0.8888f))
+								.setTitle(Localisation.getMessage(e.getGuild().block(), "permissions-list"));
+						for (Map.Entry<Commands.Category, List<Node<Command>>> entry : Commands.COMMAND_MAP.entrySet()) {
+							List<String> permissions = entry.getValue().stream().map(Commands::getPermission).collect(Collectors.toList());
+							spec.addField(WordUtils.capitalizeFully(entry.getKey().getName()), Arrays.toString(permissions.toArray()).replace("[", "").replace("]", ""), false);
+						}
+					});
 					return true;
 				}
 		), Arrays.asList(
 				new Node<>(new Command(
 						"add",
 						"permission-add-help",
-						PermissionChecks.hasPermission(Permissions.MANAGE_ROLES),
+						PermissionChecks.hasPermission(Permission.MANAGE_ROLES),
 						e -> {
 							String[] args = MessageUtil.argsArray(e.getMessage());
 							String permission;
-							IUser target;
+							Member target;
 							if (args.length <= 2) {
 								permission = new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-permission").open();
 								if (!Commands.getPermissions().contains(permission)) {
 									MessageUtil.sendMessage(e.getMessage().getChannel().block(), "invalid-permission", permission);
 									return false;
 								}
-								target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
+								target = new TargetDialog((TextChannel) e.getMessage().getChannel().block(), e.getMember().get()).open();
 							} else if (args.length == 3) {
 								permission = args[2];
 								if (!Commands.getPermissions().contains(permission)) {
 									MessageUtil.sendMessage(e.getMessage().getChannel().block(), "invalid-permission", permission);
 									return false;
 								}
-								target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
+								target = new TargetDialog((TextChannel) e.getMessage().getChannel().block(), e.getMember().get()).open();
 							} else {
 								permission = args[2];
 								if (!Commands.getPermissions().contains(permission)) {
@@ -75,7 +74,7 @@ public class CommandPermission extends Node<Command> {
 								return false;
 							permission = permission.toLowerCase();
 
-							new Guild(e.getGuild().block()).getUser(target).addPermission(permission);
+							//new Guild(e.getGuild().block()).getUser(target).addPermission(permission);
 							MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "added-permission", permission, target.getName()));
 							return true;
 						}
@@ -83,11 +82,11 @@ public class CommandPermission extends Node<Command> {
 				new Node<>(new Command(
 						"remove",
 						"permission-remove-help",
-						PermissionChecks.hasPermission(Permissions.MANAGE_ROLES),
+						PermissionChecks.hasPermission(Permission.MANAGE_ROLES),
 						e -> {
 							String[] args = MessageUtil.argsArray(e.getMessage());
 							String permission = null;
-							IUser target = null;
+							Member target = null;
 							if (args.length <= 2) {
 								permission = new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-permission").open();
 								if (!Commands.getPermissions().contains(permission)) {
@@ -122,7 +121,7 @@ public class CommandPermission extends Node<Command> {
 				new Node<>(new Command(
 						"group",
 						"permission-group-help",
-						PermissionChecks.hasPermission(Permissions.MANAGE_ROLES),
+						PermissionChecks.hasPermission(Permission.MANAGE_ROLES),
 						e -> {
 							String[] args = MessageUtil.argsArray(e.getMessage());
 							String target = null;
@@ -153,8 +152,8 @@ public class CommandPermission extends Node<Command> {
 									MessageUtil.sendMessage(e.getMessage().getChannel().block(), "no-results");
 									return false;
 								}
-								Set<IUser> members = group.getMembers();
-								IRole role = group.getRole();
+								Set<Member> members = group.getMembers();
+								Role role = group.getRole();
 
 								MessageUtil.sendMessage(e.getMessage().getChannel().block(), new EmbedBuilder()
 										.withColor(ColorUtil.withinTwoHues(0.333f, 0.888f))
@@ -170,7 +169,7 @@ public class CommandPermission extends Node<Command> {
 						new Node<>(new Command(
 								"add",
 								"permission-group-add-help",
-								PermissionChecks.hasPermission(Permissions.MANAGE_ROLES),
+								PermissionChecks.hasPermission(Permission.MANAGE_ROLES),
 								e -> {
 									Guild guild = new Guild(e.getGuild().block());
 									String[] args = MessageUtil.argsArray(e.getMessage());
@@ -211,7 +210,7 @@ public class CommandPermission extends Node<Command> {
 						new Node<>(new Command(
 								"remove",
 								"permission-group-remove-help",
-								PermissionChecks.hasPermission(Permissions.MANAGE_ROLES),
+								PermissionChecks.hasPermission(Permission.MANAGE_ROLES),
 								e -> {
 									Guild guild = new Guild(e.getGuild().block());
 									String[] args = MessageUtil.argsArray(e.getMessage());
@@ -251,12 +250,12 @@ public class CommandPermission extends Node<Command> {
 						new Node<>(new Command(
 								"adduser",
 								"permission-group-adduser-help",
-								PermissionChecks.hasPermission(Permissions.MANAGE_ROLES),
+								PermissionChecks.hasPermission(Permission.MANAGE_ROLES),
 								e -> {
 									Guild guild = new Guild(e.getGuild().block());
 									String[] args = MessageUtil.argsArray(e.getMessage());
 									Group group = null;
-									IUser target = null;
+									Member target = null;
 									if (args.length <= 3) {
 										group = guild.getGroup(new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-group").open());
 										if (group == null) {
@@ -290,12 +289,12 @@ public class CommandPermission extends Node<Command> {
 						new Node<>(new Command(
 								"removeuser",
 								"permission-group-removeuser-help",
-								PermissionChecks.hasPermission(Permissions.MANAGE_ROLES),
+								PermissionChecks.hasPermission(Permission.MANAGE_ROLES),
 								e -> {
 									Guild guild = new Guild(e.getGuild().block());
 									String[] args = MessageUtil.argsArray(e.getMessage());
 									Group group = null;
-									IUser target = null;
+									Member target = null;
 									if (args.length <= 3) {
 										group = guild.getGroup(new InputDialog(e.getMessage().getChannel().block(), e.getMember().get(), "input-group").open());
 										if (group == null) {
@@ -328,4 +327,4 @@ public class CommandPermission extends Node<Command> {
 						), Collections.emptyList())))
 		));
 	}
-}
+}*/

@@ -4,7 +4,7 @@ import com.winter.mayawinterfox.checks.PermissionChecks;
 import com.winter.mayawinterfox.command.Command;
 import com.winter.mayawinterfox.data.Node;
 import com.winter.mayawinterfox.util.StatusUtil;
-import sx.blah.discord.handle.obj.Permissions;
+import sx.blah.discord.handle.obj.Permission;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -15,7 +15,7 @@ public class CommandPing extends Node<Command> {
 		super(new Command(
 				"ping",
 				"ping-help",
-				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+				PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 				StatusUtil::ping,
 				new HashSet<>(Collections.singleton("pong"))
 		), Collections.emptyList());

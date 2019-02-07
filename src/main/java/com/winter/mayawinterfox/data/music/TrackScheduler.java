@@ -1,4 +1,4 @@
-package com.winter.mayawinterfox.data.music;
+/*package com.winter.mayawinterfox.data.music;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
@@ -95,4 +95,4 @@ public class TrackScheduler extends AudioEventAdapter {
 	public void onTrackStart(AudioPlayer player, AudioTrack track) {
 		MessageUtil.sendMessage(MusicUtils.getGuildMusicManager(guild).getBoundChannel(), EmbedUtil.playEmbed(guild, track));
 	}
-}
+}*/

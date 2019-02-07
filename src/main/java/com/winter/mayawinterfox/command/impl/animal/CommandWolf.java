@@ -13,11 +13,12 @@ import com.winter.mayawinterfox.util.ColorUtil;
 import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
 import com.winter.mayawinterfox.util.ParsingUtil;
-import sx.blah.discord.handle.obj.Permissions;
-import sx.blah.discord.util.EmbedBuilder;
+import discord4j.core.object.util.Permission;
+import discord4j.core.spec.EmbedCreateSpec;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.function.Consumer;
 
 public class CommandWolf extends Node<Command> {
 
@@ -25,7 +26,7 @@ public class CommandWolf extends Node<Command> {
 		super(new Command(
 				"wolf",
 				"wolf-help",
-				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+				PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 				e -> {
 					Wolf wolf = new Wolf(e.getMember().get());
 					wolf.update();
@@ -39,7 +40,7 @@ public class CommandWolf extends Node<Command> {
 				new Node<>(new Command(
 						"feed",
 						"wolf-feed-help",
-						PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+						PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 						e -> {
 							String[] args = MessageUtil.argsArray(e.getMessage());
 							String i;
@@ -70,7 +71,7 @@ public class CommandWolf extends Node<Command> {
 				/*new Node<>(new Command(
 						"play",
 						"wolf-play-help",
-						PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+						PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 						e -> {
 							Wolf wolf = new Wolf(e.getMember().get());
 							wolf.update();
@@ -85,7 +86,7 @@ public class CommandWolf extends Node<Command> {
 				new Node<>(new Command(
 						"equip",
 						"wolf-equip-help",
-						PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+						PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 						e -> {
 							String[] args = MessageUtil.argsArray(e.getMessage());
 							String i;
@@ -109,7 +110,7 @@ public class CommandWolf extends Node<Command> {
 				new Node<>(new Command(
 						"rename",
 						"wolf-rename-help",
-						PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+						PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 						e -> {
 							String[] args = MessageUtil.argsArray(e.getMessage());
 							String i;
@@ -132,13 +133,13 @@ public class CommandWolf extends Node<Command> {
 				new Node<>(new Command(
 						"foods",
 						"wolf-foods-help",
-						PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+						PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 						e -> {
-							EmbedBuilder builder = new EmbedBuilder()
-									.withColor(ColorUtil.withinTwoHues(0.333333f, 0.88888f));
+							Consumer<EmbedCreateSpec> builder = spec -> spec
+									.setColor(ColorUtil.withinTwoHues(0.333333f, 0.88888f));
 							for (Food food : ItemProvider.foods)
-								builder.appendField(food.getName(), "Value: " + food.getValue() + "\nCooldown: " + ParsingUtil.formatTime(food.getCooldown()), true);
-							MessageUtil.sendMessage(e.getMessage().getChannel().block(), builder.build());
+								builder.andThen(spec -> spec.addField(food.getName(), "Value: " + food.getValue() + "\nCooldown: " + ParsingUtil.formatTime(food.getCooldown()), true));
+							MessageUtil.sendMessage(e.getMessage().getChannel().block(), builder);
 							return true;
 						}
 				), Collections.emptyList())));

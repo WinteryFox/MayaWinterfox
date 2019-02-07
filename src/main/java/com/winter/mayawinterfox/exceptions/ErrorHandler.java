@@ -1,15 +1,6 @@
 package com.winter.mayawinterfox.exceptions;
 
-import com.winter.mayawinterfox.Main;
-import com.winter.mayawinterfox.data.locale.Localisation;
-import com.winter.mayawinterfox.exceptions.impl.UpdateFailedException;
-import com.winter.mayawinterfox.util.ColorUtil;
-import com.winter.mayawinterfox.util.MessageUtil;
 import discord4j.core.object.entity.MessageChannel;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.util.EmbedBuilder;
-
-import java.util.Arrays;
 
 public class ErrorHandler {
 
@@ -19,16 +10,15 @@ public class ErrorHandler {
 	 * @param meta The meta message to append
 	 */
 	public static void log(Throwable t, String meta) {
-		MessageUtil.sendMessage(Main.getClient().getChannelByID(Long.parseLong(Main.config.get(Main.ConfigValue.ERROR_CHANNEL))),
-				new EmbedBuilder()
-						.setLenient(false)
-						.withColor(ColorUtil.withinTwoHues(0.7f, 1.2f))
-						.withTitle("An error has occurred! " + meta)
-						.appendDescription("```\n")
+		/*MessageUtil.sendMessage(Main.getClient().getChannelByID(Long.parseLong(Main.config.get(Main.ConfigValue.ERROR_CHANNEL))),
+				spec -> spec
+						.setColor(ColorUtil.withinTwoHues(0.7f, 1.2f))
+						.setTitle("An error has occurred! " + meta)
+						.setDescription("```\n")
 						.appendDescription(t.toString())
 						.appendDescription(Arrays.toString(t.getStackTrace()))
 						.appendDescription("\n```")
-						.build());
+						.build());*/
 	}
 
 	/**
@@ -37,7 +27,7 @@ public class ErrorHandler {
 	 * @param channel The channel to notify the user in
 	 */
 	public static void log(Throwable t, MessageChannel channel) {
-		if (!(t instanceof UpdateFailedException) && !(t instanceof NumberFormatException)) {
+		/*if (!(t instanceof UpdateFailedException) && !(t instanceof NumberFormatException)) {
 			MessageUtil.sendMessage(Main.getClient().getChannelByID(Long.parseLong(Main.config.get(Main.ConfigValue.ERROR_CHANNEL))),
 					new EmbedBuilder()
 							.setLenient(false)
@@ -56,7 +46,7 @@ public class ErrorHandler {
 						.withColor(ColorUtil.withinTwoHues(0.7f, 1.2f))
 						.withTitle(Localisation.getMessage(channel.getGuild(), "error"))
 						.withDescription(t.getMessage())
-						.build());
+						.build());*/
 	}
 
 	/**
@@ -67,7 +57,7 @@ public class ErrorHandler {
 	 * @param messageKey The error message to put into the channel
 	 */
 	public static void log(Throwable t, MessageChannel channel, String messageKey) {
-		if (!(t instanceof UpdateFailedException) && !(t instanceof NumberFormatException)) {
+		/*if (!(t instanceof UpdateFailedException) && !(t instanceof NumberFormatException)) {
 			MessageUtil.sendMessage(Main.getClient().getChannelByID(Long.parseLong(Main.config.get(Main.ConfigValue.ERROR_CHANNEL))),
 							builder -> builder
 							.withColor(ColorUtil.withinTwoHues(0.7f, 1.2f))
@@ -85,6 +75,6 @@ public class ErrorHandler {
 						.withColor(ColorUtil.withinTwoHues(0.7f, 1.2f))
 						.withTitle(Localisation.getMessage(channel.getGuild(), "error"))
 						.withDescription(Localisation.getMessage(channel.getGuild(), messageKey))
-						.build());
+						.build());*/
 	}
 }

@@ -1,4 +1,4 @@
-package com.winter.mayawinterfox.data.music;
+/*package com.winter.mayawinterfox.data.music;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
@@ -42,4 +42,4 @@ public class GuildMusicManager {
 	public Guild getGuild() {
 		return this.guild;
 	}
-}
+}*/

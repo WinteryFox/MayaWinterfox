@@ -7,7 +7,7 @@ import com.winter.mayawinterfox.data.dialog.impl.InputDialog;
 import com.winter.mayawinterfox.data.http.HTTPHandler;
 import com.winter.mayawinterfox.exceptions.ErrorHandler;
 import com.winter.mayawinterfox.util.MessageUtil;
-import sx.blah.discord.handle.obj.Permissions;
+import sx.blah.discord.handle.obj.Permission;
 
 import java.util.Collections;
 
@@ -17,7 +17,7 @@ public class CommandUrban extends Node<Command> {
 		super(new Command(
 				"urban",
 				"urban-help",
-				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+				PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 				e -> {
 					String[] args = MessageUtil.argsArray(e.getMessage());
 					String q;

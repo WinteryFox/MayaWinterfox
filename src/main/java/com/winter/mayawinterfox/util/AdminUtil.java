@@ -2,8 +2,9 @@ package com.winter.mayawinterfox.util;
 
 import com.winter.mayawinterfox.data.dialog.impl.InputDialog;
 import com.winter.mayawinterfox.data.dialog.impl.TargetDialog;
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.TextChannel;
 
 
 public class AdminUtil {
@@ -13,22 +14,22 @@ public class AdminUtil {
 	 * @param event The event to kick for
 	 * @return True on success, false on failure
 	 */
-	public static boolean kick(MessageReceivedEvent event) {
+	public static boolean kick(MessageCreateEvent event) {
 		String[] args = MessageUtil.argsArray(event.getMessage());
-		IUser target;
+		Member target;
 		if (args.length > 1)
-			target = ParsingUtil.getUser(args[1]);
+			target = ParsingUtil.getUser(args[1]).asMember(event.getGuildId().get()).block();
 		else
-			target = (IUser) new TargetDialog(event.getChannel(), event.getAuthor()).open();
+			target = (Member) new TargetDialog((TextChannel) event.getMessage().getChannel().block(), event.getMember().get()).open();
 		if (target == null)
 			return false;
 		String reason;
 		if (args.length > 2)
 			reason = args.length > 2 ? MessageUtil.args(event.getMessage()).substring(("kick " + args[1] + " ").length()) : null;
 		else
-			reason = (String) new InputDialog(event.getChannel(), event.getAuthor(), "input-reason").open();
-		event.getGuild().kickUser(target, reason);
-		MessageUtil.sendMessage(event.getChannel(), EmbedUtil.kickEmbed(event.getGuild(), target, event.getAuthor(), reason));
+			reason = (String) new InputDialog((TextChannel) event.getMessage().getChannel().block(), event.getMember().get(), "input-reason").open();
+		event.getGuild().block().kick(target.getId(), reason);
+		MessageUtil.sendMessage(event.getMessage().getChannel().block(), EmbedUtil.kickEmbed(event.getGuild().block(), target, event.getMember().get(), reason));
 		return true;
 	}
 
@@ -37,22 +38,22 @@ public class AdminUtil {
 	 * @param event The event to ban for
 	 * @return True on success, false on failure
 	 */
-	public static boolean ban(MessageReceivedEvent event) {
+	public static boolean ban(MessageCreateEvent event) {
 		String[] args = MessageUtil.argsArray(event.getMessage());
-		IUser target;
+		Member target;
 		if (args.length > 1)
-			target = ParsingUtil.getUser(args[1]);
+			target = ParsingUtil.getUser(args[1]).asMember(event.getGuildId().get()).block();
 		else
-			target = (IUser) new TargetDialog(event.getChannel(), event.getAuthor()).open();
+			target = (Member) new TargetDialog((TextChannel) event.getMessage().getChannel().block(), event.getMember().get()).open();
 		if (target == null)
 			return false;
 		String reason;
 		if (args.length > 2)
 			reason = args.length > 2 ? MessageUtil.args(event.getMessage()).substring(("ban " + args[1] + " ").length()) : null;
 		else
-			reason = (String) new InputDialog(event.getChannel(), event.getAuthor(), "input-reason").open();
-		event.getGuild().banUser(target, reason);
-		MessageUtil.sendMessage(event.getChannel(), EmbedUtil.banEmbed(event.getGuild(), target, event.getAuthor(), reason));
+			reason = (String) new InputDialog(event.getMessage().getChannel().block(), event.getMember().get(), "input-reason").open();
+		event.getGuild().block().ban(target.getId(), spec -> spec.setReason(reason));
+		MessageUtil.sendMessage(event.getMessage().getChannel().block(), EmbedUtil.banEmbed(event.getGuild().block(), target, event.getMember().get(), reason));
 		return true;
 	}
 }

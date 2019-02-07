@@ -13,7 +13,7 @@ import com.winter.mayawinterfox.exceptions.impl.UpdateFailedException;
 import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.GuildUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
-import sx.blah.discord.handle.obj.Permissions;
+import discord4j.core.object.util.Permission;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -24,7 +24,7 @@ public class CommandPrefix extends Node<Command> {
 		super(new Command(
 				"prefix",
 				"prefix-help",
-				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+				PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 				e -> {
 					MessageUtil.sendMessage(e.getMessage().getChannel().block(), "prefixes", Arrays.toString(Caches.getGuild(e.getGuild().block()).getPrefixes().toArray()).replace("[", "").replace("]", ""));
 					return true;
@@ -33,7 +33,7 @@ public class CommandPrefix extends Node<Command> {
 				new Node<>(new Command(
 						"add",
 						"prefix-add-help",
-						PermissionChecks.hasPermission(Permissions.MANAGE_SERVER, false),
+						PermissionChecks.hasPermission(Permission.MANAGE_GUILD),
 						e -> {
 							try {
 								String[] args = MessageUtil.argsArray(e.getMessage());
@@ -55,7 +55,7 @@ public class CommandPrefix extends Node<Command> {
 									guild.addPrefix(prefix);
 									MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "added-prefix", prefix));
 								} else {
-									if (GuildUtil.isPremium(e.getGuild().block(), e.getMember().get()))
+									if (GuildUtil.isPremium(e.getMember().get()))
 										MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.premiumEmbed(e.getGuild().block(), "max-prefixes"));
 									else
 										MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.premiumEmbed(e.getGuild().block(), "max-prefixes-premium"));
@@ -70,7 +70,7 @@ public class CommandPrefix extends Node<Command> {
 				new Node<>(new Command(
 						"remove",
 						"prefix-remove-help",
-						PermissionChecks.hasPermission(Permissions.MANAGE_SERVER, false),
+						PermissionChecks.hasPermission(Permission.MANAGE_GUILD),
 						e -> {
 							try {
 								String[] args = MessageUtil.argsArray(e.getMessage());

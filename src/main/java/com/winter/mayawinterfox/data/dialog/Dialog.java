@@ -2,15 +2,15 @@ package com.winter.mayawinterfox.data.dialog;
 
 import com.winter.mayawinterfox.Main;
 import com.winter.mayawinterfox.data.locale.Localisation;
-import com.winter.mayawinterfox.exceptions.ErrorHandler;
 import com.winter.mayawinterfox.util.MessageUtil;
+import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.message.MessageEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.reaction.ReactionEmoji;
-import discord4j.core.spec.EmbedCreateSpec;
 
 import java.awt.*;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -18,7 +18,7 @@ import java.util.function.Function;
 
 public class Dialog<T> {
 	private DialogType type;
-	private MessageChannel channel;
+	private TextChannel channel;
 	private User user;
 	private String thumbnail;
 	private String title;
@@ -31,7 +31,7 @@ public class Dialog<T> {
 	private TimeUnit timeUnit = TimeUnit.MINUTES;
 	private Function<String, T> function;
 
-	public Dialog(DialogType type, MessageChannel channel, User user, String thumbnail, String title, Object[] titleReplacements, String description, Object[] descriptionReplacements, Map<String, T> choices, Color color, Long timeout, TimeUnit timeUnit, Function<String, T> function) {
+	public Dialog(DialogType type, TextChannel channel, User user, String thumbnail, String title, Object[] titleReplacements, String description, Object[] descriptionReplacements, Map<String, T> choices, Color color, Long timeout, TimeUnit timeUnit, Function<String, T> function) {
 		this.type = type;
 		this.channel = channel;
 		this.user = user;
@@ -51,7 +51,7 @@ public class Dialog<T> {
 		return type;
 	}
 
-	private MessageChannel getChannel() {
+	private TextChannel getChannel() {
 		return channel;
 	}
 
@@ -107,48 +107,45 @@ public class Dialog<T> {
 				list.append("**").append(n).append(".**").append(" ").append(entry.getKey()).append("\n");
 				n++;
 			}
-			Message message = MessageUtil.sendMessage(this.getChannel(), new EmbedCreateSpec()
+			Message message = MessageUtil.sendMessage(this.getChannel(), spec -> spec
 					.setThumbnail(this.getThumbnail())
 					.setTitle(Localisation.getMessage(this.getChannel().getGuild().block(), this.getTitle()))
 					.setDescription(Localisation.getMessage(this.getChannel().getGuild().block(), this.getDescription()) + "\n\n" + list.toString())
 					.setFooter(Localisation.getMessage(this.getChannel().getGuild().block(), "pick-reaction"), null)
-					.setColor(this.getColor())
-					.asRequest());
-			MessageUtil.addReaction(message, EmojiManager.getForAlias("x"));
+					.setColor(this.getColor()));
+			MessageUtil.addReaction(message, ReactionEmoji.unicode("x"));
 			HashMap<String, T> c = new HashMap<>();
 			int i = 1;
 			for (Map.Entry<String, T> entry : choices.entrySet()) {
-				ReactionEmoji emoji = ReactionEmoji.of(EmojiManager.getForAlias(Reactions.valueOf(i).getEmoji()).getUnicode());
+				ReactionEmoji emoji = ReactionEmoji.unicode(Reactions.valueOf(i).getEmoji());
 				c.put(Reactions.valueOf(i).getEmoji(), entry.getValue());
 				MessageUtil.addReaction(message, emoji);
 				i++;
 			}
 			MessageEvent response = null;
-			try {
-				response = Main.getClient().getDispatcher().waitFor((MessageEvent e) -> {
-					if (e instanceof ReactionAddEvent) {
-						return ((ReactionAddEvent) e).getUser().equals(user) && e.getMessage().getChannel().block().equals(channel);
-					} else if (e instanceof MessageReceivedEvent) {
-						return e.getMember().get().equals(user) && e.getMessage().getChannel().block().equals(channel);
-					}
-					return false;
-				}, timeout, timeUnit);
-			} catch (InterruptedException e) {
-				ErrorHandler.log(e, this.getChannel());
-			}
+
+			response = Main.getClient().getEventDispatcher().on(MessageEvent.class).filter(e -> {
+				if (e instanceof ReactionAddEvent) {
+					return ((ReactionAddEvent) e).getUser().block().equals(user) && ((ReactionAddEvent) e).getMessage().block().getChannel().block().equals(channel);
+				} else if (e instanceof MessageCreateEvent) {
+					return ((MessageCreateEvent) e).getMember().get().equals(user) && ((MessageCreateEvent) e).getMessage().getChannel().block().equals(channel);
+				}
+				return false;
+			}).next().block(Duration.ofMinutes(1));
+
 			MessageUtil.delete(message);
 			if (response == null)
 				return null;
 			if (response instanceof ReactionAddEvent) {
-				if (((ReactionAddEvent) response).getReaction().getEmoji().getName().equalsIgnoreCase("x"))
+				if (((ReactionAddEvent) response).getEmoji().asUnicodeEmoji().get().getRaw().equalsIgnoreCase("x"))
 					return null;
-				return c.get(EmojiManager.getByUnicode(((ReactionAddEvent) response).getReaction().getEmoji().getName()).getAliases().get(0));
-			} else if (response instanceof MessageReceivedEvent) {
-				if (response.getMessage().getContent().equalsIgnoreCase("x") || response.getMessage().getContent().equalsIgnoreCase("none") || response.getMessage().getContent().equalsIgnoreCase("quit") || response.getMessage().getContent().equalsIgnoreCase("close"))
+				return c.get(ReactionEmoji.unicode(((ReactionAddEvent) response).getEmoji().asUnicodeEmoji().get().getRaw()).getRaw());
+			} else if (response instanceof MessageCreateEvent) {
+				if (((MessageCreateEvent) response).getMessage().getContent().get().equalsIgnoreCase("x") || ((MessageCreateEvent) response).getMessage().getContent().get().equalsIgnoreCase("none") || ((MessageCreateEvent) response).getMessage().getContent().get().equalsIgnoreCase("quit") || ((MessageCreateEvent) response).getMessage().getContent().get().equalsIgnoreCase("close"))
 					return null;
 				int emoji;
 				try {
-					emoji = Integer.parseUnsignedInt(response.getMessage().getContent());
+					emoji = Integer.parseUnsignedInt(((MessageCreateEvent) response).getMessage().getContent().get());
 				} catch (NumberFormatException e) {
 					return null;
 				}
@@ -156,25 +153,27 @@ public class Dialog<T> {
 			}
 			return null;
 		} else if (this.getType() == DialogType.OPEN) {
-			IMessage message = MessageUtil.sendMessage(this.getChannel(), new EmbedBuilder()
-					.withThumbnail(this.getThumbnail())
-					.withTitle(Localisation.getMessage(this.getChannel().getGuild(), this.getTitle(), this.getTitleReplacements()))
-					.withDescription(Localisation.getMessage(this.getChannel().getGuild(), this.getDescription(), this.getDescriptionReplacements()))
-					.withFooterText(Localisation.getMessage(this.getChannel().getGuild(), "type-response"))
-					.withColor(this.getColor())
-					.build());
-			IMessage response = null;
-			try {
-				response = Main.getClient().getDispatcher().waitFor((MessageReceivedEvent e) -> e.getMessage().getChannel().block().equals(this.getChannel()) && e.getMember().get().equals(this.getUser()), timeout, timeUnit).getMessage();
-			} catch (InterruptedException e) {
-				ErrorHandler.log(e, this.getChannel());
-			}
+			Message message = MessageUtil.sendMessage(this.getChannel(), spec -> spec
+					.setThumbnail(this.getThumbnail())
+					.setTitle(Localisation.getMessage(this.getChannel().getGuild().block(), this.getTitle(), this.getTitleReplacements()))
+					.setDescription(Localisation.getMessage(this.getChannel().getGuild().block(), this.getDescription(), this.getDescriptionReplacements()))
+					.setFooter(Localisation.getMessage(this.getChannel().getGuild().block(), "type-response"), "")
+					.setColor(this.getColor()));
+			Message response = null;
+
+			//response = Main.getClient().getDispatcher().waitFor((MessageReceivedEvent e) -> e.getMessage().getChannel().block().equals(this.getChannel()) && e.getMember().get().equals(this.getUser()), timeout, timeUnit).getMessage();
+			response = Main.getClient().getEventDispatcher().on(MessageCreateEvent.class).filter(e -> {
+				//return e.getMessage().getChannel().block().equals(this.getChannel()) && e.getMember().get().equals(this.getUser());
+				return e.getMessage().getChannel().block().equals(this.getChannel()) && e.getMember().get().equals(user.asMember(channel.getGuildId()));
+			}).next().block(Duration.ofMinutes(1)).getMessage();
+
 			if (response == null)
 				throw new NullPointerException("No input received");
 			MessageUtil.delete(message);
-			String content = response.getContent();
+
+			String content = response.getContent().get();
 			MessageUtil.delete(response);
-			if (response.getContent().equalsIgnoreCase("x") || response.getContent().equalsIgnoreCase("none") || response.getContent().equalsIgnoreCase("quit") || response.getContent().equalsIgnoreCase("close"))
+			if (response.getContent().get().equalsIgnoreCase("x") || response.getContent().get().equalsIgnoreCase("none") || response.getContent().get().equalsIgnoreCase("quit") || response.getContent().get().equalsIgnoreCase("close"))
 				return null;
 			return this.getFunction().apply(content);
 		} else

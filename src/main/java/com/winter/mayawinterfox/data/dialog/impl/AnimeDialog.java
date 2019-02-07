@@ -3,16 +3,16 @@ package com.winter.mayawinterfox.data.dialog.impl;
 import com.winter.mayawinterfox.data.dialog.Dialog;
 import com.winter.mayawinterfox.data.dialog.DialogType;
 import com.winter.mayawinterfox.util.ColorUtil;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.TextChannel;
 import org.json.JSONObject;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IUser;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class AnimeDialog extends Dialog<JSONObject> {
 
-	public AnimeDialog(IChannel channel, IUser user, Map<String, JSONObject> choices) {
+	public AnimeDialog(TextChannel channel, Member user, Map<String, JSONObject> choices) {
 		super(DialogType.CHOICE,
 				channel,
 				user,

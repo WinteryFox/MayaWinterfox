@@ -7,7 +7,7 @@ import com.winter.mayawinterfox.data.dialog.impl.InputDialog;
 import com.winter.mayawinterfox.data.locale.Localisation;
 import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
-import sx.blah.discord.handle.obj.Permissions;
+import discord4j.core.object.util.Permission;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -18,7 +18,7 @@ public class CommandLanguage extends Node<Command> {
 		super(new Command(
 				"language",
 				"language-help",
-				PermissionChecks.hasPermission(Permissions.MANAGE_SERVER, false),
+				PermissionChecks.hasPermission(Permission.MANAGE_GUILD),
 				e -> {
 					String[] args = MessageUtil.argsArray(e.getMessage());
 					String lang;

@@ -5,7 +5,7 @@ import com.winter.mayawinterfox.command.Command;
 import com.winter.mayawinterfox.data.Node;
 import com.winter.mayawinterfox.data.dialog.impl.InputDialog;
 import com.winter.mayawinterfox.util.MessageUtil;
-import sx.blah.discord.handle.obj.Permissions;
+import discord4j.core.object.util.Permission;
 
 import java.util.Collections;
 
@@ -15,7 +15,7 @@ public class CommandSay extends Node<Command> {
 		super(new Command(
 				"say",
 				"say-help",
-				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+				PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 				e -> {
 					String[] args = MessageUtil.argsArray(e.getMessage());
 					String i = null;

@@ -71,12 +71,12 @@ public class Commands {
 	 * @param e The event that triggered it
 	 * @return True on success, false on failure
 	 */
-	public boolean sendHelp(MessageCreateEvent e) {
+	public static boolean sendHelp(MessageCreateEvent e) {
 		try {
 			Consumer<EmbedCreateSpec> embed = spec -> {
 				spec.setColor(ColorUtil.withinTwoHues(0.3f, 0.8f));
-				spec.setTitle(Localisation.getMessage(e.getGuild().block().block(), "command-list"));
-				spec.setDescription(Localisation.getMessage(e.getGuild().block().block(), "command-list-desc"));
+				spec.setTitle(Localisation.getMessage(e.getGuild().block(), "command-list"));
+				spec.setDescription(Localisation.getMessage(e.getGuild().block(), "command-list-desc"));
 				for (Map.Entry<Category, List<Node<Command>>> c : COMMAND_MAP.entrySet()) {
 					StringBuilder desc = new StringBuilder();
 					for (Node<Command> n : c.getValue()) {
@@ -164,7 +164,7 @@ public class Commands {
 	 */
 	private void messageCreateEvent(@org.jetbrains.annotations.NotNull MessageCreateEvent e) {
 		if (!e.getMember().get().isBot()) {
-			GuildMeta guild = Caches.getGuild(e.getGuild().block().block());
+			GuildMeta guild = Caches.getGuild(e.getGuild().block());
 			Optional<String> o = guild.getPrefixes().stream().filter(e.getMessage().getContent().get()::startsWith).findFirst();
 			if (o.isPresent()) {
 				try {
@@ -175,7 +175,7 @@ public class Commands {
 								Node<Command> gotten = getCommand(n, lookingFor + " ");
 								if (gotten != null) {
 									LOGGER.debug(String.format("Found `%s`", gotten.getData().getName()));
-									if (Caches.getGuild(e.getGuild().block().block()).hasCustomPermissions()) {
+									if (Caches.getGuild(e.getGuild().block()).hasCustomPermissions()) {
 										/*String perm = getPermission(gotten);
 										if (PermissionChecks.hasPermission(perm).test(e)) {
 											e.getMessage().getChannel().block().setTypingStatus(true);

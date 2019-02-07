@@ -1,15 +1,12 @@
 package com.winter.mayawinterfox.util;
 
 import com.winter.mayawinterfox.Main;
-import discord4j.core.object.entity.Member;
-import discord4j.core.object.entity.User;
+import discord4j.core.object.entity.*;
 import discord4j.core.object.util.Snowflake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IRole;
-import sx.blah.discord.handle.obj.IUser;
+
+import javax.annotation.Nullable;
 
 public class ParsingUtil {
 
@@ -21,6 +18,7 @@ public class ParsingUtil {
 	 * @return The user that was found
 	 * @throws IllegalArgumentException On failure
 	 */
+	@Nullable
 	public static User getUser(String s) {
 		LOGGER.debug(String.format("Passed in with `%s`...", s));
 		if (s.matches("<@!?\\d+>")) {
@@ -29,13 +27,8 @@ public class ParsingUtil {
 		} else if (s.matches("\\d+")) {
 			long id = Long.parseLong(s);
 			return Main.getClient().getUserById(Snowflake.of(id)).block();
-		} else if (s.matches("[^#]+#\\d{4}")) {
-			//return Main.getClient().getUsersByName(s.replaceAll("([^#]+)#\\d{4}", "$1")).parallelStream().filter(u -> u.getDiscriminator().equals(s.replaceAll(".+#(\\d{4})", "$1"))).findFirst().orElseThrow(() -> new IllegalArgumentException("No users found"));
-			return Main.getClient().getUsers().filter(user -> {
-				//return user.getUsername().equals(s.replaceAll("([^#]+)#\\d{4}", "$1")) && user.getDiscriminator().equals(s.replace(".+#(\\d{4})", "$1"));
-			}).collectList().block().get(0);
 		}
-		throw new IllegalArgumentException("Not a valid user string!");
+		return null;
 	}
 
 	/**
@@ -43,32 +36,40 @@ public class ParsingUtil {
 	 * @param guild The guild to search for the role
 	 * @param s The role to search for
 	 * @return The role that was found
-	 * @throws IllegalArgumentException On failure
 	 */
-	public static IRole getRole(IGuild guild, String s) {
+	@Nullable
+	public static Role getRole(Guild guild, String s) {
 		LOGGER.debug(String.format("Passed in with `%s`...", s));
 		if (s.matches("<@&\\d+>")) {
 			long id = Long.parseLong(s.replaceAll("<@&(\\d+)>", "$1"));
-			return guild.getRoleByID(id);
+			return guild.getRoleById(Snowflake.of(id)).block();
 		} else if (s.matches("\\d+")) {
 			long id = Long.parseLong(s);
-			return guild.getRoleByID(id);
+			return guild.getRoleById(Snowflake.of(id)).block();
 		} else {
-			return guild.getRolesByName(s).parallelStream().findFirst().orElseThrow(() -> new IllegalArgumentException("No roles found."));
+			return guild.getRoles().filter(role -> {return role.getName().equals(s);}).blockFirst();
 		}
 	}
-	
-	public static IChannel getChannel(IGuild guild, String s) {
+
+	@Nullable
+	public static TextChannel getChannel(Guild guild, String s) {
 		LOGGER.info(String.format("Passed in with '%s'...", s));
+
+		Channel channel;
+
 		if (s.matches("<#\\d+>")) {
 			long id = Long.parseLong(s.replaceAll("<#(\\d+)>", "$1"));
-			return guild.getChannelByID(id);
+			channel = guild.getChannelById(Snowflake.of(id)).block();
 		} else if (s.matches("\\d+")) {
 			long id = Long.parseLong(s);
-			return guild.getChannelByID(id);
+			channel = guild.getChannelById(Snowflake.of(id)).block();
 		} else {
-			return guild.getChannelsByName(s).parallelStream().findFirst().orElseThrow(() -> new IllegalArgumentException("No channels found"));
+			channel = guild.getChannels().filter(c -> c.getName().equals(s)).blockFirst();
 		}
+
+		if (channel instanceof TextChannel)
+			return (TextChannel) channel;
+		return null;
 	}
 
 	/**
@@ -93,7 +94,7 @@ public class ParsingUtil {
 			if (hours < 10)
 				builder.append("0");
 			builder.append(hours);
-			builder.append(":");
+			builder.append("h:");
 		} else if (days > 0) {
 			builder.append("00:");
 		}
@@ -101,17 +102,18 @@ public class ParsingUtil {
 		if (minutes > 0) {
 			if (minutes < 10 && (hours > 0 || days > 0))
 				builder.append("0");
-			builder.append(minutes);
+			builder.append(minutes).append("m");
 		} else {
 			builder.append("0");
 			if (hours > 0 || days > 0)
 				builder.append("0");
+			builder.append("m");
 		}
 
 		builder.append(":");
 		if (seconds < 10)
 			builder.append("0");
-		builder.append(seconds);
+		builder.append(seconds).append("s");
 
 		if (convert < 1f && convert > 0f) {
 			return "0:0" + String.format("%.3f", Math.max(convert, 0.001f));

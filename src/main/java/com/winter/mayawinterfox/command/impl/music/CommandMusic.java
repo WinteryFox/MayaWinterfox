@@ -1,4 +1,4 @@
-package com.winter.mayawinterfox.command.impl.music;
+/*package com.winter.mayawinterfox.command.impl.music;
 
 import com.mashape.unirest.http.exceptions.UnirestException;
 import com.winter.mayawinterfox.checks.PermissionChecks;
@@ -14,11 +14,11 @@ import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.GuildUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
 import com.winter.mayawinterfox.util.MusicUtils;
+import discord4j.core.object.util.Permission;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import sx.blah.discord.handle.obj.Permissions;
 
 import java.io.UnsupportedEncodingException;
 import java.util.*;
@@ -29,7 +29,7 @@ public class CommandMusic extends Node<Command> {
 		super(new Command(
 				"music",
 				"music-help",
-				PermissionChecks.hasPermission(Permissions.VOICE_CONNECT),
+				PermissionChecks.hasPermission(Permission.CONNECT),
 				e -> {
 					MessageUtil.sendMessage(e.getMessage().getChannel().block(), Commands.getHelp(e.getGuild().block(), "music"));
 					return true;
@@ -39,7 +39,7 @@ public class CommandMusic extends Node<Command> {
 				new Node<>(new Command(
 						"join",
 						"join-help",
-						PermissionChecks.hasPermission(Permissions.VOICE_CONNECT),
+						PermissionChecks.hasPermission(Permission.CONNECT),
 						e -> {
 							MusicUtils.join(e.getMessage().getChannel().block(), e.getMember().get());
 							return true;
@@ -49,7 +49,7 @@ public class CommandMusic extends Node<Command> {
 				new Node<>(new Command(
 						"leave",
 						"leave-help",
-						PermissionChecks.hasPermission(Permissions.VOICE_CONNECT),
+						PermissionChecks.hasPermission(Permission.CONNECT),
 						e -> {
 							GuildMusicManager m = MusicUtils.getGuildMusicManager(e.getGuild().block());
 							if (m.getBoundChannel() != null && !m.getBoundChannel().equals(e.getMessage().getChannel().block()))
@@ -66,7 +66,7 @@ public class CommandMusic extends Node<Command> {
 				new Node<>(new Command(
 						"play",
 						"play-help",
-						PermissionChecks.hasPermission(Permissions.VOICE_CONNECT),
+						PermissionChecks.hasPermission(Permission.CONNECT),
 						e -> {
 							if (e.getMember().get().getVoiceStateForGuild(e.getGuild().block()).getChannel() == null) {
 								MessageUtil.sendMessage(e.getMessage().getChannel().block(), "no-voice");
@@ -131,7 +131,7 @@ public class CommandMusic extends Node<Command> {
 				new Node<>(new Command(
 						"clear",
 						"clear-help",
-						PermissionChecks.hasPermission(Permissions.VOICE_CONNECT),
+						PermissionChecks.hasPermission(Permission.CONNECT),
 						e -> {
 							if (e.getMember().get().getVoiceStateForGuild(e.getGuild().block()).getChannel() == null) {
 								MessageUtil.sendMessage(e.getMessage().getChannel().block(), "no-voice");
@@ -151,7 +151,7 @@ public class CommandMusic extends Node<Command> {
 				new Node<>(new Command(
 						"skip",
 						"skip-help",
-						PermissionChecks.hasPermission(Permissions.VOICE_CONNECT),
+						PermissionChecks.hasPermission(Permission.CONNECT),
 						e -> {
 							if (e.getMember().get().getVoiceStateForGuild(e.getGuild().block()).getChannel() == null) {
 								MessageUtil.sendMessage(e.getMessage().getChannel().block(), "no-voice");
@@ -170,7 +170,7 @@ public class CommandMusic extends Node<Command> {
 				new Node<>(new Command(
 						"song",
 						"song-help",
-						PermissionChecks.hasPermission(Permissions.VOICE_CONNECT),
+						PermissionChecks.hasPermission(Permission.CONNECT),
 						e -> {
 							if (e.getMember().get().getVoiceStateForGuild(e.getGuild().block()).getChannel() == null) {
 								MessageUtil.sendMessage(e.getMessage().getChannel().block(), "no-voice");
@@ -188,7 +188,7 @@ public class CommandMusic extends Node<Command> {
 				new Node<>(new Command(
 						"repeat",
 						"repeat-help",
-						PermissionChecks.hasPermission(Permissions.VOICE_CONNECT),
+						PermissionChecks.hasPermission(Permission.CONNECT),
 						e -> {
 							if (e.getMember().get().getVoiceStateForGuild(e.getGuild().block()).getChannel() == null) {
 								MessageUtil.sendMessage(e.getMessage().getChannel().block(), "no-voice");
@@ -212,7 +212,7 @@ public class CommandMusic extends Node<Command> {
 				new Node<>(new Command(
 						"volume",
 						"volume-help",
-						PermissionChecks.hasPermission(Permissions.VOICE_CONNECT),
+						PermissionChecks.hasPermission(Permission.CONNECT),
 						e -> {
 							if (e.getMember().get().getVoiceStateForGuild(e.getGuild().block()).getChannel() == null) {
 								MessageUtil.sendMessage(e.getMessage().getChannel().block(), "no-voice");
@@ -243,3 +243,4 @@ public class CommandMusic extends Node<Command> {
 				), Collections.emptyList())));
 	}
 }
+*/

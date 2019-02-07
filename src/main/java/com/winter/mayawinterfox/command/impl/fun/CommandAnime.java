@@ -8,9 +8,10 @@ import com.winter.mayawinterfox.data.dialog.impl.InputDialog;
 import com.winter.mayawinterfox.data.http.HTTPHandler;
 import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.util.Permission;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import sx.blah.discord.handle.obj.Permissions;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -22,7 +23,7 @@ public class CommandAnime extends Node<Command> {
 		super(new Command(
 				"anime",
 				"anime-help",
-				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+				PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 				e -> {
 					String[] args = MessageUtil.argsArray(e.getMessage());
 					String tags;
@@ -40,7 +41,7 @@ public class CommandAnime extends Node<Command> {
 						Map<String, JSONObject> choices = new HashMap<>();
 						for (int i = 0; i < 3 || i > animes.length(); i++)
 							choices.put(animes.getJSONObject(i).getString("title") + " (" + animes.getJSONObject(i).getString("english") + ")", animes.getJSONObject(i));
-						JSONObject anime = new AnimeDialog(e.getMessage().getChannel().block(), e.getMember().get(), choices).open();
+						JSONObject anime = new AnimeDialog((TextChannel) e.getMessage().getChannel().block(), e.getMember().get(), choices).open();
 						if (anime == null)
 							return true;
 						MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.animeEmbed(e.getGuild().block(), anime));

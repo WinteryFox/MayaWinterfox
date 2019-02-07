@@ -6,7 +6,7 @@ import com.winter.mayawinterfox.data.Node;
 import com.winter.mayawinterfox.data.dialog.impl.InputDialog;
 import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
-import sx.blah.discord.handle.obj.Permissions;
+import discord4j.core.object.util.Permission;
 
 import java.util.Collections;
 import java.util.Random;
@@ -17,7 +17,7 @@ public class CommandEightball extends Node<Command> {
 		super(new Command(
 				"8ball",
 				"8ball-help",
-				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+				PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 				e -> {
 					String[] args = MessageUtil.argsArray(e.getMessage());
 					String question;

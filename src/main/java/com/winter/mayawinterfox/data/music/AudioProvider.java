@@ -1,4 +1,4 @@
-package com.winter.mayawinterfox.data.music;
+/*package com.winter.mayawinterfox.data.music;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.playback.AudioFrame;
@@ -39,4 +39,4 @@ public class AudioProvider implements IAudioProvider {
 	public AudioEncodingType getAudioEncodingType() {
 		return AudioEncodingType.OPUS;
 	}
-}
+}*/

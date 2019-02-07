@@ -4,15 +4,15 @@ import com.winter.mayawinterfox.data.dialog.Dialog;
 import com.winter.mayawinterfox.data.dialog.DialogType;
 import com.winter.mayawinterfox.util.ColorUtil;
 import com.winter.mayawinterfox.util.ParsingUtil;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.TextChannel;
 
 import java.util.concurrent.TimeUnit;
 
-public class ChannelDialog extends Dialog<IChannel> {
+public class ChannelDialog extends Dialog<TextChannel> {
 
-	public ChannelDialog(IChannel channel,
-	                     IUser user) {
+	public ChannelDialog(TextChannel channel,
+	                     Member user) {
 		super(DialogType.OPEN,
 		      channel,
 		      user,
@@ -25,6 +25,6 @@ public class ChannelDialog extends Dialog<IChannel> {
 		      ColorUtil.withinTwoHues(0.3333f, 0.8888f),
 		      1L,
 		      TimeUnit.MINUTES,
-				o -> o == null ? null : ParsingUtil.getChannel(channel.getGuild(), o));
+				o -> o == null ? null : ParsingUtil.getChannel(channel.getGuild().block(), o));
 	}
 }

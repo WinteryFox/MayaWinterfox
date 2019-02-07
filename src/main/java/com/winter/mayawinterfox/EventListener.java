@@ -127,7 +127,6 @@ public class EventListener {
 			Commands.THREAD_POOL.submit(() -> {
 				GuildMeta guild = Caches.getGuild(e.getGuild().block());
 				if (guild.isWelcomeEnabled() && guild.getWelcomeChannel() != null && guild.getWelcome() != null && !guild.getWelcome().equals("")) {
-					UserMeta user = Caches.getUser(e.getMember());
 					String message = guild.getWelcome()
 					                      .replace("[user]", e.getMember().getDisplayName())
 					                      .replace("[mention]", e.getMember().getMention())

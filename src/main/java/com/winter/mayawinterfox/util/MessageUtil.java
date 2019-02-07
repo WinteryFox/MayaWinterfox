@@ -8,8 +8,6 @@ import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.spec.EmbedCreateSpec;
-import discord4j.core.spec.MessageCreateSpec;
-import discord4j.rest.json.request.EmbedRequest;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;

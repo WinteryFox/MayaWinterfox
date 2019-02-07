@@ -7,12 +7,13 @@ import com.winter.mayawinterfox.data.dialog.impl.TargetDialog;
 import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
 import com.winter.mayawinterfox.util.ParsingUtil;
-import sx.blah.discord.api.internal.json.objects.Consumer<EmbedCreateSpec>;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.Permissions;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.util.Permission;
+import discord4j.core.spec.EmbedCreateSpec;
 
 import java.util.Collections;
 import java.util.Random;
+import java.util.function.Consumer;
 
 public class CommandCookie extends Node<Command> {
 
@@ -20,12 +21,12 @@ public class CommandCookie extends Node<Command> {
         super(new Command(
                 "cookie",
                 "cookie-help",
-                PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+                PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
                 e -> {
                     String[] args = MessageUtil.argsArray(e.getMessage());
-                    IUser target;
+                    Member target;
                     if (args.length == 2)
-                        target = ParsingUtil.getUser(MessageUtil.args(e.getMessage()).substring("cookie ".length()));
+                        target = ParsingUtil.getUser(MessageUtil.args(e.getMessage()).substring("cookie ".length())).asMember(e.getGuildId().get()).block();
                     else
                         target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
                     if (target == null)
@@ -40,9 +41,9 @@ public class CommandCookie extends Node<Command> {
                     Consumer<EmbedCreateSpec> embed = EmbedUtil.imageEmbed(e.getGuild().block(), images[new Random().nextInt(images.length)]);
 
                     if (e.getMember().get().equals(target))
-                        MessageUtil.sendMessage(e.getMessage().getChannel().block(), embed, "cookie-from-yourself", e.getMember().get().getName());
+                        MessageUtil.sendMessage(e.getMessage().getChannel().block(), embed, "cookie-from-yourself", target.getDisplayName());
                     else
-                        MessageUtil.sendMessage(e.getMessage().getChannel().block(), embed, "cookie-from", target.getName(), e.getMember().get().getName());
+                        MessageUtil.sendMessage(e.getMessage().getChannel().block(), embed, "cookie-from", target.getDisplayName(), e.getMember().get().getDisplayName());
                     return true;
                 }
         ), Collections.emptyList());

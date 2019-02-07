@@ -5,7 +5,7 @@ import com.winter.mayawinterfox.command.Command;
 import com.winter.mayawinterfox.data.Node;
 import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
-import sx.blah.discord.handle.obj.Permissions;
+import discord4j.core.object.util.Permission;
 
 import java.util.Collections;
 
@@ -15,7 +15,7 @@ public class CommandWoop extends Node<Command> {
 		super(new Command(
 				"woop",
 				"woop-help",
-				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+				PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 				e -> {
 					MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.imageEmbed(e.getGuild().block(), "https://i.imgur.com/oVvHXXS.gif"));
 					return true;

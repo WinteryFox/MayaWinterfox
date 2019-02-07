@@ -10,7 +10,7 @@ import com.winter.mayawinterfox.data.item.Item;
 import com.winter.mayawinterfox.data.profile.Profile;
 import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
-import sx.blah.discord.handle.obj.Permissions;
+import discord4j.core.object.util.Permission;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -21,7 +21,7 @@ public class CommandProfile extends Node<Command> {
 		super(new Command(
 				"profile",
 				"profile-help",
-				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+				PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 				e -> {
 					Profile profile = new Profile(e.getMember().get());
 					if (profile.getUser().getBackground().getPath().endsWith(".gif"))
@@ -34,7 +34,7 @@ public class CommandProfile extends Node<Command> {
 				new Node<>(new Command(
 						"background",
 						"profile-background-help",
-						PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+						PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 						e -> {
 							String[] args = MessageUtil.argsArray(e.getMessage());
 							String i;
@@ -58,7 +58,7 @@ public class CommandProfile extends Node<Command> {
 				new Node<>(new Command(
 						"info",
 						"profile-info-help",
-						PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+						PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 						e -> {
 							String[] args = MessageUtil.argsArray(e.getMessage());
 							String i;

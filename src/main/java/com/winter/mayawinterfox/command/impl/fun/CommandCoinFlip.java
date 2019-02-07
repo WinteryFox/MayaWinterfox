@@ -5,7 +5,7 @@ import com.winter.mayawinterfox.command.Command;
 import com.winter.mayawinterfox.data.Node;
 import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
-import sx.blah.discord.handle.obj.Permissions;
+import discord4j.core.object.util.Permission;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -17,13 +17,13 @@ public class CommandCoinFlip extends Node<Command> {
 		super(new Command(
 				"coinflip",
 				"coinflip-help",
-				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+				PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 				o -> {
 					int result = new Random().nextInt(2);
 					if (result == 1)
-						MessageUtil.sendMessage(o.getChannel(), EmbedUtil.successEmbed(o.getGuild(), "coinflip-heads"));
+						MessageUtil.sendMessage(o.getMessage().getChannel().block(), EmbedUtil.successEmbed(o.getGuild().block(), "coinflip-heads"));
 					else
-						MessageUtil.sendMessage(o.getChannel(), EmbedUtil.successEmbed(o.getGuild(), "coinflip-tails"));
+						MessageUtil.sendMessage(o.getMessage().getChannel().block(), EmbedUtil.successEmbed(o.getGuild().block(), "coinflip-tails"));
 					return true;
 				},
 				new HashSet<>(Collections.singletonList("cf"))

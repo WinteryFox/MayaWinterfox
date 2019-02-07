@@ -1,6 +1,7 @@
 package com.winter.mayawinterfox.util;
 
 import com.madgag.gif.fmsware.GifDecoder;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.User;
 
 import javax.imageio.ImageIO;

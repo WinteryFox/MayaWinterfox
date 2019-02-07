@@ -4,7 +4,6 @@ import com.winter.mayawinterfox.Main;
 import com.winter.mayawinterfox.data.cache.Caches;
 import com.winter.mayawinterfox.data.cache.meta.GuildMeta;
 import com.winter.mayawinterfox.data.cache.meta.UserMeta;
-import com.winter.mayawinterfox.data.music.GuildMusicManager;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.util.Permission;
 import discord4j.core.object.util.Snowflake;
@@ -68,8 +67,9 @@ public class GuildUtil {
 	public static boolean hasQueueSpaceLeft(Member user) {
 		GuildMeta g = Caches.getGuild(user.getGuild().block());
 		UserMeta u = Caches.getUser(user);
-		GuildMusicManager m = MusicUtils.getGuildMusicManager(user.getGuild().block());
-		return g.isPremium() || u.isPremium() ? m.getScheduler().getQueueSize() < Integer.parseUnsignedInt(Main.config.get(Main.ConfigValue.MAX_SONG_QUEUE_PREMIUM)) : m.getScheduler().getQueueSize() < Integer.parseUnsignedInt(Main.config.get(Main.ConfigValue.MAX_SONG_QUEUE));
+		//GuildMusicManager m = MusicUtils.getGuildMusicManager(user.getGuild().block());
+		//return g.isPremium() || u.isPremium() ? m.getScheduler().getQueueSize() < Integer.parseUnsignedInt(Main.config.get(Main.ConfigValue.MAX_SONG_QUEUE_PREMIUM)) : m.getScheduler().getQueueSize() < Integer.parseUnsignedInt(Main.config.get(Main.ConfigValue.MAX_SONG_QUEUE));
+		return true;
 	}
 
 	/**
@@ -80,8 +80,9 @@ public class GuildUtil {
 	 * @return True if there is still space and false if there is not
 	 */
 	public static boolean hasQueueSpaceLeft(GuildMeta g, UserMeta u) {
-		GuildMusicManager m = MusicUtils.getGuildMusicManager(Main.getClient().getGuildById(g.getGuild().getId()).block());
-		return g.isPremium() || u.isPremium() ? m.getScheduler().getQueueSize() < Integer.parseUnsignedInt(Main.config.get(Main.ConfigValue.MAX_SONG_QUEUE_PREMIUM)) : m.getScheduler().getQueueSize() < Integer.parseUnsignedInt(Main.config.get(Main.ConfigValue.MAX_SONG_QUEUE));
+		//GuildMusicManager m = MusicUtils.getGuildMusicManager(Main.getClient().getGuildById(g.getGuild().getId()).block());
+		//return g.isPremium() || u.isPremium() ? m.getScheduler().getQueueSize() < Integer.parseUnsignedInt(Main.config.get(Main.ConfigValue.MAX_SONG_QUEUE_PREMIUM)) : m.getScheduler().getQueueSize() < Integer.parseUnsignedInt(Main.config.get(Main.ConfigValue.MAX_SONG_QUEUE));
+		return true;
 	}
 
 	/**

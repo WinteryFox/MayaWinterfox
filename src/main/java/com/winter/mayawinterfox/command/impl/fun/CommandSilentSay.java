@@ -5,8 +5,7 @@ import com.winter.mayawinterfox.command.Command;
 import com.winter.mayawinterfox.data.Node;
 import com.winter.mayawinterfox.data.dialog.impl.InputDialog;
 import com.winter.mayawinterfox.util.MessageUtil;
-import sx.blah.discord.handle.obj.Permissions;
-import sx.blah.discord.util.RequestBuffer;
+import discord4j.core.object.util.Permission;
 
 import java.util.Collections;
 
@@ -16,7 +15,7 @@ public class CommandSilentSay extends Node<Command> {
 		super(new Command(
 				"ssay",
 				"say-help",
-				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+				PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 				e -> {
 					String[] args = MessageUtil.argsArray(e.getMessage());
 					String i = null;
@@ -26,7 +25,7 @@ public class CommandSilentSay extends Node<Command> {
 						i = MessageUtil.args(e.getMessage()).substring("ssay ".length());
 
 					MessageUtil.sendRawMessage(e.getMessage().getChannel().block(), i);
-					RequestBuffer.request(() -> e.getMessage().delete());
+					e.getMessage().delete().block();
 					return true;
 				}
 		), Collections.emptyList());

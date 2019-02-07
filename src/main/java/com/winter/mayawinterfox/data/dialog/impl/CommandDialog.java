@@ -5,15 +5,15 @@ import com.winter.mayawinterfox.data.Node;
 import com.winter.mayawinterfox.data.dialog.Dialog;
 import com.winter.mayawinterfox.data.dialog.DialogType;
 import com.winter.mayawinterfox.util.ColorUtil;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.TextChannel;
 
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class CommandDialog extends Dialog<Node<Command>> {
 
-	public CommandDialog(IChannel channel, IUser user, Map<String, Node<Command>> choices) {
+	public CommandDialog(TextChannel channel, Member user, Map<String, Node<Command>> choices) {
 		super(DialogType.CHOICE,
 				channel,
 				user,

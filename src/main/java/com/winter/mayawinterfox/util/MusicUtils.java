@@ -1,4 +1,4 @@
-package com.winter.mayawinterfox.util;
+/*package com.winter.mayawinterfox.util;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
@@ -14,7 +14,7 @@ import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.VoiceChannel;
 import sx.blah.discord.handle.obj.IChannel;
 import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.handle.obj.IUser;
+import sx.blah.discord.handle.obj.Member;
 import sx.blah.discord.handle.obj.IVoiceChannel;
 
 public class MusicUtils {
@@ -104,4 +104,4 @@ public class MusicUtils {
 	public static void skipTrack(IChannel channel) {
 		getGuildMusicManager(channel.getGuild()).getScheduler().nextTrack();
 	}
-}
+}*/

@@ -1,15 +1,11 @@
 package com.winter.mayawinterfox;
 
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
-import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
-import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.winter.mayawinterfox.command.Commands;
 import com.winter.mayawinterfox.data.Database;
 import com.winter.mayawinterfox.data.item.ItemProvider;
-import com.winter.mayawinterfox.data.music.GuildMusicManager;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
-import discord4j.core.object.entity.Guild;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,8 +19,8 @@ public class Main {
 	public static Map<ConfigValue, String> config = new EnumMap<>(ConfigValue.class);
 	private static DiscordClient client = null;
 
-	public static AudioPlayerManager playerManager;
-	public static Map<Guild, GuildMusicManager> musicManagers;
+	//public static AudioPlayerManager playerManager;
+	//public static Map<Guild, GuildMusicManager> musicManagers;
 
 	/**
 	 * Main method, guh!
@@ -62,10 +58,10 @@ public class Main {
 		ItemProvider.loadFoods();
 		ItemProvider.loadItems();
 
-		musicManagers = new HashMap<>();
-		playerManager = new DefaultAudioPlayerManager();
-		AudioSourceManagers.registerRemoteSources(playerManager);
-		AudioSourceManagers.registerLocalSource(playerManager);
+		//musicManagers = new HashMap<>();
+		//playerManager = new DefaultAudioPlayerManager();
+		//AudioSourceManagers.registerRemoteSources(playerManager);
+		//AudioSourceManagers.registerLocalSource(playerManager);
 
 		client.login().block();
 	}

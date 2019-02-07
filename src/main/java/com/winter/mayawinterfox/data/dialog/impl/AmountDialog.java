@@ -4,14 +4,14 @@ import com.winter.mayawinterfox.data.dialog.Dialog;
 import com.winter.mayawinterfox.data.dialog.DialogType;
 import com.winter.mayawinterfox.data.locale.Localisation;
 import com.winter.mayawinterfox.util.ColorUtil;
-import sx.blah.discord.handle.obj.IChannel;
-import sx.blah.discord.handle.obj.IUser;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.TextChannel;
 
 import java.util.concurrent.TimeUnit;
 
 public class AmountDialog extends Dialog<Integer> {
 
-	public AmountDialog(IChannel channel, IUser user, int min, int max) {
+	public AmountDialog(TextChannel channel, Member user, int min, int max) {
 		super(DialogType.OPEN,
 				channel,
 				user,
@@ -29,7 +29,7 @@ public class AmountDialog extends Dialog<Integer> {
 						return 0;
 					int amount = Integer.parseUnsignedInt(o);
 					if (amount < min || amount > max)
-						throw new NumberFormatException(Localisation.getMessage(channel.getGuild(), "wrong-amount-dialog", min, max));
+						throw new NumberFormatException(Localisation.getMessage(channel.getGuild().block(), "wrong-amount-dialog", min, max));
 					return amount;
 				});
 	}

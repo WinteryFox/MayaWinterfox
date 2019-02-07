@@ -38,12 +38,12 @@ public class Guild {
 		}
 	}
 
-	public boolean hasPermission(IUser user, String permission) {
+	public boolean hasPermission(Member user, String permission) {
 		//if (PermissionChecks.isGlobal(user))
 		//	return true;
 		//if (guild.getOwner().equals(user))
 		//	return true;
-		//if (user.getPermissionsForGuild(guild).contains(Permissions.ADMINISTRATOR))
+		//if (user.getPermissionsForGuild(guild).contains(Permission.ADMINISTRATOR))
 		//	return true;
 
 		Node node = new Node(permission);

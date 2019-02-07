@@ -5,11 +5,12 @@ import com.winter.mayawinterfox.command.Command;
 import com.winter.mayawinterfox.command.Commands;
 import com.winter.mayawinterfox.data.Node;
 import com.winter.mayawinterfox.util.MessageUtil;
-import sx.blah.discord.api.internal.json.objects.Consumer<EmbedCreateSpec>;
-import sx.blah.discord.handle.obj.Permissions;
+import discord4j.core.object.util.Permission;
+import discord4j.core.spec.EmbedCreateSpec;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.function.Consumer;
 
 public class CommandHelp extends Node<Command> {
 
@@ -17,7 +18,7 @@ public class CommandHelp extends Node<Command> {
 		super(new Command(
 				"help",
 				"help-help",
-				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+				PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 				e -> {
 					String[] args = MessageUtil.argsArray(e.getMessage());
 					if (args.length == 1) {

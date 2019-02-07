@@ -8,7 +8,7 @@ import com.winter.mayawinterfox.data.http.HTTPHandler;
 import com.winter.mayawinterfox.exceptions.ErrorHandler;
 import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
-import sx.blah.discord.handle.obj.Permissions;
+import sx.blah.discord.handle.obj.Permission;
 
 import java.net.MalformedURLException;
 import java.util.Collections;
@@ -20,7 +20,7 @@ public class CommandCat extends Node<Command> {
 		super(new Command(
 				"cat",
 				"cat-help",
-				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+				PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 				e -> {
 					try {
 						MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.imageEmbed(e.getGuild().block(), HTTPHandler.requestCat()));

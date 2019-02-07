@@ -7,8 +7,9 @@ import com.winter.mayawinterfox.data.dialog.impl.TargetDialog;
 import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
 import com.winter.mayawinterfox.util.ParsingUtil;
-import sx.blah.discord.handle.obj.IUser;
-import sx.blah.discord.handle.obj.Permissions;
+import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.util.Permission;
 
 import java.util.Collections;
 import java.util.Random;
@@ -19,18 +20,18 @@ public class CommandKawaii extends Node<Command> {
 		super(new Command(
 				"kawaii",
 				"kawaii-help",
-				PermissionChecks.hasPermission(Permissions.SEND_MESSAGES),
+				PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 				e -> {
 					String[] args = MessageUtil.argsArray(e.getMessage());
-					IUser target;
+					Member target;
 					if (args.length == 2)
-						target = ParsingUtil.getUser(MessageUtil.args(e.getMessage()).substring("kawaii ".length()));
+						target = ParsingUtil.getUser(MessageUtil.args(e.getMessage()).substring("kawaii ".length())).asMember(e.getGuildId().get()).block();
 					else
-						target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
+						target = new TargetDialog((TextChannel) e.getMessage().getChannel().block(), e.getMember().get()).open();
 					if (target == null)
 						return false;
 
-					MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "is-kawaii", target.getName(), new Random(target.getLongID()).nextInt(100)));
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "is-kawaii", target.getUsername(), new Random().nextInt(100)));
 					return true;
 				}
 		), Collections.emptyList());

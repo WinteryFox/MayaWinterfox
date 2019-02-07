@@ -8,20 +8,20 @@ import com.winter.mayawinterfox.Main;
 import com.winter.mayawinterfox.data.locale.Localisation;
 import com.winter.mayawinterfox.exceptions.ErrorHandler;
 import com.winter.mayawinterfox.util.ColorUtil;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.spec.EmbedCreateSpec;
 import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.XML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sx.blah.discord.api.internal.json.objects.Consumer<EmbedCreateSpec>;
-import sx.blah.discord.handle.obj.IGuild;
-import sx.blah.discord.util.EmbedBuilder;
 
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.function.Consumer;
 
 public class HTTPHandler {
 	
@@ -45,12 +45,12 @@ public class HTTPHandler {
 	 */
 	public static void postStats(int shard) {
 		JSONObject pw = new JSONObject();
-		pw.put("server_count", Main.getClient().getGuilds().size());
+		pw.put("server_count", Main.getClient().getGuilds().count());
 		pw.put("shard_id", shard);
-		pw.put("shard_count", Main.getClient().getShardCount());
+		pw.put("shard_count", Main.getClient().getConfig().getShardCount());
 		
 		JSONObject org = new JSONObject();
-		org.put("shards", Main.getClient().getShards().stream().map(s -> s.getGuilds().size()).toArray());
+		//org.put("shards", Main.getClient().get.stream().map(s -> s.getGuilds().size()).toArray());
 
 		try {
 			LOGGER.info("Content: " + pw.toString());
@@ -106,7 +106,7 @@ public class HTTPHandler {
 	 * @throws UnirestException             Upon failure of the getGuild request
 	 * @throws UnsupportedEncodingException When there's an unknown encoding type
 	 */
-	public static Consumer<EmbedCreateSpec> requestUrban(IGuild guild, String query) throws UnirestException, UnsupportedEncodingException {
+	public static Consumer<EmbedCreateSpec> requestUrban(Guild guild, String query) throws UnirestException, UnsupportedEncodingException {
 		HttpResponse<JsonNode> response = Unirest.get("https://mashape-community-urban-dictionary.p.mashape.com/define?term=" + URLEncoder.encode(query, "UTF-8"))
 				.header("X-Mashape-Key", Main.config.get(Main.ConfigValue.MASHAPE_KEY))
 				.header("Accept", "text/plain")
@@ -117,15 +117,14 @@ public class HTTPHandler {
 		JSONObject o = response.getBody().getObject().getJSONArray("list").getJSONObject(0);
 		String d = o.getString("definition");
 		String e = o.getString("example");
-		return new EmbedBuilder()
-				.withColor(ColorUtil.withinTwoHues(0.3333333f, 0.88888888f))
-				.withTitle("Source")
-				.withUrl(o.getString("permalink"))
-				.appendField(Localisation.getMessage(guild, "word"), "[" + query + "](" + o.getString("permalink") + ")", false)
-				.appendField(Localisation.getMessage(guild, "rating"), ":thumbsup: " + o.getInt("thumbs_up") + "       :thumbsdown: " + o.getInt("thumbs_down"), false)
-				.appendField(Localisation.getMessage(guild, "definition"), StringUtils.abbreviate(d, Math.max(d.length(), 1024)), false)
-				.appendField(Localisation.getMessage(guild, "example"), StringUtils.abbreviate(e, Math.max(e.length(), 1024)), false)
-				.build();
+		return spec -> spec
+				.setColor(ColorUtil.withinTwoHues(0.3333333f, 0.88888888f))
+				.setTitle("Source")
+				.setUrl(o.getString("permalink"))
+				.addField(Localisation.getMessage(guild, "word"), "[" + query + "](" + o.getString("permalink") + ")", false)
+				.addField(Localisation.getMessage(guild, "rating"), ":thumbsup: " + o.getInt("thumbs_up") + "       :thumbsdown: " + o.getInt("thumbs_down"), false)
+				.addField(Localisation.getMessage(guild, "definition"), StringUtils.abbreviate(d, Math.max(d.length(), 1024)), false)
+				.addField(Localisation.getMessage(guild, "example"), StringUtils.abbreviate(e, Math.max(e.length(), 1024)), false);
 	}
 
 	public static JSONArray requestAnime(String query) {
