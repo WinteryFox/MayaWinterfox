@@ -140,9 +140,9 @@ public class Dialog<T> {
 			response = Main.getClient().getEventDispatcher().on(MessageEvent.class)
 					.map(e -> {
 						if (e instanceof ReactionAddEvent) {
-							return ((ReactionAddEvent) e);
+							return e;
 						} else if (e instanceof MessageCreateEvent) {
-							return ((MessageCreateEvent) e);
+							return e;
 						}
 						return null;
 					})
@@ -179,10 +179,10 @@ public class Dialog<T> {
 					.setColor(this.getColor()));
 
 			Message response = Main.getClient().getEventDispatcher().on(MessageCreateEvent.class)
-					.filterWhen(e -> e.getMessage().getChannel().map(c -> c.equals(this.getChannel())))
-					.filterWhen(e -> e.getMessage().getAuthor().map(a -> a.equals(this.getUser())))
-					.next()
 					.map(MessageCreateEvent::getMessage)
+					.filterWhen(m -> m.getChannel().map(c -> c.equals(channel)))
+					.filterWhen(m -> m.getAuthor().map(a -> a.equals(user)))
+					.next()
 					.timeout(Duration.ofMinutes(1), Mono.empty())
 					.block();
 
