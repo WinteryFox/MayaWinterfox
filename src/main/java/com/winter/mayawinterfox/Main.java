@@ -1,6 +1,5 @@
 package com.winter.mayawinterfox;
 
-import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.winter.mayawinterfox.command.Commands;
 import com.winter.mayawinterfox.data.Database;
 import com.winter.mayawinterfox.data.item.ItemProvider;
@@ -28,25 +27,30 @@ public class Main {
 	 * @throws IOException Upon failure to read the config
 	 */
 	public static void main(String[] args) throws IOException {
-		InputStream configProperties = Main.class.getResourceAsStream("../config.properties");
+		InputStream configProperties = Main.class.getResourceAsStream("/config.properties");
 		Properties p = new Properties();
 		p.load(configProperties);
 		configProperties.close();
 		p.keySet().forEach(k -> config.put(ConfigValue.from(k.toString()), p.getProperty(k.toString())));
 
-		DiscordClientBuilder b = new DiscordClientBuilder("");
+		String token = "";
+		int count = 1;
 		if(config.get(ConfigValue.DEBUG).equalsIgnoreCase("false")) {
-			b.setToken(config.get(ConfigValue.TOKEN));
+			token = config.get(ConfigValue.TOKEN);
+			count = 10;
 		} else if (config.get(ConfigValue.DEBUG).equalsIgnoreCase("true")) {
-			b.setToken(config.get(ConfigValue.DEBUG_TOKEN));
+			token = config.get(ConfigValue.DEBUG_TOKEN);
+			count = 1;
 		} else {
 			LOGGER.error("Invalid debug value, it must be 'true' or 'false'");
 			System.exit(1);
 		}
-		b.setShardCount(10);
+		DiscordClientBuilder b = new DiscordClientBuilder(token);
+		b.setShardCount(count);
 		client = b.build();
 
 		new Commands(client);
+		new EventListener(client);
 
 		Database.connect();
 		if (!Database.setup()) {

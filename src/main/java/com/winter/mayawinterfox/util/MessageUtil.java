@@ -4,6 +4,7 @@ import com.winter.mayawinterfox.data.cache.Caches;
 import com.winter.mayawinterfox.data.locale.Localisation;
 import com.winter.mayawinterfox.exceptions.ErrorHandler;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.GuildChannel;
 import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.reaction.ReactionEmoji;
@@ -32,14 +33,14 @@ public class MessageUtil {
 		return String.join(" ", argsArray(m));
 	}
 
-	public static Mono<Message> sendMessage(MessageChannel channel, String messageKey, Object... params) {
-		return channel.createMessage(Localisation.getMessage(channel.getGuild().block(), messageKey, params)).single();
+	public static Message sendMessage(MessageChannel channel, String messageKey, Object... params) {
+		return channel.createMessage(Localisation.getMessage(((GuildChannel) channel).getGuild().block(), messageKey, params)).block();
 	}
 
 	public static Message sendMessage(MessageChannel channel, String messageKey, Consumer<EmbedCreateSpec> embed, InputStream file, String fileName, Object... params) {
 		try {
 			return channel.createMessage(spec -> spec
-					.setContent(Localisation.getMessage(channel.getGuild().block(), messageKey, params))
+					.setContent(Localisation.getMessage(((GuildChannel) channel).getGuild().block(), messageKey, params))
 					.setEmbed(embed)
 					.setFile(fileName, file)
 					.setTts(false)).block();
@@ -94,7 +95,7 @@ public class MessageUtil {
 	 */
 	public static Message sendMessage(MessageChannel channel, Consumer<EmbedCreateSpec> embed, String messageKey, Object... params) {
 		return channel.createMessage(spec ->
-				spec.setContent(Localisation.getMessage(channel.getGuild().block(), messageKey, params))
+				spec.setContent(Localisation.getMessage(((GuildChannel) channel).getGuild().block(), messageKey, params))
 				.setEmbed(embed)).block();
 	}
 

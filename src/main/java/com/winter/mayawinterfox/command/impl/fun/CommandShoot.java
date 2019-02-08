@@ -34,9 +34,9 @@ public class CommandShoot extends Node<Command> {
 						MessageUtil.sendMessage(e.getMessage().getChannel().block(), "shoot-at-yourself", e.getMember().get().getDisplayName());
 					else
 						if (new Random().nextInt(2) == 1)
-							MessageUtil.sendMessage(e.getMessage().getChannel().block(), "shoot-at", e.getMember().get().getName(), target.getName(), new Random().nextInt(1000));
+							MessageUtil.sendMessage(e.getMessage().getChannel().block(), "shoot-at", e.getMember().get().getDisplayName(), target.getDisplayName(), new Random().nextInt(1000));
 						else
-							MessageUtil.sendMessage(e.getMessage().getChannel().block(), "shoot-at-miss", e.getMember().get().getName(), target.getName());
+							MessageUtil.sendMessage(e.getMessage().getChannel().block(), "shoot-at-miss", e.getMember().get().getDisplayName(), target.getDisplayName());
 					return true;
 				}
 		), Collections.emptyList());

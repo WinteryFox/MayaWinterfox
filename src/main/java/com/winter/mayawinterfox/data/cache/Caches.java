@@ -6,6 +6,7 @@ import com.winter.mayawinterfox.data.cache.meta.GuildMeta;
 import com.winter.mayawinterfox.data.cache.meta.UserMeta;
 import com.winter.mayawinterfox.data.item.ItemProvider;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
 
@@ -48,7 +49,7 @@ public class Caches {
 		return new GuildMeta(guild,
 				prefixes.stream().map(v -> (String) v.get("prefix")).collect(Collectors.toSet()),
 				autoroles.stream().map(v -> (Long) v.get("role")).collect(Collectors.toSet()),
-				guild.getChannelById(Snowflake.of((Long) settings.get(0).get("welcomeChannel"))).block(),
+				(TextChannel) guild.getChannelById(Snowflake.of((Long) settings.get(0).get("welcomeChannel"))).block(),
 				(String) settings.get(0).get("language"),
 				(String) settings.get(0).get("welcome"),
 				(String) settings.get(0).get("pm"),

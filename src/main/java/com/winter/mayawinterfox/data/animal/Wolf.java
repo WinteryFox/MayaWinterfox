@@ -446,7 +446,7 @@ public class Wolf {
 			paws1 = ImageIO.read(pa);
 			hat1 = ImageIO.read(ha);
 		} catch (IOException ex) {
-			ErrorHandler.log(ex, "Failed to getGuild wolf images");
+			ErrorHandler.log(ex, "Failed to get wolf images");
 		}
 		g.drawImage(template,
 				x,

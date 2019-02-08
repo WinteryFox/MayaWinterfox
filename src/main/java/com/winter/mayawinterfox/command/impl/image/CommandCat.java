@@ -8,7 +8,7 @@ import com.winter.mayawinterfox.data.http.HTTPHandler;
 import com.winter.mayawinterfox.exceptions.ErrorHandler;
 import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
-import sx.blah.discord.handle.obj.Permission;
+import discord4j.core.object.util.Permission;
 
 import java.net.MalformedURLException;
 import java.util.Collections;

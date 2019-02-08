@@ -29,7 +29,7 @@ public class CommandKiss extends Node<Command> {
 					if (args.length == 2)
 						target = ParsingUtil.getUser(MessageUtil.args(e.getMessage()).substring("kiss ".length())).asMember(e.getGuildId().get()).block();
 					else
-						target = new TargetDialog((GuildChannel) e.getMessage().getChannel().block(), e.getMember().get()).open();
+						target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
 					if (target == null)
 						return false;
 					String[] images = {

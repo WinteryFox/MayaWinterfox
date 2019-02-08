@@ -8,6 +8,8 @@ import discord4j.core.event.domain.message.MessageEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
 import discord4j.core.object.entity.*;
 import discord4j.core.object.reaction.ReactionEmoji;
+import org.apache.commons.lang3.ObjectUtils;
+import reactor.core.publisher.Mono;
 
 import java.awt.*;
 import java.time.Duration;
@@ -124,18 +126,34 @@ public class Dialog<T> {
 			}
 			MessageEvent response = null;
 
-			response = Main.getClient().getEventDispatcher().on(MessageEvent.class).filter(e -> {
+			/*response = Main.getClient().getEventDispatcher().on(MessageEvent.class).filter(e -> {
+				System.out.println("hello!");
 				if (e instanceof ReactionAddEvent) {
+					System.out.println("react!");
 					return ((ReactionAddEvent) e).getUser().block().equals(user) && ((ReactionAddEvent) e).getMessage().block().getChannel().block().equals(channel);
 				} else if (e instanceof MessageCreateEvent) {
+					System.out.println("say!");
 					return ((MessageCreateEvent) e).getMember().get().equals(user) && ((MessageCreateEvent) e).getMessage().getChannel().block().equals(channel);
 				}
 				return false;
-			}).next().block(Duration.ofMinutes(1));
+			}).next().block(Duration.ofMinutes(1));*/
+			response = Main.getClient().getEventDispatcher().on(MessageEvent.class)
+					.map(e -> {
+						if (e instanceof ReactionAddEvent) {
+							return ((ReactionAddEvent) e);
+						} else if (e instanceof MessageCreateEvent) {
+							return ((MessageCreateEvent) e);
+						}
+						return null;
+					})
+					.next()
+					.timeout(Duration.ofMinutes(1))
+					.block();
 
 			MessageUtil.delete(message);
 			if (response == null)
-				return null;
+				throw new NullPointerException("No input received");
+
 			if (response instanceof ReactionAddEvent) {
 				if (((ReactionAddEvent) response).getEmoji().asUnicodeEmoji().get().getRaw().equalsIgnoreCase("x"))
 					return null;
@@ -159,17 +177,18 @@ public class Dialog<T> {
 					.setDescription(Localisation.getMessage(this.getChannel().getGuild().block(), this.getDescription(), this.getDescriptionReplacements()))
 					.setFooter(Localisation.getMessage(this.getChannel().getGuild().block(), "type-response"), "")
 					.setColor(this.getColor()));
-			Message response = null;
 
-			//response = Main.getClient().getDispatcher().waitFor((MessageReceivedEvent e) -> e.getMessage().getChannel().block().equals(this.getChannel()) && e.getMember().get().equals(this.getUser()), timeout, timeUnit).getMessage();
-			response = Main.getClient().getEventDispatcher().on(MessageCreateEvent.class).filter(e -> {
-				//return e.getMessage().getChannel().block().equals(this.getChannel()) && e.getMember().get().equals(this.getUser());
-				return e.getMessage().getChannel().block().equals(this.getChannel()) && e.getMember().get().equals(user.asMember(channel.getGuildId()));
-			}).next().block(Duration.ofMinutes(1)).getMessage();
+			Message response = Main.getClient().getEventDispatcher().on(MessageCreateEvent.class)
+					.filterWhen(e -> e.getMessage().getChannel().map(c -> c.equals(this.getChannel())))
+					.filterWhen(e -> e.getMessage().getAuthor().map(a -> a.equals(this.getUser())))
+					.next()
+					.map(MessageCreateEvent::getMessage)
+					.timeout(Duration.ofMinutes(1), Mono.empty())
+					.block();
 
+			MessageUtil.delete(message);
 			if (response == null)
 				throw new NullPointerException("No input received");
-			MessageUtil.delete(message);
 
 			String content = response.getContent().get();
 			MessageUtil.delete(response);

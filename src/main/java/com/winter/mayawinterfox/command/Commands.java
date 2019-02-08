@@ -4,12 +4,10 @@ import com.winter.mayawinterfox.command.impl.admin.*;
 import com.winter.mayawinterfox.command.impl.animal.CommandInventory;
 import com.winter.mayawinterfox.command.impl.animal.CommandShop;
 import com.winter.mayawinterfox.command.impl.animal.CommandWolf;
-import com.winter.mayawinterfox.command.impl.developer.CommandSet;
 import com.winter.mayawinterfox.command.impl.fun.*;
 import com.winter.mayawinterfox.command.impl.image.*;
 import com.winter.mayawinterfox.command.impl.misc.CommandInvite;
 import com.winter.mayawinterfox.command.impl.misc.CommandLinks;
-import com.winter.mayawinterfox.command.impl.music.CommandMusic;
 import com.winter.mayawinterfox.command.impl.profile.CommandProfile;
 import com.winter.mayawinterfox.command.impl.status.CommandHi;
 import com.winter.mayawinterfox.command.impl.status.CommandPing;
@@ -26,10 +24,13 @@ import com.winter.mayawinterfox.util.MessageUtil;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.MessageChannel;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.reaction.ReactionEmoji;
 import discord4j.core.spec.EmbedCreateSpec;
 import org.apache.commons.text.WordUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
@@ -38,6 +39,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Commands {
@@ -47,20 +49,23 @@ public class Commands {
 	public static final Map<Category, List<Node<Command>>> COMMAND_MAP = new EnumMap<>(Category.class);
 
 	public Commands(DiscordClient client) {
-		COMMAND_MAP.put(Category.DEV, new ArrayList<>(Arrays.asList(new CommandSet())));
+		COMMAND_MAP.put(Category.DEV, new ArrayList<>(Arrays.asList(/*new CommandSet()*/)));
 		COMMAND_MAP.put(Category.STATUS, new ArrayList<>(Arrays.asList(new CommandPing(), new CommandHi())));
 		COMMAND_MAP.put(Category.FUN, new ArrayList<>(Arrays.asList(new CommandColor(), new CommandCoinFlip(), new CommandEightball(), new CommandHug(), /*new CommandKiss(), new CommandPat(),*/ new CommandCookie(), new CommandKawaii(), new CommandPornstar(), new CommandRate(), new CommandShoot(), new CommandWoop(), new CommandSay(), new CommandUrban(), new CommandSilentSay(), new CommandAnime())));
-		COMMAND_MAP.put(Category.ADMIN, new ArrayList<>(Arrays.asList(new CommandKick(), new CommandBan(), new CommandPrefix(), new CommandPurge(), new CommandAssign(), new CommandRemove(), new CommandLanguage(), new CommandPermission(), new CommandWelcome())));
+		COMMAND_MAP.put(Category.ADMIN, new ArrayList<>(Arrays.asList(new CommandKick(), new CommandBan(), new CommandPrefix(), new CommandPurge(), new CommandAssign(), new CommandRemove(), new CommandLanguage() /*new CommandPermission()*/, new CommandWelcome())));
 		COMMAND_MAP.put(Category.ANIMAL, new ArrayList<>(Arrays.asList(new CommandWolf(), new CommandInventory())));
 		COMMAND_MAP.put(Category.PROFILE, new ArrayList<>(Arrays.asList(new CommandProfile())));
 		COMMAND_MAP.put(Category.MISC, new ArrayList<>(Arrays.asList(new CommandLinks(), new CommandInvite())));
 		COMMAND_MAP.put(Category.UTIL, new ArrayList<>(Arrays.asList(new CommandHelp(), new CommandServer(), new CommandUser(), new CommandShop())));
-		COMMAND_MAP.put(Category.MUSIC, Collections.singletonList(new CommandMusic()));
+		COMMAND_MAP.put(Category.MUSIC, new ArrayList<>(/*new CommandMusic()*/));
 		COMMAND_MAP.put(Category.IMAGE, new ArrayList<>(Arrays.asList(new CommandImgur(), new CommandCat(), new CommandKona(), new CommandDanbooru(), new CommandYandere(), new CommandGelbooru(), new CommandRule34())));
 
 		COMMAND_MAP.values().forEach(COMMANDS::addAll);
 
-		client.getEventDispatcher().on(MessageCreateEvent.class).subscribe(this::messageCreateEvent);
+		client.getEventDispatcher().on(MessageCreateEvent.class)
+				.filter(Predicate.not(e -> e.getMember().map(User::isBot).orElse(false)))
+				.filter(e -> e.getMessage().getContent().isPresent())
+				.subscribe(this::messageCreateEvent);
 	}
 
 	public static final ExecutorService THREAD_POOL = Executors.newCachedThreadPool();
@@ -162,7 +167,7 @@ public class Commands {
 	 *
 	 * @param e The event
 	 */
-	private void messageCreateEvent(@org.jetbrains.annotations.NotNull MessageCreateEvent e) {
+	private void messageCreateEvent(@NotNull MessageCreateEvent e) {
 		if (!e.getMember().get().isBot()) {
 			GuildMeta guild = Caches.getGuild(e.getGuild().block());
 			Optional<String> o = guild.getPrefixes().stream().filter(e.getMessage().getContent().get()::startsWith).findFirst();
@@ -176,17 +181,19 @@ public class Commands {
 								if (gotten != null) {
 									LOGGER.debug(String.format("Found `%s`", gotten.getData().getName()));
 									if (Caches.getGuild(e.getGuild().block()).hasCustomPermissions()) {
-										/*String perm = getPermission(gotten);
-										if (PermissionChecks.hasPermission(perm).test(e)) {
-											e.getMessage().getChannel().block().setTypingStatus(true);
-											gotten.getData().call(e);
-											e.getMessage().getChannel().block().setTypingStatus(false);
-										} else {
-											RequestBuffer.request(() -> e.getMessage().addReaction(ReactionEmoji.of("\uD83D\uDEAB")));
-										}*/
+//										String perm = getPermission(gotten);
+//										if (PermissionChecks.hasPermission(perm).test(e)) {
+//											e.getMessage().getChannel().block().setTypingStatus(true);
+//											gotten.getData().call(e);
+//											e.getMessage().getChannel().block().setTypingStatus(false);
+//										} else {
+//											RequestBuffer.request(() -> e.getMessage().addReaction(ReactionEmoji.of("\uD83D\uDEAB")));
+//										}
 									} else {
 										if (gotten.getData().getCheck().test(e)) {
-											Objects.requireNonNull(e.getMessage().getChannel().block()).typeUntil(Mono.fromRunnable(() -> gotten.getData().call(e)));
+											e.getMessage().getChannel().block().typeUntil(Mono.fromRunnable(() -> {
+												gotten.getData().call(e);
+											})).blockFirst();
 										} else {
 											e.getMessage().addReaction(ReactionEmoji.unicode("\uD83D\uDEAB"));
 										}

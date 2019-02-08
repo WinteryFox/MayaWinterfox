@@ -17,7 +17,9 @@
     <logger name="org.apache" level="NONE"/>
     <logger name="com.sedmelluq" level="INFO"/>
     <logger name="httpclient" level="INFO"/>
-    <logger name="sx.blah.discord.Discord4J" level="INFO"/>
     <logger name="com.winter.mayawinterfox" level="INFO"/>
     <logger name="org.ehcache" level="INFO"/>
+    <logger name="discord4j" level="INFO"/>
+    <logger name="reactor" level="INFO"/>
+    <logger name="io.netty" level="INFO"/>
 </configuration>

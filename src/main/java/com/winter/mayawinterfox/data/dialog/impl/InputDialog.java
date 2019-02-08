@@ -4,6 +4,7 @@ import com.winter.mayawinterfox.data.dialog.Dialog;
 import com.winter.mayawinterfox.data.dialog.DialogType;
 import com.winter.mayawinterfox.util.ColorUtil;
 import discord4j.core.object.entity.MessageChannel;
+import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.User;
 
 import java.util.concurrent.TimeUnit;
@@ -13,7 +14,7 @@ public class InputDialog extends Dialog<String> {
 
 	public InputDialog(MessageChannel channel, User user, String description) {
 		super(DialogType.OPEN,
-				channel,
+				(TextChannel) channel,
 				user,
 				null,
 				"input",

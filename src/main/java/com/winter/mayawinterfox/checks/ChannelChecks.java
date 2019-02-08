@@ -1,13 +1,14 @@
 package com.winter.mayawinterfox.checks;
 
-import sx.blah.discord.handle.impl.events.guild.channel.message.MessageReceivedEvent;
+import discord4j.core.event.domain.message.MessageCreateEvent;
+import discord4j.core.object.entity.TextChannel;
 
 import java.util.function.Predicate;
 
 public class ChannelChecks {
 
-	public static Predicate<MessageReceivedEvent> isNSFW() {
-		return messageReceivedEvent -> messageReceivedEvent.getChannel().isNSFW();
+	public static Predicate<MessageCreateEvent> isNSFW() {
+		return messageReceivedEvent -> ((TextChannel) messageReceivedEvent.getMessage().getChannel().block()).isNsfw();
 	}
 
 }
