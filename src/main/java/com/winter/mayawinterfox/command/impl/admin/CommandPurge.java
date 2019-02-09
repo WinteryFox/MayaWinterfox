@@ -10,14 +10,16 @@ import com.winter.mayawinterfox.util.EmbedUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
 import com.winter.mayawinterfox.util.ParsingUtil;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Message;
 import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.util.Permission;
 import discord4j.core.object.util.Snowflake;
-import org.reactivestreams.Publisher;
+import reactor.core.publisher.Flux;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Objects;
 
 public class CommandPurge extends Node<Command> {
 
@@ -46,7 +48,7 @@ public class CommandPurge extends Node<Command> {
 					if (args.length > 2)
 						target = ParsingUtil.getUser(args[2]).asMember(e.getGuildId().get()).block();
 					else
-						target = new TargetDialog((TextChannel) e.getMessage().getChannel().block(), e.getMember().get()).open();
+						target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
 					/*if (target != null)
 						history = e.getMessage().getChannel().block().getMessageHistory(amount).stream().filter(m -> m.getAuthor().equals(target)).collect(Collectors.toList());
 					else
@@ -61,19 +63,36 @@ public class CommandPurge extends Node<Command> {
 
 						});*/
 
-					Publisher<Snowflake> messages;
-					if (target != null)
-						messages = message -> {
-							e.getMessage().getChannel().block().getMessagesBefore(e.getMessage().getId()).take(100);
-						};
-					else
-						messages = m -> {
-							e.getMessage().getChannel().block().getMessagesBefore(e.getMessage().getId()).filter(message -> Objects.equals(message.getAuthor().block(), target));
-						};
+					/*Flux<Snowflake> messages;
+					Mono<MessageChannel> channel = e.getMessage().getChannel();
+					//if (target != null)
+					//	messages = channel
+					//			.flatMapMany(c -> c.getMessagesBefore(e.getMessage().getId()))
+					//			.map(Message::getId)
+					//			.take(100);
+					//else
+						messages = channel
+								.flux()
+								.flatMap(c -> c.getMessagesBefore(e.getMessage().getId()))
+								.map(m -> m.getId())
+								.take(amount);*/
 
-					((TextChannel) e.getMessage().getChannel().block()).bulkDelete(messages);
+					Flux<Snowflake> history = e.getMessage().getChannel().ofType(TextChannel.class)
+							.flatMapMany(c -> c.getMessagesBefore(e.getMessage().getId()))
+							.filterWhen(m -> m.getAuthor().map(u ->
+									target == null || u.equals(target)
+							))
+							.filter(m -> m.getTimestamp().isAfter(LocalDate.now().minusWeeks(2).atStartOfDay().toInstant(ZoneOffset.UTC)))
+							.take(amount)
+							.map(Message::getId)
+							.cache();
+					Long count = e.getMessage().getChannel().ofType(TextChannel.class)
+							.map(c -> c.bulkDelete(history)
+									.count()
+									.flatMap(not -> history.count().map(total -> total - not)).block())
+							.block();
 
-					MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "purged-messages", "?"));
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "purged-messages", count));
 					return true;
 				},
 				new HashSet<>(Collections.singletonList("prune"))
