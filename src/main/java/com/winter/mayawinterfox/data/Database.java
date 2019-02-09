@@ -2,14 +2,14 @@ package com.winter.mayawinterfox.data;
 
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.winter.mayawinterfox.Main;
-import com.winter.mayawinterfox.exceptions.ErrorHandler;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class Database {
 
@@ -22,50 +22,50 @@ public class Database {
 
 	/**
 	 * Executes an update to the database
+	 *
 	 * @param sql String containing an SQL statement to be executed.
 	 * @return true on success, false on failure
 	 */
-	public static boolean set(String sql, Object... params) {
-		try (
-				Connection con = poolingDataSource.getConnection();
-				PreparedStatement statement = setStatementParams(con.prepareStatement(sql), params)
-		) {
-			statement.executeUpdate();
-			return true;
-		} catch (SQLException e) {
-			LOGGER.error("Caught an SQL exception!", e);
-		}
-		return false;
+	@NotNull
+	public static Mono<Integer> set(String sql, Object... params) {
+		return Mono.fromCallable(() -> {
+			try (Connection con = poolingDataSource.getConnection()) {
+				try (PreparedStatement statement = setStatementParams(con.prepareStatement(sql), params)) {
+					return statement.executeUpdate();
+				}
+			}
+		});
 	}
 
-	public static List<Row> get(String sql, Object... params) {
-		List<Row> rows = new ArrayList<>();
-		try (
-				Connection con = poolingDataSource.getConnection();
-				PreparedStatement statement = setStatementParams(con.prepareStatement(sql), params);
-				ResultSet set = statement.executeQuery()
-		) {
-			while (set.next()) {
-				Row row = new Row();
-				ResultSetMetaData md = set.getMetaData();
-				int columns = md.getColumnCount();
-				for (int i = 1; i <= columns; i++) {
-					row.addColumn(md.getColumnName(i), set.getObject(i));
+	@NotNull
+	public static Flux<Row> get(String sql, Object... params) {
+		return Flux.create(sink -> {
+			try (Connection con = poolingDataSource.getConnection();
+			     PreparedStatement statement = setStatementParams(con.prepareStatement(sql), params);
+			     ResultSet set = statement.executeQuery()) {
+				while (set.next()) {
+					Row row = new Row();
+					ResultSetMetaData md = set.getMetaData();
+					int columns = md.getColumnCount();
+					for (int i = 1; i <= columns; i++) {
+						row.addColumn(md.getColumnName(i), set.getObject(i));
+					}
+					sink.next(row);
 				}
-				rows.add(row);
+				sink.complete();
+			} catch (SQLException e) {
+				sink.error(e);
 			}
-		} catch (SQLException e) {
-			ErrorHandler.log(e, "database");
-		}
-		return rows;
+		});
 	}
 
 	/**
 	 * This method should not be used during normal operation
+	 *
 	 * @param sql The sql to execute
 	 * @return True on success false on failure
 	 */
-	public static boolean executeUnsafe(String sql) {
+	private static boolean executeUnsafe(String sql) {
 		try (
 				Connection con = poolingDataSource.getConnection();
 				Statement statement = con.createStatement()
@@ -80,11 +80,13 @@ public class Database {
 
 	/**
 	 * Sets the statement parameters for a prepared statement
+	 *
 	 * @param statement PreparedStatement with parameters that need to be set
-	 * @param params Array of parameters that need to be set
+	 * @param params    Array of parameters that need to be set
 	 * @throws SQLException Upon failing to set a parameter
 	 */
-	private static PreparedStatement setStatementParams(PreparedStatement statement, Object[] params) throws SQLException {
+	@Contract("_, _ -> param1")
+	private static PreparedStatement setStatementParams(PreparedStatement statement, @NotNull Object[] params) throws SQLException {
 		for (int i = 0; i < params.length; i++) {
 			if (params[i] instanceof String)
 				statement.setString(i + 1, (String) params[i]);
@@ -118,6 +120,7 @@ public class Database {
 
 	/**
 	 * Sets up the database for bot use, creating all schemas and tables required
+	 *
 	 * @return true upon successful setup and false on failure
 	 */
 	public static boolean setup() {

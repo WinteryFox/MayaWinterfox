@@ -1,13 +1,12 @@
 package com.winter.mayawinterfox.data.item;
 
 import com.winter.mayawinterfox.data.Database;
-import com.winter.mayawinterfox.data.Row;
 import com.winter.mayawinterfox.exceptions.impl.ItemNotOwnedException;
 import com.winter.mayawinterfox.exceptions.impl.UpdateFailedException;
 import discord4j.core.object.entity.User;
+import org.jetbrains.annotations.NotNull;
+import reactor.core.publisher.Mono;
 
-import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,11 +15,16 @@ public class Inventory {
 	private User user;
 	private Set<Item> items;
 
-	public Inventory(User user) {
+	private Inventory(User user, @NotNull Set<Item> items) {
 		this.user = user;
-		this.items = new HashSet<>();
-		List<Row> map = Database.get("SELECT item FROM item WHERE id=?", user.getId().asLong());
-		this.items = map.stream().map(v -> ItemProvider.getItemById((int) v.get("item"))).collect(Collectors.toSet());
+		this.items = items;
+	}
+
+	public static Mono<Inventory> create(@NotNull User user) {
+		return Database.get("SELECT item FROM item WHERE id=?", user.getId().asLong())
+				.map(v -> ItemProvider.getItemById((int) v.get("item")))
+				.collect(Collectors.toSet())
+				.map(i -> new Inventory(user, i));
 	}
 
 	/**
@@ -37,10 +41,12 @@ public class Inventory {
 	 * @param item The item to add to the inventory
 	 * @return True on success false on failure
 	 */
-	public boolean addItem(Item item) {
-		if (!Database.set("INSERT IGNORE INTO item (id, item) VALUES (?, ?);", user.getId().asLong(), item.getId()))
-			throw new UpdateFailedException("Failed to update inventory metadata");
-		return items.add(item);
+	public Mono<Boolean> addItem(Item item) {
+		return Mono.fromCallable(() -> {
+			if (!Database.set("INSERT IGNORE INTO item (id, item) VALUES (?, ?);", user.getId().asLong(), item.getId()))
+				throw new UpdateFailedException("Failed to update inventory metadata");
+			return items.add(item);
+		});
 	}
 
 	/**
