@@ -49,33 +49,6 @@ public class CommandPurge extends Node<Command> {
 						target = ParsingUtil.getUser(args[2]).asMember(e.getGuildId().get()).block();
 					else
 						target = new TargetDialog(e.getMessage().getChannel().block(), e.getMember().get()).open();
-					/*if (target != null)
-						history = e.getMessage().getChannel().block().getMessageHistory(amount).stream().filter(m -> m.getAuthor().equals(target)).collect(Collectors.toList());
-					else
-						history = e.getMessage().getChannel().block().getMessageHistory(amount);
-					GuildUtil.bulkDelete(e.getMessage().getChannel().block(), history);*/
-
-					/*Flux<Message> messages;
-					if (target != null)
-						messages = e.getMessage().getChannel().block().getMessagesBefore(e.getMessage().getId()).take(amount);
-					else
-						messages = e.getMessage().getChannel().block().getMessagesBefore(e.getMessage().getId()).take(amount).filter(message -> {
-
-						});*/
-
-					/*Flux<Snowflake> messages;
-					Mono<MessageChannel> channel = e.getMessage().getChannel();
-					//if (target != null)
-					//	messages = channel
-					//			.flatMapMany(c -> c.getMessagesBefore(e.getMessage().getId()))
-					//			.map(Message::getId)
-					//			.take(100);
-					//else
-						messages = channel
-								.flux()
-								.flatMap(c -> c.getMessagesBefore(e.getMessage().getId()))
-								.map(m -> m.getId())
-								.take(amount);*/
 
 					Flux<Snowflake> history = e.getMessage().getChannel().ofType(TextChannel.class)
 							.flatMapMany(c -> c.getMessagesBefore(e.getMessage().getId()))
