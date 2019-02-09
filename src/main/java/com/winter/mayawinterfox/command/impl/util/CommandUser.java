@@ -10,6 +10,7 @@ import com.winter.mayawinterfox.util.ImageUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
 import com.winter.mayawinterfox.util.ParsingUtil;
 import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.Role;
 import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Permission;
@@ -40,17 +41,19 @@ public class CommandUser extends Node<Command> {
 
 					Consumer<EmbedCreateSpec> embed = spec -> {
 							spec.setColor(ColorUtil.withinTwoHues(0.2f, 0.8f))
-								.setTitle(target.getUsername() + "#" + target.getDiscriminator())
-								.setThumbnail(ImageUtil.getAvatar(target))
-								.setTimestamp(Instant.now())
-								.addField(Localisation.getMessage(e.getGuild().block(), "id"), target.getId().asString(), false);
+									.setTitle(target.getUsername() + "#" + target.getDiscriminator())
+									.setThumbnail(ImageUtil.getAvatar(target))
+									.setTimestamp(Instant.now())
+									.addField(Localisation.getMessage(e.getGuild().block(), "id"), target.getId().asString(), false)
+									.addField("Discriminator", target.getDiscriminator(), true)
+									.addField("Avatar URL", target.getAvatarUrl(), false);
 
-						//if ()
-						//	String roles = Arrays.toString(target.getRolesForGuild(e.getGuild().block()).toArray()).replace("[", "").replace("]", "");
-						//	String perms = Arrays.toString(target.getPermissionsForGuild(e.getGuild().block()).toArray()).replace("[", "").replace("]", "");
-						//	builder.appendField(Localisation.getMessage(e.getGuild().block(), "roles"), StringUtils.abbreviate(roles, Math.min(roles.length(), 1024)), false);
-						//	builder.appendField(Localisation.getMessage(e.getGuild().block(), "perms"), StringUtils.abbreviate(perms, Math.min(perms.length(), 1024)), false);
-						//}
+						Member member = target.asMember(e.getGuildId().get()).block();
+						if (member != null) {
+							spec.addField("Join Date", member.getJoinTime().toString(), false);
+							String roles = Arrays.toString(member.getRoles().map(Role::getName).collectList().block().toArray()).replace("[", "").replace("]", "");
+							spec.addField(Localisation.getMessage(e.getGuild().block(), "roles"), StringUtils.abbreviate(roles, Math.min(roles.length(), 1024)), false);
+						}
 					};
 					MessageUtil.sendMessage(e.getMessage().getChannel().block(), embed);
 					return true;

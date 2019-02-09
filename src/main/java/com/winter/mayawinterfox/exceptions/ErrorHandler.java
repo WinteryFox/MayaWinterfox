@@ -36,6 +36,7 @@ public class ErrorHandler {
 						.setColor(ColorUtil.withinTwoHues(0.7f, 1.2f))
 						.setTitle(Localisation.getMessage(((TextChannel) channel).getGuild().block(), "error"))
 						.setDescription(t.getMessage()));
+		t.printStackTrace();
 	}
 
 	/**
@@ -51,5 +52,6 @@ public class ErrorHandler {
 						.setColor(ColorUtil.withinTwoHues(0.7f, 1.2f))
 						.setTitle(Localisation.getMessage(((TextChannel) channel).getGuild().block(), "error"))
 						.setDescription(Localisation.getMessage(((TextChannel) channel).getGuild().block(), messageKey)));
+		t.printStackTrace();
 	}
 }
