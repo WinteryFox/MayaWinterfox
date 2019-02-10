@@ -20,12 +20,12 @@ import java.util.function.Consumer;
 public class MessageUtil {
 
 	public static String[] argsArray(Message m) {
-		Optional<String> o = Caches.getGuild(Objects.requireNonNull(m.getGuild().block())).getPrefixes().stream().filter(m.getContent().get()::startsWith).findAny();
+		Optional<String> o = Caches.getGuild(Objects.requireNonNull(m.getGuild().block())).block().getPrefixes().stream().filter(m.getContent().get()::startsWith).findAny();
 		return o.map(s -> m.getContent().get().substring(s.length())).orElseGet(m.getContent()::toString).split("\\s+");
 	}
 
 	public static String[] argsArray(Guild g, String m) {
-		Optional<String> o = Caches.getGuild(g).getPrefixes().stream().filter(m::startsWith).findAny();
+		Optional<String> o = Caches.getGuild(g).block().getPrefixes().stream().filter(m::startsWith).findAny();
 		return o.map(s -> m.substring(s.length())).orElse(m).split("\\s+");
 	}
 
@@ -33,8 +33,8 @@ public class MessageUtil {
 		return String.join(" ", argsArray(m));
 	}
 
-	public static Message sendMessage(MessageChannel channel, String messageKey, Object... params) {
-		return channel.createMessage(Localisation.getMessage(((GuildChannel) channel).getGuild().block(), messageKey, params)).block();
+	public static Mono<Message> sendMessage(MessageChannel channel, String messageKey, Object... params) {
+		return channel.createMessage(Localisation.getMessage(((GuildChannel) channel).getGuild().block(), messageKey, params));
 	}
 
 	public static Message sendMessage(MessageChannel channel, String messageKey, Consumer<EmbedCreateSpec> embed, InputStream file, String fileName, Object... params) {

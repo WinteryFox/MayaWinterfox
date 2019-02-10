@@ -1,11 +1,11 @@
 package com.winter.mayawinterfox.data.permissions;
 
 import com.winter.mayawinterfox.data.Database;
-import com.winter.mayawinterfox.exceptions.impl.UpdateFailedException;
+import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.Role;
 import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
-import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -14,14 +14,23 @@ public class Group {
 	private final discord4j.core.object.entity.Guild guild;
 	private String name;
 	private final Set<String> permissions;
-	private final Set<discord4j.core.object.entity.User> members = new HashSet<>();
-	private Long roleID;
+	private final Set<Member> members;
+	private Snowflake roleID;
 	
 	Group(discord4j.core.object.entity.Guild guild, String name) {
 		this.guild = guild;
 		this.name = name;
-		this.permissions = Database.get("SELECT permission FROM groups WHERE guild=? AND groupname=?;", guild.getId().asLong(), name).stream().map(v -> (String) v.get("permission")).collect(Collectors.toSet());
-		this.roleID = (Long) Database.get("SELECT role FROM groups WHERE guild=? AND groupname=?;", guild.getId().asLong(), name).get(0).get("role");
+		this.members = Database.get("SELECT userid FROM usergroup WHERE guild=? AND groupname=?;", guild.getId().asLong(), name)
+				.flatMap(v -> guild.getMemberById(Snowflake.of((long) v.get("userid"))))
+				.collect(Collectors.toSet())
+				.block();
+		this.permissions = Database.get("SELECT permission FROM groups WHERE guild=? AND groupname=?;", guild.getId().asLong(), name)
+				.map(v -> (String) v.get("permission"))
+				.collect(Collectors.toSet())
+				.block();
+		this.roleID = Snowflake.of((Long) Database.get("SELECT role FROM groups WHERE guild=? AND groupname=?;", guild.getId().asLong(), name)
+				.blockFirst()
+				.get("role"));
 	}
 
 	public Set<String> getPermissions() {
@@ -32,34 +41,31 @@ public class Group {
 		return name;
 	}
 
-	public Set<discord4j.core.object.entity.User> getMembers() {
-		if (members.isEmpty())
-			members.addAll(Database.get("SELECT userid FROM usergroup WHERE guild=? AND groupname=?;", guild.getId().asLong(), name).stream().map(v -> guild.getMemberById(Snowflake.of((long) v.get("userid"))).block()).collect(Collectors.toSet()));
+	public Set<Member> getMembers() {
+		//if (members.isEmpty())
+		//	members.addAll(Database.get("SELECT userid FROM usergroup WHERE guild=? AND groupname=?;", guild.getId().asLong(), name).stream().map(v -> guild.getMemberById(Snowflake.of((long) v.get("userid"))).block()).collect(Collectors.toSet()));
+		//return members;
 		return members;
 	}
 
-	public boolean addMember(discord4j.core.object.entity.User user) {
-		if (!Database.set("INSERT IGNORE INTO usergroup (guild, userid, groupname) VALUES (?, ?, ?);", guild.getId().asLong(), user.getId().asLong(), name))
-			throw new UpdateFailedException("Failed to update group in database.");
-		return members.add(user);
+	public Mono<Group> addMember(discord4j.core.object.entity.User user) {
+		return Database.set("INSERT IGNORE INTO usergroup (guild, userid, groupname) VALUES (?, ?, ?);", guild.getId().asLong(), user.getId().asLong(), name)
+				.thenReturn(new Group(guild, name));
 	}
 
-	public boolean removeMember(discord4j.core.object.entity.User user) {
-		if (!Database.set("DELETE FROM usergroup WHERE guild=? AND userid=? AND groupname=?", guild.getId().asLong(), user.getId().asLong(), name))
-			throw new UpdateFailedException("Failed to update group in database.");
-		return members.remove(user);
+	public Mono<Group> removeMember(discord4j.core.object.entity.User user) {
+		return Database.set("DELETE FROM usergroup WHERE guild=? AND userid=? AND groupname=?", guild.getId().asLong(), user.getId().asLong(), name)
+				.thenReturn(new Group(guild, name));
 	}
 
-	public boolean addPermission(String permission) {
-		if (!Database.set("INSERT IGNORE INTO groups (guild, groupname, permission) VALUES (?, ?, ?);", guild.getId().asLong(), name, permission))
-			throw new UpdateFailedException("Failed to update group in database.");
-		return permissions.add(permission);
+	public Mono<Group> addPermission(String permission) {
+		return Database.set("INSERT IGNORE INTO groups (guild, groupname, permission) VALUES (?, ?, ?);", guild.getId().asLong(), name, permission)
+				.thenReturn(new Group(guild, name));
 	}
 
-	public boolean removePermission(String permission) {
-		if (!Database.set("DELETE FROM groups WHERE guild=? AND groupname=? AND permission=?;", guild.getId().asLong(), name, permission))
-			throw new UpdateFailedException("Failed to update group in database.");
-		return permissions.remove(permission);
+	public Mono<Group> removePermission(String permission) {
+		return Database.set("DELETE FROM groups WHERE guild=? AND groupname=? AND permission=?;", guild.getId().asLong(), name, permission)
+				.thenReturn(new Group(guild, name));
 	}
 
 	public boolean hasPermission(String permission) {
@@ -73,19 +79,15 @@ public class Group {
 		return false;
 	}
 
-	public void linkRole(Role role) {
-		if (role == null)
-			return;
-
-		if (!Database.set("UPDATE groups SET role=? WHERE guild=? AND groupname=?;", role.getId().asLong(), guild.getId().asLong(), name))
-			throw new UpdateFailedException("Failed to update group in database.");
-		this.roleID = role.getId().asLong();
+	public Mono<Group> linkRole(Role role) {
+		return Database.set("UPDATE groups SET role=? WHERE guild=? AND groupname=?;", role.getId().asLong(), guild.getId().asLong(), name)
+				.thenReturn(new Group(guild, name));
 	}
 
 	public Role getRole() {
 		if (roleID == null)
 			return null;
 
-		return guild.getRoleById(Snowflake.of(roleID)).block();
+		return guild.getRoleById(roleID).block();
 	}
 }

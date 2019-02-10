@@ -2,7 +2,6 @@ package com.winter.mayawinterfox.data.item;
 
 import com.winter.mayawinterfox.data.Database;
 import com.winter.mayawinterfox.exceptions.impl.ItemNotOwnedException;
-import com.winter.mayawinterfox.exceptions.impl.UpdateFailedException;
 import discord4j.core.object.entity.User;
 import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
@@ -15,11 +14,12 @@ public class Inventory {
 	private User user;
 	private Set<Item> items;
 
-	private Inventory(User user, @NotNull Set<Item> items) {
+	private Inventory(User user, Set<Item> items) {
 		this.user = user;
 		this.items = items;
 	}
 
+	@NotNull
 	public static Mono<Inventory> create(@NotNull User user) {
 		return Database.get("SELECT item FROM item WHERE id=?", user.getId().asLong())
 				.map(v -> ItemProvider.getItemById((int) v.get("item")))
@@ -42,11 +42,8 @@ public class Inventory {
 	 * @return True on success false on failure
 	 */
 	public Mono<Boolean> addItem(Item item) {
-		return Mono.fromCallable(() -> {
-			if (!Database.set("INSERT IGNORE INTO item (id, item) VALUES (?, ?);", user.getId().asLong(), item.getId()))
-				throw new UpdateFailedException("Failed to update inventory metadata");
-			return items.add(item);
-		});
+		return Database.set("INSERT IGNORE INTO item (id, item) VALUES (?, ?)", user, item.getId())
+				.map(v -> items.add(item));
 	}
 
 	/**
@@ -54,24 +51,22 @@ public class Inventory {
 	 * @param item The item to remove from the inventory
 	 * @return True on success false on failure
 	 */
-	public boolean removeItem(Item item) {
-		if (!Database.set("DELETE IGNORE FROM item WHERE id=? AND item=?;", user.getId().asLong(), item.getId()))
-			throw new UpdateFailedException("Failed to update inventory metadata");
-		return items.remove(item);
+	public Mono<Boolean> removeItem(Item item) {
+		return Database.set("DELETE IGNORE FROM item WHERE id=? AND item=?;", user.getId().asLong(), item.getId())
+				.map(v -> items.remove(item));
 	}
 
 	/**
 	 * Get an item by id or name
 	 * @param s The string to search the item for
 	 * @return The item that was found
-	 * @throws ItemNotOwnedException When the person doesn't own the item
 	 */
 	public Item getItem(String s) {
 		if (s.matches("\\d+")) {
 			int id = Integer.parseUnsignedInt(s);
 			return getItemById(id);
 		} else {
-			return getItemsByName(s).stream().findFirst().orElseThrow(ItemNotOwnedException::new);
+			return getItemsByName(s).stream().findFirst().orElse(null);
 		}
 	}
 
@@ -82,7 +77,7 @@ public class Inventory {
 	 * @return The item with that id
 	 * @throws ItemNotOwnedException if no such item exists
 	 */
-	public Item getItemById(int id) {
+	private Item getItemById(int id) {
 		return id == 0 ? null : items.stream().filter(i -> i.getId() == id).findFirst().orElseThrow(ItemNotOwnedException::new);
 	}
 

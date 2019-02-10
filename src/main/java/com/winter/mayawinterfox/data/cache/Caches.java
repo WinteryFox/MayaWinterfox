@@ -9,22 +9,13 @@ import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.util.Snowflake;
+import org.jetbrains.annotations.NotNull;
+import reactor.core.publisher.Mono;
 
 import java.sql.Date;
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class Caches {
-
-	//private static final Logger LOGGER = LoggerFactory.getLogger(Caches.class);
-
-	//private static CacheManager manager = CacheManagerBuilder.newCacheManagerBuilder()
-	//		.withCache("guilds",
-	//				CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, GuildMeta.class, ResourcePoolsBuilder.heap(1000)))
-	//		.withCache("users",
-	//				CacheConfigurationBuilder.newCacheConfigurationBuilder(Long.class, UserMeta.class, ResourcePoolsBuilder.heap(5000))).build(true);
-	//private static Cache<Long, GuildMeta> GUILDS = manager.getCache("guilds", Long.class, GuildMeta.class);
-	//private static Cache<Long, UserMeta> USERS = manager.getCache("users", Long.class, UserMeta.class);
 
 	/**
 	 * Get a guild from the cache, if the guild is not already in the cache the guild will be put into it
@@ -32,46 +23,38 @@ public class Caches {
 	 * @param guild The guild implementation to getGuild the meta for
 	 * @return The guild meta for the guild implementation
 	 */
-	public static GuildMeta getGuild(Guild guild) {
-		/*if (!GUILDS.containsKey(guild.getLongID())) {
-			Database.set("INSERT IGNORE INTO guild (id) VALUES (?);", guild.getLongID());
-			Map<String, List<Object>> settings = Database.getGuild("SELECT * FROM guild WHERE id=?", guild.getLongID());
-			Map<String, List<Object>> prefixes = Database.getGuild("SELECT * FROM prefixes WHERE id=?", guild.getLongID());
-			Map<String, List<Object>> autoroles = Database.getGuild("SELECT * FROM autoroles WHERE id=?", guild.getLongID());
-			GUILDS.putIfAbsent(guild.getLongID(), new GuildMeta(guild.getShard(), guild.getName(), guild.getLongID(), guild.getIcon(), guild.getOwnerLongID(), guild.getAFKChannel() != null ? guild.getAFKChannel().getLongID() : 0L, guild.getAFKTimeout(), guild.getRegion().getID(), guild.getVerificationLevel().ordinal(), prefixes.getOrDefault("prefix", Collections.emptyList()).stream().map(v -> (String) v).collect(Collectors.toSet()), autoroles.getOrDefault("role", Collections.emptyList()).stream().map(v -> (Long) v).collect(Collectors.toSet()), (String) settings.getGuild("language").getGuild(0), (String) settings.getGuild("welcome").getGuild(0), (String) settings.getGuild("pm").getGuild(0), (boolean) settings.getGuild("lvlup").getGuild(0), (boolean) settings.getGuild("premium").getGuild(0), (boolean) settings.getGuild("newguild").getGuild(0)));
-			LOGGER.trace("Put guild meta for guild " + guild.getName() + " in the cache.");
-		}
-		return GUILDS.getGuild(guild.getLongID());*/
-		Database.set("INSERT IGNORE INTO guild (id) VALUES (?);", guild.getId().asLong());
-		List<Row> settings = Database.get("SELECT * FROM guild WHERE id=?", guild.getId().asLong());
-		List<Row> prefixes = Database.get("SELECT * FROM prefixes WHERE id=?", guild.getId().asLong());
-		List<Row> autoroles = Database.get("SELECT * FROM autoroles WHERE id=?", guild.getId().asLong());
-		return new GuildMeta(guild,
-				prefixes.stream().map(v -> (String) v.get("prefix")).collect(Collectors.toSet()),
-				autoroles.stream().map(v -> (Long) v.get("role")).collect(Collectors.toSet()),
-				(TextChannel) guild.getChannelById(Snowflake.of((Long) settings.get(0).get("welcomeChannel"))).block(),
-				(String) settings.get(0).get("language"),
-				(String) settings.get(0).get("welcome"),
-				(String) settings.get(0).get("pm"),
-				(boolean) settings.get(0).get("lvlup"),
-				(boolean) settings.get(0).get("premium"),
-				(boolean) settings.get(0).get("newguild"),
-				(boolean) settings.get(0).get("permission"),
-				(boolean) settings.get(0).get("welcomeEnabled"),
-				(boolean) settings.get(0).get("welcomeEmbed"));
-		
-		/*Set<String> prefixes,
-		Set<Long> autoroles,
-		IChannel welcomeChannel,
-		String language,
-		String welcome,
-		String pm,
-		boolean levelupNotifications,
-		boolean premium,
-		boolean newGuild,
-		boolean permissions,
-		boolean welcomeEnabled,
-		boolean welcomeEmbed*/
+	public static Mono<GuildMeta> getGuild(@NotNull Guild guild) {
+		var settings = Database.get("SELECT * FROM guild WHERE id=?", guild.getId().asLong())
+				.next()
+				.map(Row::getColumns);
+		var prefixes = Database.get("SELECT * FROM prefixes WHERE id=?", guild.getId().asLong())
+				.map(v -> (String) v.get("prefix"))
+				.collect(Collectors.toSet());
+		var autoroles = Database.get("SELECT * FROM autoroles WHERE id=?", guild.getId().asLong())
+				.map(v -> Snowflake.of((Long) v.get("role")))
+				.collect(Collectors.toSet());
+		return Mono.zip(settings, prefixes, autoroles)
+				.zipWhen(v -> guild.getChannelById(Snowflake.of((Long) v.getT1().get("welcomeChannel"))).ofType(TextChannel.class))
+				.map(v -> {
+					var o = v.getT1();
+					var s = o.getT1();
+					var p = o.getT2();
+					var r = o.getT3();
+					var c = v.getT2();
+					return new GuildMeta(guild,
+							p,
+							r,
+							c,
+							(String) s.get("language"),
+							(String) s.get("welcome"),
+							(String) s.get("pm"),
+							(boolean) s.get("lvlup"),
+							(boolean) s.get("premium"),
+							(boolean) s.get("newguild"),
+							(boolean) s.get("permission"),
+							(boolean) s.get("welcomeEnabled"),
+							(boolean) s.get("welcomeEmbed"));
+				});
 	}
 
 	/**
@@ -80,47 +63,21 @@ public class Caches {
 	 * @param user The user implementation to getGuild the meta for
 	 * @return The user meta for the user implementation
 	 */
-	public static UserMeta getUser(User user) {
-		/*if (!USERS.containsKey(user.getLongID())) {
-			Database.set("INSERT IGNORE INTO user (id) VALUES (?);", user.getLongID());
-			HashMap<String, List<Object>> result = Database.getGuild("SELECT * FROM user WHERE id=?;", user.getLongID());
-			USERS.putIfAbsent(user.getLongID(), new UserMeta(user.getShard(), user.getName(), user.getLongID(), user.getDiscriminator(), user.getAvatar(), user.getPresence(), user.isBot(), (String) result.getGuild("description").getGuild(0), (int) result.getGuild("level").getGuild(0), (int) result.getGuild("xp").getGuild(0), (int) result.getGuild("maxxp").getGuild(0), (long) result.getGuild("totalxp").getGuild(0), (int) result.getGuild("coins").getGuild(0), (int) result.getGuild("gems").getGuild(0), ItemProvider.getItemById((int) result.getGuild("background").getGuild(0)), (boolean) result.getGuild("notifications").getGuild(0), (boolean) result.getGuild("premium").getGuild(0), (Date) result.getGuild("premiumexpiry").getGuild(0)));
-			LOGGER.trace("Put user meta for user " + user.getName() + " in the cache.");
-		}
-		return USERS.getGuild(user.getLongID());*/
-		Database.set("INSERT IGNORE INTO user (id) VALUES (?);", user.getId().asLong());
-		List<Row> result = Database.get("SELECT * FROM user WHERE id=?;", user.getId().asLong());
-		return new UserMeta(user,
-				(String) result.get(0).get("description"),
-				(int) result.get(0).get("level"),
-				(int) result.get(0).get("xp"),
-				(int) result.get(0).get("maxxp"),
-				(long) result.get(0).get("totalxp"),
-				(int) result.get(0).get("coins"),
-				(int) result.get(0).get("gems"),
-				ItemProvider.getItemById((int) result.get(0).get("background")),
-				(boolean) result.get(0).get("notifications"),
-				(boolean) result.get(0).get("premium"),
-				(Date) result.get(0).get("premiumexpiry"));
+	public static Mono<UserMeta> getUser(User user) {
+		return Database.get("SELECT * FROM user WHERE id=?;", user.getId().asLong())
+				.next()
+				.map(Row::getColumns)
+				.map(v -> new UserMeta(user,
+						(String) v.get("description"),
+						(int) v.get("level"),
+						(int) v.get("xp"),
+						(int) v.get("maxxp"),
+						(long) v.get("totalxp"),
+						(int) v.get("coins"),
+						(int) v.get("gems"),
+						ItemProvider.getItemById((int) v.get("background")),
+						(boolean) v.get("notifications"),
+						(boolean) v.get("premium"),
+						(Date) v.get("premiumexpiry")));
 	}
-
-	/**
-	 * Get the guild cache
-	 * @return The guild cache
-	 */
-	//public static Cache<Long, GuildMeta> getGuildCache() {
-	//	return GUILDS;
-	//}
-
-	/**
-	 * Get the user cache
-	 * @return The user cache
-	 */
-	//public static Cache<Long, UserMeta> getUserCache() {
-	//	return USERS;
-	//}
-
-	//public static CacheManager getManager() {
-	//	return manager;
-	//}
 }

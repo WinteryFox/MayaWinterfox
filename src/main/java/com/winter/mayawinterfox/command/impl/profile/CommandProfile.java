@@ -46,7 +46,7 @@ public class CommandProfile extends Node<Command> {
 								return false;
 
 							Profile profile = new Profile(e.getMember().get());
-							Inventory inventory = new Inventory(e.getMember().get());
+							Inventory inventory = Inventory.create(e.getMember().get()).block();
 							Item item = inventory.getItem(i);
 							if (item != null) {
 								profile.getUser().setBackground(item);
@@ -70,7 +70,7 @@ public class CommandProfile extends Node<Command> {
 								return false;
 
 							if (i.length() < 54) {
-								Caches.getUser(e.getMember().get()).setDescription(i);
+								Caches.getUser(e.getMember().get()).block().setDescription(i);
 								MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "changed-info"));
 							} else {
 								throw new RuntimeException("Profile description must be less than 54 characters including spaces.");

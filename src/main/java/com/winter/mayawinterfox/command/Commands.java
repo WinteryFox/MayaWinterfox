@@ -24,7 +24,6 @@ import com.winter.mayawinterfox.util.MessageUtil;
 import discord4j.core.DiscordClient;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.Guild;
-import discord4j.core.object.entity.Member;
 import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.User;
 import discord4j.core.object.reaction.ReactionEmoji;
@@ -169,7 +168,7 @@ public class Commands {
 	 */
 	private void messageCreateEvent(@NotNull MessageCreateEvent e) {
 		if (!e.getMember().get().isBot()) {
-			GuildMeta guild = Caches.getGuild(e.getGuild().block());
+			GuildMeta guild = Caches.getGuild(e.getGuild().block()).block();
 			Optional<String> o = guild.getPrefixes().stream().filter(e.getMessage().getContent().get()::startsWith).findFirst();
 			if (o.isPresent()) {
 				try {
@@ -180,7 +179,7 @@ public class Commands {
 								Node<Command> gotten = getCommand(n, lookingFor + " ");
 								if (gotten != null) {
 									LOGGER.debug(String.format("Found `%s`", gotten.getData().getName()));
-									if (Caches.getGuild(e.getGuild().block()).hasCustomPermissions()) {
+									if (guild.hasCustomPermissions()) {
 //										String perm = getPermission(gotten);
 //										if (PermissionChecks.hasPermission(perm).test(e)) {
 //											e.getMessage().getChannel().block().setTypingStatus(true);

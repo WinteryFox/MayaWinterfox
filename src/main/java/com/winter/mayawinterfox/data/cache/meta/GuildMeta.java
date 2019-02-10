@@ -2,9 +2,12 @@ package com.winter.mayawinterfox.data.cache.meta;
 
 import com.winter.mayawinterfox.Main;
 import com.winter.mayawinterfox.data.Database;
-import com.winter.mayawinterfox.exceptions.impl.UpdateFailedException;
+import com.winter.mayawinterfox.data.cache.Caches;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.util.Snowflake;
+import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 import java.util.Set;
@@ -12,22 +15,22 @@ import java.util.Set;
 public class GuildMeta {
 
 	private final Guild guild;
-	private Set<String> prefixes;
-	private Set<Long> autoroles;
-	private TextChannel welcomeChannel;
-	private String language;
-	private String welcome;
-	private String pm;
-	private boolean levelupNotifications;
-	private boolean premium;
-	private boolean newGuild;
-	private boolean permissions;
-	private boolean welcomeEnabled;
-	private boolean welcomeEmbed;
+	private final Set<String> prefixes;
+	private final Set<Snowflake> autoroles;
+	private final TextChannel welcomeChannel;
+	private final String language;
+	private final String welcome;
+	private final String pm;
+	private final boolean levelupNotifications;
+	private final boolean premium;
+	private final boolean newGuild;
+	private final boolean permissions;
+	private final boolean welcomeEnabled;
+	private final boolean welcomeEmbed;
 
 	public GuildMeta(Guild guild,
 	                 Set<String> prefixes,
-	                 Set<Long> autoroles,
+	                 Set<Snowflake> autoroles,
 	                 TextChannel welcomeChannel,
 	                 String language,
 	                 String welcome,
@@ -67,21 +70,17 @@ public class GuildMeta {
 		}
 	}
 
-	public void addPrefix(String prefix) {
-		if (!Database.set("INSERT IGNORE INTO prefixes (id, prefix) VALUES (?, ?);", guild.getId().asLong(), prefix))
-			throw new UpdateFailedException("Failed to update guild in database.");
-		this.prefixes.add(prefix);
+	public Mono<GuildMeta> addPrefix(String prefix) {
+		return Database.set("INSERT IGNORE INTO prefixes (id, prefix) VALUES (?, ?);", guild, prefix)
+				.then(Caches.getGuild(guild));
 	}
 
-	public void removePrefix(String prefix) {
-		if (this.prefixes.contains(prefix)) {
-			if (!Database.set("DELETE FROM prefixes WHERE id=? AND prefix=?", guild.getId().asLong(), prefix))
-				throw new UpdateFailedException("Failed to update guild in database.");
-			this.prefixes.remove(prefix);
-		}
+	public Mono<GuildMeta> removePrefix(String prefix) {
+		return Database.set("DELETE FROM prefixes WHERE id=? AND prefix=?", guild, prefix)
+				.then(Caches.getGuild(guild));
 	}
 
-	public Set<Long> getAutoroles() {
+	public Set<Snowflake> getAutoroles() {
 		return autoroles;
 	}
 
@@ -89,99 +88,95 @@ public class GuildMeta {
 		return welcomeChannel;
 	}
 
-	public void setWelcomeChannel(TextChannel channel) {
-		if (!Database.set("UPDATE guild SET welcomeChannel=? WHERE id=?;", channel.getId().asLong(), channel.getGuildId().asLong()))
-			throw new UpdateFailedException("Failed to update guild in database.");
-		this.welcomeChannel = channel;
+	public Mono<GuildMeta> setWelcomeChannel(TextChannel channel) {
+		return Database.set("UPDATE guild SET welcomeChannel=? WHERE id=?;", channel.getId().asLong(), channel.getGuildId().asLong())
+				.then(Caches.getGuild(guild));
 	}
 	
 	public String getLanguage() {
 		return language;
 	}
 
-	public void setLanguage(String language) {
-		if (!Database.set("UPDATE guild SET language=? WHERE id=?;", language, guild.getId().asLong()))
-			throw new UpdateFailedException("Failed to update guild in database.");
-		this.language = language;
+	public Mono<GuildMeta> setLanguage(String language) {
+		return Database.set("UPDATE guild SET language=? WHERE id=?;", language, guild.getId().asLong())
+				.then(Caches.getGuild(guild));
 	}
 
 	public String getWelcome() {
 		return welcome;
 	}
 
-	public void setWelcome(String welcome) {
-		if (!Database.set("UPDATE guild SET welcome=? WHERE id=?;", welcome, guild.getId().asLong()))
-			throw new UpdateFailedException("Failed to update guild in database.");
-		this.welcome = welcome;
+	public String getWelcome(User user) {
+		return welcome.replace("[user]", user.getUsername())
+				.replace("[mention]", user.getMention())
+				.replace("[server]", guild.getName());
+	}
+
+	public Mono<GuildMeta> setWelcome(String welcome) {
+		return Database.set("UPDATE guild SET welcome=? WHERE id=?;", welcome, guild.getId().asLong())
+				.then(Caches.getGuild(guild));
 	}
 
 	public String getPm() {
 		return pm;
 	}
 
-	public void setPm(String pm) {
-		if (!Database.set("UPDATE guild SET pm=? WHERE id=?;", pm, guild.getId().asLong()))
-			throw new UpdateFailedException("Failed to update guild in database.");
-		this.pm = pm;
+	public Mono<GuildMeta> setPm(String pm) {
+		return Database.set("UPDATE guild SET pm=? WHERE id=?;", pm, guild.getId().asLong())
+				.then(Caches.getGuild(guild));
 	}
 
 	public boolean isLevelupNotifications() {
 		return levelupNotifications;
 	}
 
-	public void setLevelupNotifications(boolean levelupNotifications) {
-		if (!Database.set("UPDATE lvlup SET pm=? WHERE id=?;", levelupNotifications, guild.getId().asLong()))
-			throw new UpdateFailedException("Failed to update guild in database.");
-		this.levelupNotifications = levelupNotifications;
+	public Mono<GuildMeta> setLevelupNotifications(boolean levelupNotifications) {
+		return Database.set("UPDATE guild SET lvlup=? WHERE id=?;", levelupNotifications, guild.getId().asLong())
+				.then(Caches.getGuild(guild));
 	}
 
 	public boolean isPremium() {
 		return premium;
 	}
 
-	public void setPremium(boolean premium) {
-		if (!Database.set("UPDATE guild SET premium=? WHERE id=?;", premium, guild.getId().asLong()))
-			throw new UpdateFailedException("Failed to update guild in database.");
-		this.premium = premium;
+	public Mono<GuildMeta> setPremium(boolean premium) {
+		return Database.set("UPDATE guild SET premium=? WHERE id=?;", premium, guild.getId().asLong())
+				.then(Caches.getGuild(guild));
 	}
 
 	public boolean isNewGuild() {
 		return newGuild;
 	}
 
-	public void setNewGuild(boolean newGuild) {
-		if (!Database.set("UPDATE guild SET newguild=? WHERE id=?;", newGuild, guild.getId().asLong()))
-			throw new UpdateFailedException("Failed to update guild in database.");
-		this.newGuild = newGuild;
+	public Mono<GuildMeta> setNewGuild(boolean newGuild) {
+		return Database.set("UPDATE guild SET newguild=? WHERE id=?;", newGuild, guild.getId().asLong())
+				.then(Caches.getGuild(guild));
 	}
 
 	public boolean hasCustomPermissions() {
 		return permissions;
 	}
 
-	public void setCustomPermissions(boolean permissions) {
-		if (!Database.set("UPDATE guild SET permission=? WHERE id=?", permissions, guild.getId().asLong()))
-			throw new UpdateFailedException("Failed to update guild in database.");
-		this.permissions = permissions;
+	public Mono<GuildMeta> setCustomPermissions(boolean permissions) {
+		return Database.set("UPDATE guild SET permission=? WHERE id=?", permissions, guild.getId().asLong())
+				.then(Caches.getGuild(guild));
 	}
 
 	public boolean isWelcomeEnabled() {
 		return welcomeEnabled;
 	}
-	
-	public boolean toggleWelcomeEnabled() {
-		if (!Database.set("UPDATE guild SET welcomeEnabled=? WHERE id=?", !welcomeEnabled, guild.getId().asLong()))
-			throw new UpdateFailedException("Failed to update guild in database.");
-		return welcomeEnabled = !welcomeEnabled;
+
+	public Mono<GuildMeta> toggleWelcomeEnabled() {
+		return Database.set("UPDATE guild SET welcomeEnabled=? WHERE id=?", !welcomeEnabled, guild.getId().asLong())
+				.then(Caches.getGuild(guild));
 	}
 
 	public boolean isWelcomeEmbed() {
 		return welcomeEmbed;
 	}
-	
-	public boolean toggleWelcomeEmbed() {
-		if (!Database.set("UPDATE guild SET welcomeEmbed=? WHERE id=?", !welcomeEmbed, guild.getId().asLong()))
-			throw new UpdateFailedException("Failed to update guild in database.");
-		return welcomeEmbed = !welcomeEmbed;
+
+	public Mono<GuildMeta> toggleWelcomeEmbed() {
+		return Database.set("UPDATE guild SET welcomeEmbed=? WHERE id=?", !welcomeEmbed, guild.getId().asLong())
+				.then(Caches.getGuild(guild));
 	}
 }

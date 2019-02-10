@@ -1,13 +1,12 @@
 package com.winter.mayawinterfox.data.profile;
 
 import com.madgag.gif.fmsware.AnimatedGifEncoder;
-import com.winter.mayawinterfox.data.Database;
 import com.winter.mayawinterfox.data.animal.Wolf;
 import com.winter.mayawinterfox.data.cache.Caches;
 import com.winter.mayawinterfox.data.cache.meta.UserMeta;
 import com.winter.mayawinterfox.exceptions.ErrorHandler;
 import com.winter.mayawinterfox.util.ImageUtil;
-import discord4j.core.object.entity.Member;
+import discord4j.core.object.entity.User;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -25,8 +24,8 @@ public class Profile {
 
 	private UserMeta user;
 
-	public Profile(Member user) {
-		this.user = Caches.getUser(user);
+	public Profile(User user) {
+		this.user = Caches.getUser(user).block();
 	}
 
 	public Profile(UserMeta user) {
@@ -102,7 +101,8 @@ public class Profile {
 			g.drawString("$" + user.getCoins(), 63, 165);
 
 			try {
-				g.drawString("#" + (long) Database.get("SELECT RANK() OVER (PARTITION BY level ORDER BY level DESC) AS rank FROM user ORDER BY rank DESC;").get(0).get("rank"), 63, 213);
+				//g.drawString("#" + (long) Database.get("SELECT RANK() OVER (PARTITION BY level ORDER BY level DESC) AS rank FROM user ORDER BY rank DESC;").get(0).get("rank"), 63, 213);
+				// TODO
 			} catch (Exception ex) {
 				ErrorHandler.log(ex, "rank-getting");
 			}
@@ -202,7 +202,8 @@ public class Profile {
 			g.drawString("$" + user.getCoins(), 63, 165);
 
 			try {
-				g.drawString("#" + (long) Database.get("SELECT ROW_NUMBER() OVER (ORDER BY level DESC) AS rank FROM user;").get(0).get("rank"), 63, 213);
+				//g.drawString("#" + (long) Database.get("SELECT ROW_NUMBER() OVER (ORDER BY level DESC) AS rank FROM user;").get(0).get("rank"), 63, 213);
+				// TODO
 			} catch (Exception e) {
 				ErrorHandler.log(e, "rank-getting");
 			}

@@ -7,9 +7,10 @@ import com.winter.mayawinterfox.data.cache.meta.GuildMeta;
 import com.winter.mayawinterfox.data.cache.meta.UserMeta;
 import com.winter.mayawinterfox.data.schedule.Cooldowns;
 import com.winter.mayawinterfox.exceptions.ErrorHandler;
-import com.winter.mayawinterfox.util.*;
-import discord4j.core.DiscordClient;
-import discord4j.core.event.EventDispatcher;
+import com.winter.mayawinterfox.util.ColorUtil;
+import com.winter.mayawinterfox.util.EmbedUtil;
+import com.winter.mayawinterfox.util.GuildUtil;
+import com.winter.mayawinterfox.util.MessageUtil;
 import discord4j.core.event.domain.channel.VoiceChannelUpdateEvent;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
 import discord4j.core.event.domain.guild.GuildDeleteEvent;
@@ -22,29 +23,38 @@ import discord4j.core.object.presence.Activity;
 import discord4j.core.object.presence.Presence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Mono;
 
+import java.time.Instant;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class EventListener {
-	
+
 	private final Logger LOGGER = LoggerFactory.getLogger(EventListener.class);
 
-	public EventListener(DiscordClient client) {
-		EventDispatcher dispatch = client.getEventDispatcher();
-		dispatch.on(ReconnectEvent.class).subscribe(this::onReconnect);
-		dispatch.on(GuildCreateEvent.class).subscribe(this::onGuildCreated);
-		dispatch.on(GuildDeleteEvent.class).subscribe(this::onGuildDeleted);
-		dispatch.on(MessageCreateEvent.class).subscribe(this::onMessageReceived);
-		dispatch.on(MemberJoinEvent.class).subscribe(this::onUserJoined);
+	static Mono<Void> onUserJoined(MemberJoinEvent e) {
+		Mono<GuildMeta> meta = e.getGuild().flatMap(Caches::getGuild);
+		Mono<TextChannel> channel = meta.map(GuildMeta::getWelcomeChannel);
+		Mono<String> message = meta.map(m -> m.getWelcome(e.getMember()));
+
+		return meta.filter(GuildMeta::isWelcomeEnabled)
+				.flatMap(v -> meta.filter(GuildMeta::isWelcomeEmbed)
+						.flatMap(send -> Mono.zip(channel, message)
+								.map(aa -> MessageUtil.sendMessage(aa.getT1(), spec -> spec
+										.setDescription(aa.getT2())
+										.setColor(ColorUtil.withinTwoHues(0.333f, 0.888f))
+										.setTimestamp(Instant.now()))))
+						.switchIfEmpty(Mono.zip(channel, message, MessageUtil::sendRawMessage)))
+				.then();
 	}
 
-	private void onReconnect(ReconnectEvent e) {
+	public void onReconnect(ReconnectEvent e) {
 		e.getClient().updatePresence(Presence.online(Activity.playing(".mayahelp | .mayainvite"))).block();
 	}
 
-	private void onUserLeftVoice(VoiceChannelUpdateEvent e) {
+	public void onUserLeftVoice(VoiceChannelUpdateEvent e) {
 		/*try {
 			Commands.THREAD_POOL.submit(() -> {
 				Guild guild = e.getCurrent().getGuild().block();
@@ -66,10 +76,10 @@ public class EventListener {
 		}*/
 	}
 
-	private void onGuildCreated(GuildCreateEvent e) {
+	public void onGuildCreated(GuildCreateEvent e) {
 		try {
 			Commands.THREAD_POOL.submit(() -> {
-				GuildMeta guild = Caches.getGuild(e.getGuild());
+				GuildMeta guild = Caches.getGuild(e.getGuild()).block();
 				if (guild.isNewGuild()) {
 					TextChannel channel = GuildUtil.getFirstChannel(e.getGuild());
 					if (channel != null) {
@@ -88,16 +98,16 @@ public class EventListener {
 		}
 	}
 
-	private void onGuildDeleted(GuildDeleteEvent e) {
+	public void onGuildDeleted(GuildDeleteEvent e) {
 		LOGGER.info("Lost a guild! Currently in " + e.getClient().getGuilds().collectList().block().size() + " guilds!");
 		Database.set("UPDATE guild SET newguild=TRUE WHERE id=?;", e.getGuild().get().getId().asLong());
 	}
 
-	private void onMessageReceived(MessageCreateEvent e) {
+	public void onMessageReceived(MessageCreateEvent e) {
 		if (e.getMessage().getChannel().block() instanceof GuildChannel && !e.getMember().get().isBot()) {
 			try {
 				Commands.THREAD_POOL.submit(() -> {
-					UserMeta user = Caches.getUser(e.getMember().get());
+					UserMeta user = Caches.getUser(e.getMember().get()).block();
 					if (!Cooldowns.onCooldown(e.getMember().get(), "message-xp")) {
 						Cooldowns.putOnCooldown(e.getMember().get(), "message-xp", 120000);
 						if ((user.getXP() + 30) >= user.getMaxXP()) {
@@ -119,32 +129,6 @@ public class EventListener {
 			} catch (ExecutionException ex) {
 				ErrorHandler.log(ex, "thread-execution");
 			}
-		}
-	}
-
-	private void onUserJoined(MemberJoinEvent e) {
-		try {
-			Commands.THREAD_POOL.submit(() -> {
-				GuildMeta guild = Caches.getGuild(e.getGuild().block());
-				if (guild.isWelcomeEnabled() && guild.getWelcomeChannel() != null && guild.getWelcome() != null && !guild.getWelcome().equals("")) {
-					String message = guild.getWelcome()
-					                      .replace("[user]", e.getMember().getDisplayName())
-					                      .replace("[mention]", e.getMember().getMention())
-					                      .replace("[server]", e.getGuild().block().getName());
-					if (guild.isWelcomeEmbed())
-						MessageUtil.sendMessage(guild.getWelcomeChannel(), embed -> embed.setColor(ColorUtil.withinTwoHues(0.3333f, 0.8888f))
-						                                                                     .setDescription(message)
-						                                                                     .setTimestamp(e.getMember().getJoinTime()));
-					else
-						MessageUtil.sendRawMessage(guild.getWelcomeChannel(), message);
-				}
-			}).get(15, TimeUnit.SECONDS);
-		} catch (TimeoutException ex) {
-			ErrorHandler.log(ex, "thread-timeout");
-		} catch (InterruptedException ex) {
-			ErrorHandler.log(ex, "thread-interrupted");
-		} catch (ExecutionException ex) {
-			ErrorHandler.log(ex, "thread-execution");
 		}
 	}
 }

@@ -9,7 +9,6 @@ import com.winter.mayawinterfox.data.dialog.impl.ChannelDialog;
 import com.winter.mayawinterfox.data.dialog.impl.InputDialog;
 import com.winter.mayawinterfox.util.MessageUtil;
 import com.winter.mayawinterfox.util.ParsingUtil;
-import discord4j.core.object.entity.MessageChannel;
 import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.util.Permission;
 
@@ -24,7 +23,7 @@ public class CommandWelcome extends Node<Command> {
 				"welcome-help",
 				PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 				e -> {
-					GuildMeta guild = Caches.getGuild(e.getGuild().block());
+					GuildMeta guild = Caches.getGuild(e.getGuild().block()).block();
 					MessageUtil.sendMessage(e.getMessage().getChannel().block(), "welcome-message", guild.getWelcome(), guild.isWelcomeEnabled() ? "ENABLED" : "DISABLED", guild.getWelcomeChannel() != null ? guild.getWelcomeChannel().getMention() : "NOT SET");
 					return true;
 				}
@@ -42,8 +41,8 @@ public class CommandWelcome extends Node<Command> {
 							if (welcome == null)
 								return false;
 
-							Caches.getGuild(e.getGuild().block())
-							      .setWelcome(welcome);
+							Caches.getGuild(e.getGuild().block()).block()
+									.setWelcome(welcome).block();
 							MessageUtil.sendMessage(e.getMessage().getChannel().block(), "welcome-set", welcome);
 							return true;
 						}
@@ -62,8 +61,8 @@ public class CommandWelcome extends Node<Command> {
 								channel = new ChannelDialog((TextChannel) e.getMessage().getChannel().block(), e.getMember().get()).open();
 							if (channel == null)
 								return false;
-							
-							Caches.getGuild(e.getGuild().block()).setWelcomeChannel(channel);
+
+							Caches.getGuild(e.getGuild().block()).block().setWelcomeChannel(channel).block();
 							MessageUtil.sendMessage(e.getMessage().getChannel().block(), "welcome-channel-set", channel.getMention());
 							return true;
 						}
@@ -73,7 +72,7 @@ public class CommandWelcome extends Node<Command> {
 						"welcome-toggle-help",
 						PermissionChecks.hasPermission(Permission.MANAGE_GUILD),
 						e -> {
-							boolean enabled = Caches.getGuild(e.getGuild().block()).toggleWelcomeEnabled();
+							boolean enabled = Caches.getGuild(e.getGuild().block()).block().toggleWelcomeEnabled().block().isWelcomeEnabled();
 							if (enabled)
 								MessageUtil.sendMessage(e.getMessage().getChannel().block(), "welcome-enabled");
 							else
@@ -86,7 +85,7 @@ public class CommandWelcome extends Node<Command> {
 						"welcome-embed-help",
 						PermissionChecks.hasPermission(Permission.MANAGE_GUILD),
 						e -> {
-							boolean enabled = Caches.getGuild(e.getGuild().block()).toggleWelcomeEmbed();
+							boolean enabled = Caches.getGuild(e.getGuild().block()).block().toggleWelcomeEmbed().block().isWelcomeEnabled();
 							if (enabled)
 								MessageUtil.sendMessage(e.getMessage().getChannel().block(), "embed-enabled");
 							else

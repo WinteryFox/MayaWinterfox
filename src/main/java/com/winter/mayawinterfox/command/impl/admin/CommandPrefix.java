@@ -26,7 +26,7 @@ public class CommandPrefix extends Node<Command> {
 				"prefix-help",
 				PermissionChecks.hasPermission(Permission.SEND_MESSAGES),
 				e -> {
-					MessageUtil.sendMessage(e.getMessage().getChannel().block(), "prefixes", Arrays.toString(Caches.getGuild(e.getGuild().block()).getPrefixes().toArray()).replace("[", "").replace("]", ""));
+					MessageUtil.sendMessage(e.getMessage().getChannel().block(), "prefixes", Arrays.toString(Caches.getGuild(e.getGuild().block()).block().getPrefixes().toArray()).replace("[", "").replace("]", ""));
 					return true;
 				}
 		), Arrays.asList(
@@ -50,7 +50,7 @@ public class CommandPrefix extends Node<Command> {
 									return false;
 								if (prefix.equalsIgnoreCase(Main.config.get(Main.ConfigValue.PREFIX)))
 									throw new UpdateFailedException(Localisation.getMessage(e.getGuild().block(), "default-prefix"));
-								GuildMeta guild = Caches.getGuild(e.getGuild().block());
+								GuildMeta guild = Caches.getGuild(e.getGuild().block()).block();
 								if (GuildUtil.hasPrefixesLeft(e.getGuild().block(), e.getMember().get())) {
 									guild.addPrefix(prefix);
 									MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "added-prefix", prefix));
@@ -87,7 +87,7 @@ public class CommandPrefix extends Node<Command> {
 									return false;
 								if (prefix.equalsIgnoreCase(Main.config.get(Main.ConfigValue.PREFIX)))
 									throw new UpdateFailedException(Localisation.getMessage(e.getGuild().block(), "default-prefix"));
-								GuildMeta guild = Caches.getGuild(e.getGuild().block());
+								GuildMeta guild = Caches.getGuild(e.getGuild().block()).block();
 								guild.removePrefix(prefix);
 								MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.successEmbed(e.getGuild().block(), "removed-prefix", prefix));
 							} catch (UpdateFailedException ex) {

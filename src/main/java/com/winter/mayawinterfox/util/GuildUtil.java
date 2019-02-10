@@ -28,7 +28,7 @@ public class GuildUtil {
 	}
 
 	public static boolean isPremium(Member user) {
-		return Caches.getGuild(user.getGuild().block()).isPremium() || Caches.getUser(user).isPremium();
+		return Caches.getGuild(user.getGuild().block()).block().isPremium() || Caches.getUser(user).block().isPremium();
 	}
 
 	/**
@@ -65,8 +65,8 @@ public class GuildUtil {
 	 * @return True if there is still space and false if there is not
 	 */
 	public static boolean hasQueueSpaceLeft(Member user) {
-		GuildMeta g = Caches.getGuild(user.getGuild().block());
-		UserMeta u = Caches.getUser(user);
+		GuildMeta g = Caches.getGuild(user.getGuild().block()).block();
+		UserMeta u = Caches.getUser(user).block();
 		//GuildMusicManager m = MusicUtils.getGuildMusicManager(user.getGuild().block());
 		//return g.isPremium() || u.isPremium() ? m.getScheduler().getQueueSize() < Integer.parseUnsignedInt(Main.config.get(Main.ConfigValue.MAX_SONG_QUEUE_PREMIUM)) : m.getScheduler().getQueueSize() < Integer.parseUnsignedInt(Main.config.get(Main.ConfigValue.MAX_SONG_QUEUE));
 		return true;
@@ -93,8 +93,8 @@ public class GuildUtil {
 	 * @return True if they have prefixes left and false if they don't
 	 */
 	public static boolean hasPrefixesLeft(Guild guild, User user) {
-		GuildMeta g = Caches.getGuild(guild);
-		UserMeta u = Caches.getUser(user);
+		GuildMeta g = Caches.getGuild(guild).block();
+		UserMeta u = Caches.getUser(user).block();
 		return g.isPremium() || u.isPremium() ? g.getPrefixes().size() < Integer.parseUnsignedInt(Main.config.get(Main.ConfigValue.MAX_PREFIXES_PREMIUM)) : g.getPrefixes().size() < Integer.parseUnsignedInt(Main.config.get(Main.ConfigValue.MAX_PREFIXES));
 	}
 

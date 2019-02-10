@@ -10,9 +10,9 @@ import com.winter.mayawinterfox.data.item.Inventory;
 import com.winter.mayawinterfox.data.item.Item;
 import com.winter.mayawinterfox.data.item.ItemProvider;
 import com.winter.mayawinterfox.exceptions.ErrorHandler;
-import com.winter.mayawinterfox.exceptions.impl.UpdateFailedException;
 import com.winter.mayawinterfox.util.ImageUtil;
 import discord4j.core.object.entity.User;
+import reactor.core.publisher.Mono;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -29,35 +29,34 @@ public class Wolf {
 
 	private final long hungerLossRate = 2700000L;
 
-	private User user;
-	private String name;
-	private State state;
-	private int level;
-	private int happiness;
-	private int energy;
-	private int xp;
-	private int maxXp;
-	private int hunger;
-	private int fedTimes;
-	private long lastFedTime;
-	private Inventory inventory;
-	private Item background;
-	private Item hat;
-	private Item body;
-	private Item paws;
-	private Item tail;
-	private Item shirt;
-	private Item nose;
-	private Item eye;
-	private Item neck;
+	private final User user;
+	private final String name;
+	private final State state;
+	private final int level;
+	private final int happiness;
+	private final int energy;
+	private final int xp;
+	private final int maxXp;
+	private final int hunger;
+	private final int fedTimes;
+	private final long lastFedTime;
+	private final Inventory inventory;
+	private final Item background;
+	private final Item hat;
+	private final Item body;
+	private final Item paws;
+	private final Item tail;
+	private final Item shirt;
+	private final Item nose;
+	private final Item eye;
+	private final Item neck;
 
 	public Wolf(User user) {
 		this.user = user;
-		List<Row> stats = Database.get("SELECT * FROM wolf WHERE id=?;", user.getId().asLong());
-		if (stats.size() == 0) {
-			Database.set("INSERT IGNORE INTO wolf (id) VALUES (?);", user.getId().asLong());
-			stats = Database.get("SELECT * FROM wolf WHERE id=?;", user.getId().asLong());
-		}
+		var stats = Database.get("SELECT * FROM wolf WHERE id=?;", user.getId().asLong())
+				.map(Row::getColumns)
+				.collectList()
+				.block();
 		this.name = (String) stats.get(0).get("name");
 		this.level = (int) stats.get(0).get("level");
 		this.state = State.values()[(int) stats.get(0).get("state")];
@@ -68,7 +67,7 @@ public class Wolf {
 		this.hunger = (int) stats.get(0).get("hunger");
 		this.lastFedTime = (long) stats.get(0).get("lastfedtime");
 		this.fedTimes = (int) stats.get(0).get("fedtimes");
-		this.inventory = new Inventory(user);
+		this.inventory = Inventory.create(user).block();
 		this.background = ItemProvider.getItemById((int) stats.get(0).get("background"));
 		this.hat = ItemProvider.getItemById((int) stats.get(0).get("hat"));
 		this.body = ItemProvider.getItemById((int) stats.get(0).get("body"));
@@ -95,15 +94,15 @@ public class Wolf {
 	public void feed(Food food) {
 		setHunger(hunger + food.getValue());
 		setLastFedTime(System.currentTimeMillis());
-		setXp(xp += food.getValue());
+		setXp(xp + food.getValue());
 		if (xp >= maxXp) {
 			setXp(0);
 			setMaxXp((level - 1) * 60 + 200);
 			setLevel(level + 1);
 		}
 		setFedTimes(fedTimes + 1);
-		UserMeta u = Caches.getUser(user);
-		u.setCoins(u.getCoins() + 50);
+		UserMeta u = Caches.getUser(user).block();
+		u.setCoins(u.getCoins() + 50).block();
 	}
 
 	public void play() {
@@ -118,107 +117,98 @@ public class Wolf {
 		return name;
 	}
 
-	public synchronized void setName(String name) {
-		if (!Database.set("UPDATE wolf SET name = ? WHERE id = ?", name, user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update animal metadata.");
-		this.name = name;
+	public Mono<Wolf> setName(String name) {
+		return Database.set("UPDATE wolf SET name = ? WHERE id = ?", name, user.getId().asLong())
+				.thenReturn(new Wolf(user));
 	}
 
 	public int getLevel() {
 		return level;
 	}
 
-	public synchronized void setLevel(int level) {
-		if (!Database.set("UPDATE wolf SET level = ? WHERE id = ?", level, user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update animal metadata.");
-		this.level = level;
+	public Mono<Wolf> setLevel(int level) {
+		return Database.set("UPDATE wolf SET level = ? WHERE id = ?", level, user.getId().asLong())
+				.thenReturn(new Wolf(user));
 	}
 
-	public synchronized void incrementLevel() {
-		if (!Database.set("UPDATE wolf SET level = ? WHERE id = ?", level + 1, user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update animal metadata.");
-		this.level += 1;
+	public Mono<Wolf> incrementLevel() {
+		return Database.set("UPDATE wolf SET level = ? WHERE id = ?", level + 1, user.getId().asLong())
+				.thenReturn(new Wolf(user));
 	}
 
 	public int getHunger() {
 		return hunger;
 	}
 
-	public synchronized void setHunger(int hunger) {
-		if (!Database.set("UPDATE wolf SET hunger = ? WHERE id = ?", hunger, user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update animal metadata.");
-		this.hunger = hunger;
+	public Mono<Wolf> setHunger(int hunger) {
+		return Database.set("UPDATE wolf SET hunger = ? WHERE id = ?", hunger, user.getId().asLong())
+				.thenReturn(new Wolf(user));
 	}
 
 	public long getLastFedTime() {
 		return lastFedTime;
 	}
 
-	public synchronized void setLastFedTime(long lastFedTime) {
-		if (!Database.set("UPDATE wolf SET lastfedtime = ? WHERE id = ?", lastFedTime, user.getId().asLong())) ;
+	public Mono<Wolf> setLastFedTime(long lastFedTime) {
+		return Database.set("UPDATE wolf SET lastfedtime = ? WHERE id = ?", lastFedTime, user.getId().asLong())
+				.thenReturn(new Wolf(user));
 	}
 
 	public State getState() {
 		return state;
 	}
 
-	public synchronized void setState(State state) {
-		if (!Database.set("UPDATE wolf SET state = ? WHERE id = ?", state.ordinal(), user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update animal metadata.");
-		this.state = state;
+	public Mono<Wolf> setState(State state) {
+		return Database.set("UPDATE wolf SET state = ? WHERE id = ?", state.ordinal(), user.getId().asLong())
+				.thenReturn(new Wolf(user));
 	}
 
 	public int getHappiness() {
 		return happiness;
 	}
 
-	public synchronized void setHappiness(int happiness) {
-		if (!Database.set("UPDATE wolf SET happiness = ? WHERE id = ?", happiness, user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update animal metadata.");
-		this.happiness = happiness;
+	public Mono<Wolf> setHappiness(int happiness) {
+		return Database.set("UPDATE wolf SET happiness = ? WHERE id = ?", happiness, user.getId().asLong())
+				.thenReturn(new Wolf(user));
 	}
 
 	public int getEnergy() {
 		return energy;
 	}
 
-	public synchronized void setEnergy(int energy) {
-		if (!Database.set("UPDATE wolf SET energy = ? WHERE id = ?", energy, user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update animal metadata.");
-		this.energy = energy;
+	public Mono<Wolf> setEnergy(int energy) {
+		return Database.set("UPDATE wolf SET energy = ? WHERE id = ?", energy, user.getId().asLong())
+				.thenReturn(new Wolf(user));
 	}
 
 	public int getXP() {
 		return xp;
 	}
 
-	public synchronized void setXp(int xp) {
-		if (!Database.set("UPDATE wolf SET xp = ? WHERE id = ?", xp, user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update animal metadata.");
-		this.xp = xp;
+	public Mono<Wolf> setXp(int xp) {
+		return Database.set("UPDATE wolf SET xp = ? WHERE id = ?", xp, user.getId().asLong())
+				.thenReturn(new Wolf(user));
 	}
 
 	public int getMaxXP() {
 		return maxXp;
 	}
 
-	public synchronized void setMaxXp(int maxXp) {
-		if (!Database.set("UPDATE wolf SET maxXp = ? WHERE id = ?", maxXp, user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update animal metadata.");
-		this.maxXp = maxXp;
+	public Mono<Wolf> setMaxXp(int maxXp) {
+		return Database.set("UPDATE wolf SET maxXp = ? WHERE id = ?", maxXp, user.getId().asLong())
+				.thenReturn(new Wolf(user));
 	}
 
 	public int getFedTimes() {
 		return fedTimes;
 	}
 
-	public synchronized void setFedTimes(int fedTimes) {
-		if (!Database.set("UPDATE wolf SET fedtimes = ? WHERE id = ?", fedTimes, user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update animal metadata.");
-		this.fedTimes = fedTimes;
+	public Mono<Wolf> setFedTimes(int fedTimes) {
+		return Database.set("UPDATE wolf SET fedtimes = ? WHERE id = ?", fedTimes, user.getId().asLong())
+				.thenReturn(new Wolf(user));
 	}
 
-	public synchronized void equip(Item item) {
+	public void equip(Item item) {
 		switch (item.getType()) {
 			case BACKGROUND:
 				setBackground(item);
@@ -258,93 +248,84 @@ public class Wolf {
 		return background;
 	}
 
-	public synchronized void setBackground(Item background) {
-		if (!Database.set("UPDATE wolf SET background = ? WHERE id = ?", background.getId(), user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update animal metadata.");
-		this.background = background;
+	public Mono<Wolf> setBackground(Item background) {
+		return Database.set("UPDATE wolf SET background = ? WHERE id = ?", background.getId(), user.getId().asLong())
+				.thenReturn(new Wolf(user));
 	}
 
 	public Item getHat() {
 		return hat;
 	}
 
-	public synchronized void setHat(Item hat) {
-		if (!Database.set("UPDATE wolf SET hat = ? WHERE id = ?", hat.getId(), user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update animal metadata.");
-		this.hat = hat;
+	public Mono<Wolf> setHat(Item hat) {
+		return Database.set("UPDATE wolf SET hat = ? WHERE id = ?", hat.getId(), user.getId().asLong())
+				.thenReturn(new Wolf(user));
 	}
 
 	public Item getBody() {
 		return body;
 	}
 
-	public synchronized void setBody(Item body) {
-		if (!Database.set("UPDATE wolf SET body = ? WHERE id = ?", body.getId(), user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update animal metadata.");
-		this.body = body;
+	public Mono<Wolf> setBody(Item body) {
+		return Database.set("UPDATE wolf SET body = ? WHERE id = ?", body.getId(), user.getId().asLong())
+				.thenReturn(new Wolf(user));
 	}
 
 	public Item getPaws() {
 		return paws;
 	}
 
-	public synchronized void setPaws(Item paws) {
-		if (!Database.set("UPDATE wolf SET paws = ? WHERE id = ?", paws.getId(), user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update animal metadata.");
-		this.paws = paws;
+	public Mono<Wolf> setPaws(Item paws) {
+		return Database.set("UPDATE wolf SET paws = ? WHERE id = ?", paws.getId(), user.getId().asLong())
+				.thenReturn(new Wolf(user));
 	}
 
 	public Item getTail() {
 		return tail;
 	}
 
-	public synchronized void setTail(Item tail) {
-		if (!Database.set("UPDATE wolf SET tail = ? WHERE id = ?", tail.getId(), user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update animal metadata.");
-		this.tail = tail;
+	public Mono<Wolf> setTail(Item tail) {
+		return Database.set("UPDATE wolf SET tail = ? WHERE id = ?", tail.getId(), user.getId().asLong())
+				.thenReturn(new Wolf(user));
 	}
 
 	public Item getShirt() {
 		return shirt;
 	}
 
-	public synchronized void setShirt(Item shirt) {
-		if (!Database.set("UPDATE wolf SET shirt = ? WHERE id = ?", shirt.getId(), user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update animal metadata.");
-		this.shirt = shirt;
+	public Mono<Wolf> setShirt(Item shirt) {
+		return Database.set("UPDATE wolf SET shirt = ? WHERE id = ?", shirt.getId(), user.getId().asLong())
+				.thenReturn(new Wolf(user));
 	}
 
 	public Item getNose() {
 		return nose;
 	}
 
-	public synchronized void setNose(Item nose) {
-		if (!Database.set("UPDATE wolf SET nose = ? WHERE id = ?", nose.getId(), user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update animal metadata.");
-		this.nose = nose;
+	public Mono<Wolf> setNose(Item nose) {
+		return Database.set("UPDATE wolf SET nose = ? WHERE id = ?", nose.getId(), user.getId().asLong())
+				.thenReturn(new Wolf(user));
 	}
 
 	public Item getEye() {
 		return eye;
 	}
 
-	public synchronized void setEye(Item eye) {
-		if (!Database.set("UPDATE wolf SET eye = ? WHERE id = ?", eye.getId(), user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update animal metadata.");
-		this.eye = eye;
+	public Mono<Wolf> setEye(Item eye) {
+		return Database.set("UPDATE wolf SET eye = ? WHERE id = ?", eye.getId(), user.getId().asLong())
+				.thenReturn(new Wolf(user));
 	}
 
 	public Item getNeck() {
 		return neck;
 	}
 
-	public synchronized void setNeck(Item neck) {
-		if (!Database.set("UPDATE wolf SET neck = ? WHERE id = ?", neck.getId(), user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update animal metadata.");
-		this.neck = neck;
+	public Mono<Wolf> setNeck(Item neck) {
+		return Database.set("UPDATE wolf SET neck = ? WHERE id = ?", neck.getId(), user.getId().asLong())
+				.thenReturn(new Wolf(user));
 	}
 
-	public synchronized InputStream render() {
+	public InputStream render() {
 		final int w = 300;
 		final int h = 150;
 
@@ -383,7 +364,7 @@ public class Wolf {
 	 * @param o The OutputStream to write the image to
 	 * @return ByteArrayOutputStream containing the animal image
 	 */
-	private synchronized ByteArrayOutputStream drawGif(ByteArrayOutputStream o, int w, int h) {
+	private ByteArrayOutputStream drawGif(ByteArrayOutputStream o, int w, int h) {
 		AnimatedGifEncoder encoder = new AnimatedGifEncoder();
 		encoder.start(o);
 		encoder.setRepeat(0);
@@ -420,7 +401,7 @@ public class Wolf {
 	 * Draw the entire animal
 	 * @param g The graphics to draw with
 	 */
-	public synchronized void drawAnimal(Graphics2D g, int x, int y, int w, int h) {
+	public void drawAnimal(Graphics2D g, int x, int y, int w, int h) {
 		BufferedImage template = null;
 		BufferedImage eye1 = null;
 		BufferedImage nose1 = null;
@@ -502,7 +483,7 @@ public class Wolf {
 	 * Draw the animal's profile background
 	 * @param g The graphics to draw with
 	 */
-	private synchronized void drawProfile(Graphics2D g, int w, int h) {
+	private void drawProfile(Graphics2D g, int w, int h) {
 		BufferedImage template = null;
 		try (InputStream stream = Wolf.class.getResourceAsStream("/wolf/template.png")) {
 			template = ImageIO.read(stream);

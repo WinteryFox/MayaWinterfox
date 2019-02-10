@@ -153,7 +153,7 @@ public class EmbedUtil {
 	}
 
 	public static Consumer<EmbedCreateSpec> levelEmbed(User user) {
-		UserMeta u = Caches.getUser(user);
+		UserMeta u = Caches.getUser(user).block();
 		if (u.getBackground().getPath().endsWith(".gif")) {
 			return embed -> embed
 					.setImage("attachment://levelup.gif")
@@ -179,7 +179,7 @@ public class EmbedUtil {
 	}
 
 	public static Consumer<EmbedCreateSpec> profileEmbed(User user) {
-		UserMeta u = Caches.getUser(user);
+		UserMeta u = Caches.getUser(user).block();
 		if (u.getBackground().getPath().endsWith(".gif")) {
 			return embed -> embed
 					.setImage("attachment://profile.gif")

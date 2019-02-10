@@ -21,7 +21,7 @@ public class Localisation {
 	 * @return Returns the 2 letter code for the language
 	 */
 	private static String checkLanguage(Guild guild) {
-		return Caches.getGuild(guild).getLanguage();
+		return Caches.getGuild(guild).block().getLanguage();
 	}
 
 	/**
@@ -56,7 +56,7 @@ public class Localisation {
 	 * @param language The language to update to
 	 */
 	private static void updateGuildLanguage(Guild guild, String language) throws UpdateFailedException {
-		Caches.getGuild(guild).setLanguage(language);
+		Caches.getGuild(guild).block().setLanguage(language);
 	}
 
 	/**

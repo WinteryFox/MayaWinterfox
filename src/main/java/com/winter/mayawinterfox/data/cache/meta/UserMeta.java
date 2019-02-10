@@ -1,25 +1,26 @@
 package com.winter.mayawinterfox.data.cache.meta;
 
 import com.winter.mayawinterfox.data.Database;
+import com.winter.mayawinterfox.data.cache.Caches;
 import com.winter.mayawinterfox.data.item.Item;
-import com.winter.mayawinterfox.exceptions.impl.UpdateFailedException;
 import discord4j.core.object.entity.User;
+import reactor.core.publisher.Mono;
 
 import java.sql.Date;
 
 public class UserMeta {
 	private final User user;
-	private String description;
-	private int level;
-	private int xp;
-	private int maxXP;
-	private long totalXP;
-	private int coins;
-	private int gems;
-	private Item background;
-	private boolean notifications;
-	private boolean premium;
-	private Date premiumExpiry;
+	private final String description;
+	private final int level;
+	private final int xp;
+	private final int maxXP;
+	private final long totalXP;
+	private final int coins;
+	private final int gems;
+	private final Item background;
+	private final boolean notifications;
+	private final boolean premium;
+	private final Date premiumExpiry;
 
 	public UserMeta(User user, String description, int level, int xp, int maxXP, long totalXP, int coins, int gems, Item background, boolean notifications, boolean premium, Date premiumExpiry) {
 		this.user = user;
@@ -44,109 +45,98 @@ public class UserMeta {
 		return description;
 	}
 
-	public synchronized void setDescription(String description) {
-		if (!Database.set("UPDATE user SET description=? WHERE id=?;", description, user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update user in database.");
-		this.description = description;
+	public Mono<UserMeta> setDescription(String description) {
+		return Database.set("UPDATE user SET description=? WHERE id=?;", description, user.getId().asLong())
+				.then(Caches.getUser(user));
 	}
 
 	public int getLevel() {
 		return level;
 	}
 
-	public synchronized void setLevel(int level) {
-		if (!Database.set("UPDATE user SET level=? WHERE id=?;", level, user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update user in database.");
-		this.level = level;
+	public Mono<UserMeta> setLevel(int level) {
+		return Database.set("UPDATE user SET level=? WHERE id=?;", level, user.getId().asLong())
+				.then(Caches.getUser(user));
 	}
 
 	public int getXP() {
 		return xp;
 	}
 
-	public synchronized void setXp(int xp) {
-		if (!Database.set("UPDATE user SET xp=? WHERE id=?;", xp, user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update user in database.");
-		this.xp = xp;
+	public Mono<UserMeta> setXp(int xp) {
+		return Database.set("UPDATE user SET xp=? WHERE id=?;", xp, user.getId().asLong())
+				.then(Caches.getUser(user));
 	}
 
 	public int getMaxXP() {
 		return maxXP;
 	}
 
-	public synchronized void setMaxXP(int maxXP) {
-		if (!Database.set("UPDATE user SET maxxp=? WHERE id=?;", maxXP, user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update user in database.");
-		this.maxXP = maxXP;
+	public Mono<UserMeta> setMaxXP(int maxXP) {
+		return Database.set("UPDATE user SET maxxp=? WHERE id=?;", maxXP, user.getId().asLong())
+				.then(Caches.getUser(user));
 	}
 
 	public long getTotalXP() {
 		return totalXP;
 	}
 
-	public synchronized void setTotalXP(long totalXP) {
-		if (!Database.set("UPDATE user SET totalxp=? WHERE id=?;", totalXP, user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update user in database.");
-		this.totalXP = totalXP;
+	public Mono<UserMeta> setTotalXP(long totalXP) {
+		return Database.set("UPDATE user SET totalxp=? WHERE id=?;", totalXP, user.getId().asLong())
+				.then(Caches.getUser(user));
 	}
 
 	public int getCoins() {
 		return coins;
 	}
 
-	public synchronized void setCoins(int coins) {
-		if (!Database.set("UPDATE user SET coins=? WHERE id=?;", coins, user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update user in database.");
-		this.coins = coins;
+	public Mono<UserMeta> setCoins(int coins) {
+		return Database.set("UPDATE user SET coins=? WHERE id=?;", coins, user.getId().asLong())
+				.then(Caches.getUser(user));
 	}
 
 	public int getGems() {
 		return gems;
 	}
 
-	public synchronized void setGems(int gems) {
-		if (!Database.set("UPDATE user SET gems=? WHERE id=?;", gems, user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update user in database.");
-		this.gems = gems;
+	public Mono<UserMeta> setGems(int gems) {
+		return Database.set("UPDATE user SET gems=? WHERE id=?;", gems, user.getId().asLong())
+				.then(Caches.getUser(user));
 	}
 
 	public Item getBackground() {
 		return background;
 	}
 
-	public synchronized void setBackground(Item background) {
-		if (!Database.set("UPDATE user SET background=? WHERE id=?;", background.getId(), user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update user in database.");
-		this.background = background;
+	public Mono<UserMeta> setBackground(Item background) {
+		return Database.set("UPDATE user SET background=? WHERE id=?;", background.getId(), user.getId().asLong())
+				.then(Caches.getUser(user));
 	}
 
 	public boolean isNotifications() {
 		return notifications;
 	}
 
-	public synchronized void setNotifications(boolean notifications) {
-		if (!Database.set("UPDATE user SET lvlup=? WHERE id=?;", notifications, user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update user in database.");
-		this.notifications = notifications;
+	public Mono<UserMeta> setNotifications(boolean notifications) {
+		return Database.set("UPDATE user SET lvlup=? WHERE id=?;", notifications, user.getId().asLong())
+				.then(Caches.getUser(user));
 	}
 
 	public boolean isPremium() {
 		return premium;
 	}
 
-	public synchronized void setPremium(boolean premium) {
-		if (!Database.set("UPDATE user SET premium=? WHERE id=?;", premium, user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update user in database.");
-		this.premium = premium;
+	public Mono<UserMeta> setPremium(boolean premium) {
+		return Database.set("UPDATE user SET premium=? WHERE id=?;", premium, user.getId().asLong())
+				.then(Caches.getUser(user));
 	}
 
 	public Date getPremiumExpiry() {
 		return premiumExpiry;
 	}
 
-	public synchronized void setPremiumExpiry(Date premiumExpiry) {
-		if (!Database.set("UPDATE user SET premiumexpiry=? WHERE id=?;", premiumExpiry, user.getId().asLong()))
-			throw new UpdateFailedException("Failed to update user in database.");
-		this.premiumExpiry = premiumExpiry;
+	public Mono<UserMeta> setPremiumExpiry(Date premiumExpiry) {
+		return Database.set("UPDATE user SET premiumexpiry=? WHERE id=?;", premiumExpiry, user.getId().asLong())
+				.then(Caches.getUser(user));
 	}
 }

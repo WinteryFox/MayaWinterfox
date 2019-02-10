@@ -2,6 +2,10 @@ package com.winter.mayawinterfox.data;
 
 import com.mysql.cj.jdbc.MysqlConnectionPoolDataSource;
 import com.winter.mayawinterfox.Main;
+import discord4j.core.object.entity.Guild;
+import discord4j.core.object.entity.User;
+import discord4j.core.object.util.Snowflake;
+import org.intellij.lang.annotations.Language;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -27,18 +31,17 @@ public class Database {
 	 * @return true on success, false on failure
 	 */
 	@NotNull
-	public static Mono<Integer> set(String sql, Object... params) {
+	public static Mono<Integer> set(@Language("MariaDB") String sql, Object... params) {
 		return Mono.fromCallable(() -> {
-			try (Connection con = poolingDataSource.getConnection()) {
-				try (PreparedStatement statement = setStatementParams(con.prepareStatement(sql), params)) {
-					return statement.executeUpdate();
-				}
+			try (Connection con = poolingDataSource.getConnection();
+			     PreparedStatement statement = setStatementParams(con.prepareStatement(sql), params)) {
+				return statement.executeUpdate();
 			}
 		});
 	}
 
 	@NotNull
-	public static Flux<Row> get(String sql, Object... params) {
+	public static Flux<Row> get(@Language("MariaDB") String sql, Object... params) {
 		return Flux.create(sink -> {
 			try (Connection con = poolingDataSource.getConnection();
 			     PreparedStatement statement = setStatementParams(con.prepareStatement(sql), params);
@@ -65,7 +68,7 @@ public class Database {
 	 * @param sql The sql to execute
 	 * @return True on success false on failure
 	 */
-	private static boolean executeUnsafe(String sql) {
+	private static boolean executeUnsafe(@Language("MariaDB") String sql) {
 		try (
 				Connection con = poolingDataSource.getConnection();
 				Statement statement = con.createStatement()
@@ -100,6 +103,12 @@ public class Database {
 				statement.setDouble(i + 1, (Double) params[i]);
 			else if (params[i] instanceof Date)
 				statement.setDate(i + 1, (Date) params[i]);
+			else if (params[i] instanceof Snowflake)
+				statement.setLong(i + 1, ((Snowflake) params[i]).asLong());
+			else if (params[i] instanceof Guild)
+				statement.setLong(i + 1, ((Guild) params[i]).getId().asLong());
+			else if (params[i] instanceof User)
+				statement.setLong(i + 1, ((User) params[i]).getId().asLong());
 			else
 				statement.setObject(i + 1, params[i]);
 		}

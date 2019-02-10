@@ -11,20 +11,29 @@ import com.winter.mayawinterfox.util.ColorUtil;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.spec.EmbedCreateSpec;
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.XML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
+import reactor.core.publisher.Flux;
+import reactor.netty.http.client.HttpClient;
 
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Collections;
 import java.util.function.Consumer;
 
 public class HTTPHandler {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(HTTPHandler.class);
 
 	/**
@@ -48,7 +57,7 @@ public class HTTPHandler {
 		pw.put("server_count", Main.getClient().getGuilds().count());
 		pw.put("shard_id", shard);
 		pw.put("shard_count", Main.getClient().getConfig().getShardCount());
-		
+
 		JSONObject org = new JSONObject();
 		//org.put("shards", Main.getClient().get.stream().map(s -> s.getGuilds().size()).toArray());
 
@@ -80,6 +89,32 @@ public class HTTPHandler {
 		} catch (UnirestException e) {
 			ErrorHandler.log(e, "Something went wrong while posting stats to discordbots.org!");
 		}
+	}
+
+	@NotNull
+	public static Flux<Entry> requestRSS() {
+		return HttpClient.create()
+				.headers(h -> h.add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:65.0) Gecko/20100101 Firefox/65.0"))
+				.followRedirect(true)
+				.get()
+				.uri("https://www.reddit.com/r/foxes/.rss")
+				.responseSingle((status, buf) -> buf.asInputStream())
+				.flatMapIterable(stream -> {
+					try {
+						SAXParserFactory factory = SAXParserFactory.newInstance();
+
+						SAXParser parser = factory.newSAXParser();
+						XMLHandler handler = new XMLHandler();
+						parser.parse(stream, handler);
+
+						if (handler.isFeed()) {
+							return handler.getEntries();
+						}
+					} catch (ParserConfigurationException | SAXException | IOException e) {
+						e.printStackTrace();
+					}
+					return Collections.emptyList();
+				});
 	}
 
 	/**

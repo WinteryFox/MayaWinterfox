@@ -1,10 +1,14 @@
 package com.winter.mayawinterfox;
 
+import com.mashape.unirest.http.Unirest;
 import com.winter.mayawinterfox.command.Commands;
 import com.winter.mayawinterfox.data.Database;
+import com.winter.mayawinterfox.data.http.Entry;
+import com.winter.mayawinterfox.data.http.HTTPHandler;
 import com.winter.mayawinterfox.data.item.ItemProvider;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
+import discord4j.core.event.domain.guild.MemberJoinEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +54,6 @@ public class Main {
 		client = b.build();
 
 		new Commands(client);
-		new EventListener(client);
 
 		Database.connect();
 		if (!Database.setup()) {
@@ -62,12 +65,25 @@ public class Main {
 		ItemProvider.loadFoods();
 		ItemProvider.loadItems();
 
+		List<Entry> entries = HTTPHandler.requestRSS().collectList().block();
+		for (Entry entry : entries)
+			System.out.println(entry.getId());
+
 		//musicManagers = new HashMap<>();
 		//playerManager = new DefaultAudioPlayerManager();
 		//AudioSourceManagers.registerRemoteSources(playerManager);
 		//AudioSourceManagers.registerLocalSource(playerManager);
 
-		client.login().block();
+		client.login()
+				.and(client.getEventDispatcher().on(MemberJoinEvent.class).flatMap(EventListener::onUserJoined))
+				.block();
+
+		Unirest.shutdown();
+
+		//dispatch.on(ReconnectEvent.class).subscribe(this::onReconnect);
+		//dispatch.on(GuildCreateEvent.class).subscribe(this::onGuildCreated);
+		//dispatch.on(GuildDeleteEvent.class).subscribe(this::onGuildDeleted);
+		//dispatch.on(MessageCreateEvent.class).subscribe(this::onMessageReceived);
 	}
 
 	/**
