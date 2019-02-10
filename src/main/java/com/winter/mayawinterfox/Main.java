@@ -65,7 +65,7 @@ public class Main {
 		ItemProvider.loadFoods();
 		ItemProvider.loadItems();
 
-		List<Entry> entries = HTTPHandler.requestRSS().collectList().block();
+		List<Entry> entries = HTTPHandler.requestRSS("https://reddit.com/r/foxes/.rss").collectList().block();
 		for (Entry entry : entries)
 			System.out.println(entry.getId());
 

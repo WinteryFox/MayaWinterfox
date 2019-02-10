@@ -92,12 +92,12 @@ public class HTTPHandler {
 	}
 
 	@NotNull
-	public static Flux<Entry> requestRSS() {
+	public static Flux<Entry> requestRSS(String url) {
 		return HttpClient.create()
 				.headers(h -> h.add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:65.0) Gecko/20100101 Firefox/65.0"))
 				.followRedirect(true)
 				.get()
-				.uri("https://www.reddit.com/r/foxes/.rss")
+				.uri(url)
 				.responseSingle((status, buf) -> buf.asInputStream())
 				.flatMapIterable(stream -> {
 					try {
