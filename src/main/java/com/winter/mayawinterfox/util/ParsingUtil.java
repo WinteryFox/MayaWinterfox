@@ -47,7 +47,7 @@ public class ParsingUtil {
 			long id = Long.parseLong(s);
 			return guild.getRoleById(Snowflake.of(id)).block();
 		} else {
-			return guild.getRoles().filter(role -> {return role.getName().equals(s);}).blockFirst();
+			return guild.getRoles().filter(role -> role.getName().equals(s)).blockFirst();
 		}
 	}
 

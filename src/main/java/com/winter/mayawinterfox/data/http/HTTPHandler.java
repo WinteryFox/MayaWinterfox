@@ -40,7 +40,7 @@ public class HTTPHandler {
 	 * Get a random cat image~ Nyan~!
 	 *
 	 * @return URL to the cat image
-	 * @throws UnirestException      Upon failure of the getGuild request
+	 * @throws UnirestException      Upon failure of the get request
 	 * @throws MalformedURLException When the URL is invalid
 	 */
 	public static URL requestCat() throws UnirestException, MalformedURLException {
@@ -59,7 +59,7 @@ public class HTTPHandler {
 		pw.put("shard_count", Main.getClient().getConfig().getShardCount());
 
 		JSONObject org = new JSONObject();
-		//org.put("shards", Main.getClient().get.stream().map(s -> s.getGuilds().size()).toArray());
+		//org.put("shards", Main.getClient().getShards().stream().map(s -> s.getGuilds().size()).toArray());
 
 		try {
 			LOGGER.info("Content: " + pw.toString());
