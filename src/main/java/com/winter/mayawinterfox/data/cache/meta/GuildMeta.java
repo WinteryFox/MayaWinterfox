@@ -3,6 +3,7 @@ package com.winter.mayawinterfox.data.cache.meta;
 import com.winter.mayawinterfox.Main;
 import com.winter.mayawinterfox.data.Database;
 import com.winter.mayawinterfox.data.cache.Caches;
+import com.winter.mayawinterfox.data.http.Feed;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.User;
@@ -17,6 +18,7 @@ public class GuildMeta {
 	private final Guild guild;
 	private final Set<String> prefixes;
 	private final Set<Snowflake> autoroles;
+	private final Set<Feed> feeds;
 	private final TextChannel welcomeChannel;
 	private final String language;
 	private final String welcome;
@@ -31,6 +33,7 @@ public class GuildMeta {
 	public GuildMeta(Guild guild,
 	                 Set<String> prefixes,
 	                 Set<Snowflake> autoroles,
+	                 Set<Feed> feeds,
 	                 TextChannel welcomeChannel,
 	                 String language,
 	                 String welcome,
@@ -44,6 +47,7 @@ public class GuildMeta {
 		this.guild = guild;
 		this.prefixes = prefixes;
 		this.autoroles = autoroles;
+		this.feeds = feeds;
 		this.welcomeChannel = welcomeChannel;
 		this.language = language;
 		this.welcome = welcome;
@@ -177,6 +181,30 @@ public class GuildMeta {
 
 	public Mono<GuildMeta> toggleWelcomeEmbed() {
 		return Database.set("UPDATE guild SET welcomeEmbed=? WHERE id=?", !welcomeEmbed, guild.getId().asLong())
+				.then(Caches.getGuild(guild));
+	}
+
+	public Set<Feed> getFeeds() {
+		return feeds;
+	}
+
+	/**
+	 * Subscribe a guild to a feed
+	 * @param url The url to subscribe to
+	 * @return The guild object
+	 */
+	public Mono<GuildMeta> addFeed(String url) {
+		return Database.set("INSERT IGNORE INTO rss (feed, guild) VALUES (?, ?)", url, guild)
+				.then(Caches.getGuild(guild));
+	}
+
+	/**
+	 * Unsubscribe a guild from a feed
+	 * @param url The url to unsubscribe from
+	 * @return The guild object
+	 */
+	public Mono<GuildMeta> removeFeed(String url) {
+		return Database.set("DELETE FROM rss WHERE feed=? AND guild=?", url, guild)
 				.then(Caches.getGuild(guild));
 	}
 }

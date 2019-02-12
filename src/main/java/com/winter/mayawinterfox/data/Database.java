@@ -211,6 +211,10 @@ public class Database {
 						executeUnsafe("CREATE TABLE IF NOT EXISTS permission(" +
 								"id BIGINT NOT NULL," +
 								"permission VARCHAR(128)," +
-								"PRIMARY KEY(id, permission));"));
+								"PRIMARY KEY(id, permission));")) &&
+				executeUnsafe("CREATE TABLE IF NOT EXISTS rss(" +
+						"feed TEXT PRIMARY KEY NOT NULL," +
+						"guild BIGINT NOT NULL," +
+						"channel BIGINT NOT NULL);");
 	}
 }

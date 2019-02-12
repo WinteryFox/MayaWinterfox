@@ -51,7 +51,7 @@ public class Commands {
 		COMMAND_MAP.put(Category.DEV, new ArrayList<>(Arrays.asList(/*new CommandSet()*/)));
 		COMMAND_MAP.put(Category.STATUS, new ArrayList<>(Arrays.asList(new CommandPing(), new CommandHi())));
 		COMMAND_MAP.put(Category.FUN, new ArrayList<>(Arrays.asList(new CommandColor(), new CommandCoinFlip(), new CommandEightball(), new CommandHug(), /*new CommandKiss(), new CommandPat(),*/ new CommandCookie(), new CommandKawaii(), new CommandPornstar(), new CommandRate(), new CommandShoot(), new CommandWoop(), new CommandSay(), new CommandUrban(), new CommandSilentSay(), new CommandAnime())));
-		COMMAND_MAP.put(Category.ADMIN, new ArrayList<>(Arrays.asList(new CommandKick(), new CommandBan(), new CommandPrefix(), new CommandPurge(), new CommandAssign(), new CommandRemove(), new CommandLanguage() /*new CommandPermission()*/, new CommandWelcome())));
+		COMMAND_MAP.put(Category.ADMIN, new ArrayList<>(Arrays.asList(new CommandRSS(), new CommandKick(), new CommandBan(), new CommandPrefix(), new CommandPurge(), new CommandAssign(), new CommandRemove(), new CommandLanguage() /*new CommandPermission()*/, new CommandWelcome())));
 		COMMAND_MAP.put(Category.ANIMAL, new ArrayList<>(Arrays.asList(new CommandWolf(), new CommandInventory())));
 		COMMAND_MAP.put(Category.PROFILE, new ArrayList<>(Arrays.asList(new CommandProfile())));
 		COMMAND_MAP.put(Category.MISC, new ArrayList<>(Arrays.asList(new CommandLinks(), new CommandInvite())));
@@ -201,7 +201,7 @@ public class Commands {
 								}
 							}
 						} catch (Exception ex) {
-							ErrorHandler.log(ex, (MessageChannel) e.getMessage().getChannel().block());
+							ErrorHandler.log(ex, e.getMessage().getChannel().block());
 						}
 					}).get(120, TimeUnit.SECONDS);
 				} catch (TimeoutException ex) {

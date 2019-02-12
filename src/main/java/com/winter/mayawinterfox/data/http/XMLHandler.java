@@ -11,7 +11,7 @@ public class XMLHandler extends DefaultHandler {
 	private List<Entry> entries = new ArrayList<>();
 	private Entry entry = new Entry();
 	private StringBuilder data;
-	private boolean feed;
+	private boolean feed = false;
 	private boolean author = false;
 	private boolean category = false;
 	private boolean content = false;

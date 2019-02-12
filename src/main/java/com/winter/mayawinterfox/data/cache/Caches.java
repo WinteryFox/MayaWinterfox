@@ -4,6 +4,7 @@ import com.winter.mayawinterfox.data.Database;
 import com.winter.mayawinterfox.data.Row;
 import com.winter.mayawinterfox.data.cache.meta.GuildMeta;
 import com.winter.mayawinterfox.data.cache.meta.UserMeta;
+import com.winter.mayawinterfox.data.http.Feed;
 import com.winter.mayawinterfox.data.item.ItemProvider;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.TextChannel;
@@ -24,26 +25,33 @@ public class Caches {
 	 * @return The guild meta for the guild implementation
 	 */
 	public static Mono<GuildMeta> getGuild(@NotNull Guild guild) {
-		var settings = Database.get("SELECT * FROM guild WHERE id=?", guild.getId().asLong())
+		final var settings = Database.get("SELECT * FROM guild WHERE id=?", guild.getId().asLong())
 				.next()
 				.map(Row::getColumns);
-		var prefixes = Database.get("SELECT * FROM prefixes WHERE id=?", guild.getId().asLong())
+		final var prefixes = Database.get("SELECT * FROM prefixes WHERE id=?", guild.getId().asLong())
 				.map(v -> (String) v.get("prefix"))
 				.collect(Collectors.toSet());
-		var autoroles = Database.get("SELECT * FROM autoroles WHERE id=?", guild.getId().asLong())
+		final var autoroles = Database.get("SELECT * FROM autoroles WHERE id=?", guild.getId().asLong())
 				.map(v -> Snowflake.of((Long) v.get("role")))
 				.collect(Collectors.toSet());
-		return Mono.zip(settings, prefixes, autoroles)
+		final var feeds = Database.get("SELECT * FROM rss WHERE guild=?", guild)
+				.map(v -> {
+					return new Feed((String) v.get("feed"), Snowflake.of((Long) v.get("channel")), Snowflake.of((Long) v.get("guild")));
+				})
+				.collect(Collectors.toSet());
+		return Mono.zip(settings, prefixes, autoroles, feeds)
 				.zipWhen(v -> guild.getChannelById(Snowflake.of((Long) v.getT1().get("welcomeChannel"))).ofType(TextChannel.class))
 				.map(v -> {
 					var o = v.getT1();
 					var s = o.getT1();
 					var p = o.getT2();
 					var r = o.getT3();
+					var f = o.getT4();
 					var c = v.getT2();
 					return new GuildMeta(guild,
 							p,
 							r,
+							f,
 							c,
 							(String) s.get("language"),
 							(String) s.get("welcome"),
