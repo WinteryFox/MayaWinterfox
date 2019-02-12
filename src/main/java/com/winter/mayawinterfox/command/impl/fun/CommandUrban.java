@@ -4,7 +4,6 @@ import com.winter.mayawinterfox.checks.PermissionChecks;
 import com.winter.mayawinterfox.command.Command;
 import com.winter.mayawinterfox.data.Node;
 import com.winter.mayawinterfox.data.dialog.impl.InputDialog;
-import com.winter.mayawinterfox.data.http.HTTPHandler;
 import com.winter.mayawinterfox.exceptions.ErrorHandler;
 import com.winter.mayawinterfox.util.MessageUtil;
 import discord4j.core.object.util.Permission;
@@ -28,7 +27,7 @@ public class CommandUrban extends Node<Command> {
 					if (q == null)
 						return false;
 					try {
-						MessageUtil.sendMessage(e.getMessage().getChannel().block(), HTTPHandler.requestUrban(e.getGuild().block(), q));
+						//MessageUtil.sendMessage(e.getMessage().getChannel().block(), HTTPHandler.requestUrban(e.getGuild().block(), q));
 					} catch (Exception ex) {
 						ErrorHandler.log(ex, e.getMessage().getChannel().block());
 					}

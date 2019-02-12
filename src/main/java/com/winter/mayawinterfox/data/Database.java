@@ -213,7 +213,7 @@ public class Database {
 								"permission VARCHAR(128)," +
 								"PRIMARY KEY(id, permission));")) &&
 				executeUnsafe("CREATE TABLE IF NOT EXISTS rss(" +
-						"feed TEXT PRIMARY KEY NOT NULL," +
+						"feed VARCHAR(128) PRIMARY KEY NOT NULL," +
 						"guild BIGINT NOT NULL," +
 						"channel BIGINT NOT NULL);");
 	}

@@ -1,5 +1,17 @@
 package com.winter.mayawinterfox.data.http;
 
+import com.fasterxml.jackson.xml.XmlMapper
+import com.winter.mayawinterfox.Main
+import com.winter.mayawinterfox.data.http.bean.AnimeBean
+import com.winter.mayawinterfox.data.http.bean.FeedBean
+import org.jetbrains.annotations.NotNull
+import org.json.XML
+import reactor.core.publisher.Mono
+import reactor.netty.http.client.HttpClient
+import java.net.URLEncoder
+import java.util.*
+
+/*import com.fasterxml.jackson.databind.MapperFeature;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
@@ -17,19 +29,13 @@ import org.json.JSONObject;
 import org.json.XML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 import reactor.core.publisher.Flux;
 import reactor.netty.http.client.HttpClient;
 
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Collections;
 import java.util.function.Consumer;
 
 public class HTTPHandler {
@@ -100,20 +106,7 @@ public class HTTPHandler {
 				.uri(url)
 				.responseSingle((status, buf) -> buf.asInputStream())
 				.flatMapIterable(stream -> {
-					try {
-						SAXParserFactory factory = SAXParserFactory.newInstance();
 
-						SAXParser parser = factory.newSAXParser();
-						XMLHandler handler = new XMLHandler();
-						parser.parse(stream, handler);
-
-						if (handler.isFeed()) {
-							return handler.getEntries();
-						}
-					} catch (ParserConfigurationException | SAXException | IOException e) {
-						e.printStackTrace();
-					}
-					return Collections.emptyList();
 				});
 	}
 
@@ -173,5 +166,60 @@ public class HTTPHandler {
 			ErrorHandler.log(e, "getting-anime");
 		}
 		return null;
+	}
+}*/
+
+class HTTPHandler {
+	companion object {
+		/**
+		 * Query an RSS feed
+		 *
+		 * @param url The url to check the feed for
+		 * @return Returns an RSS FeedBean feed bean} containing a list of the {@link Entry entries}
+		 * @see FeedBean
+		 * @see Entry
+		 */
+		@JvmStatic
+		@NotNull
+		fun requestRSS(@NotNull url: String): Mono<FeedBean> {
+			return HttpClient.create()
+					.headers { h -> h.add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:65.0) Gecko/20100101 Firefox/65.0") }
+					.followRedirect(true)
+					.get()
+					.uri(url)
+					.responseSingle { response, buf -> buf.asInputStream() }
+					.map { stream ->
+						XmlMapper()
+								.readValue(stream, FeedBean::class.java)
+					}
+		}
+
+		/**
+		 * Query MyAnimeList.net for an anime
+		 *
+		 * @param query The query string
+		 * @return Returns an anime bean containing a list of the Anime
+		 * @see AnimeBean
+		 */
+		@JvmStatic
+		@NotNull
+		fun requestAnime(@NotNull query: String): Mono<AnimeBean> {
+			return HttpClient.create()
+					.headers { h -> h.add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:65.0) Gecko/20100101 Firefox/65.0") }
+					.headers { h -> h.add("Authorization", "Base " + Base64.getEncoder().encode(Main.config[Main.ConfigValue.MAL_CREDENTIALS]!!.toByteArray())) }
+					.followRedirect(true)
+					.get()
+					.uri("https://myanimelist.net/api/manga/search.xml?q=" + URLEncoder.encode(query, "UTF-8"))
+					.responseSingle { response, buf ->
+						if (response.status().code() != 200)
+							return@responseSingle Mono.empty<AnimeBean>()
+
+						// EVERYTHING PAST HERE IS WIP, PLS NO H8
+						System.out.println(response.status().code())
+						buf.asString().map { System.out.println() }
+						val json = XML.toJSONObject(buf.toString())
+						null
+					}
+		}
 	}
 }

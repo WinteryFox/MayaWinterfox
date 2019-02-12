@@ -1,20 +1,17 @@
 package com.winter.mayawinterfox;
 
-import com.mashape.unirest.http.Unirest;
-import com.winter.mayawinterfox.command.Commands;
-import com.winter.mayawinterfox.data.Database;
-import com.winter.mayawinterfox.data.http.Entry;
 import com.winter.mayawinterfox.data.http.HTTPHandler;
-import com.winter.mayawinterfox.data.item.ItemProvider;
+import com.winter.mayawinterfox.data.http.bean.AnimeBean;
 import discord4j.core.DiscordClient;
-import discord4j.core.DiscordClientBuilder;
-import discord4j.core.event.domain.guild.MemberJoinEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.*;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Properties;
 
 public class Main {
 
@@ -49,36 +46,39 @@ public class Main {
 			LOGGER.error("Invalid debug value, it must be 'true' or 'false'");
 			System.exit(1);
 		}
-		DiscordClientBuilder b = new DiscordClientBuilder(token);
-		b.setShardCount(count);
-		client = b.build();
+		//DiscordClientBuilder b = new DiscordClientBuilder(token);
+		//b.setShardCount(count);
+		//client = b.build();
 
-		new Commands(client);
+		//new Commands(client);
 
-		Database.connect();
-		if (!Database.setup()) {
-			LOGGER.error("Failed to setup database for bot use!");
-			System.exit(1);
-		}
-		LOGGER.info("Successfully set up database for bot usage");
+		//Database.connect();
+		//if (!Database.setup()) {
+		//	LOGGER.error("Failed to setup database for bot use!");
+		//	System.exit(1);
+		//}
+		//LOGGER.info("Successfully set up database for bot usage");
 
-		ItemProvider.loadFoods();
-		ItemProvider.loadItems();
+		//ItemProvider.loadFoods();
+		//ItemProvider.loadItems();
 
-		List<Entry> entries = HTTPHandler.requestRSS("https://reddit.com/r/foxes/.rss").collectList().block();
-		for (Entry entry : entries)
-			System.out.println(entry.getId());
+		//FeedBean entries = HTTPHandler.requestRSS("https://reddit.com/r/foxes/.rss").block();
+		//for (Entry entry : entries.getEntry())
+		//	System.out.println(entry.getId());
+
+		AnimeBean bean = HTTPHandler.requestAnime("Spice and Wolf").block();
+		//System.out.println(bean);
 
 		//musicManagers = new HashMap<>();
 		//playerManager = new DefaultAudioPlayerManager();
 		//AudioSourceManagers.registerRemoteSources(playerManager);
 		//AudioSourceManagers.registerLocalSource(playerManager);
 
-		client.login()
-				.and(client.getEventDispatcher().on(MemberJoinEvent.class).flatMap(EventListener::onUserJoined))
-				.block();
+		//client.login()
+		//		.and(client.getEventDispatcher().on(MemberJoinEvent.class).flatMap(EventListener::onUserJoined))
+		//		.block();
 
-		Unirest.shutdown();
+		//Unirest.shutdown();
 
 		//dispatch.on(ReconnectEvent.class).subscribe(this::onReconnect);
 		//dispatch.on(GuildCreateEvent.class).subscribe(this::onGuildCreated);
