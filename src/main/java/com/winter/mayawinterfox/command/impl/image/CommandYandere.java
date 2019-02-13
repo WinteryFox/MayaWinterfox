@@ -1,6 +1,5 @@
 package com.winter.mayawinterfox.command.impl.image;
 
-import com.tsunderebug.iaatmt.jsonapis.Yandere;
 import com.winter.mayawinterfox.checks.ChannelChecks;
 import com.winter.mayawinterfox.command.Command;
 import com.winter.mayawinterfox.data.Node;
@@ -33,12 +32,13 @@ public class CommandYandere extends Node<Command> {
 					if (tags.length < 1)
 						return false;
 
-					URI url = new Yandere.Builder().withTags(tags).build().randomURL();
-					if (url == null) {
-						MessageUtil.sendMessage(e.getMessage().getChannel().block(), "no-results");
-						return false;
-					}
-					MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.imageEmbed(e.getGuild().block(), url.toASCIIString()));
+					// TODO
+					//URI url = new Yandere.Builder().withTags(tags).build().randomURL();
+					//if (url == null) {
+					//	MessageUtil.sendMessage(e.getMessage().getChannel().block(), "no-results");
+					//	return false;
+					//}
+					//MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.imageEmbed(e.getGuild().block(), url.toASCIIString()));
 					return true;
 				}
 		), Collections.emptyList());

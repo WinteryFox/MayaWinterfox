@@ -79,8 +79,8 @@ public class Main {
 		for (Entry entry : entries.getEntry())
 			System.out.println(entry.getId());
 
-		AnimeBean bean = HTTPHandler.requestAnime("Spice and Wolf").block();
-		System.out.println(bean);
+		//AnimeBean bean = HTTPHandler.requestAnime("Spice and Wolf").block();
+		//System.out.println(bean);
 
 		//musicManagers = new HashMap<>();
 		//playerManager = new DefaultAudioPlayerManager();

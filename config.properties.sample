@@ -11,6 +11,12 @@ token=token
 debug-token=token
 # All errors will be logged to this channel
 error-channel=channelID
+# The IP of the MariaDB database
+db-ip=localhost
+# The user in the MariaDB
+db-user=maya
+# The database schema to use
+db-schema=maya
 # The PostgreSQL database password, it will try to connect to localhost:5432 as user postgres
 db-password=password
 # The database connection pool size

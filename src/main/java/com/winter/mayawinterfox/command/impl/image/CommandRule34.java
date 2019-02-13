@@ -1,6 +1,6 @@
 package com.winter.mayawinterfox.command.impl.image;
 
-import com.tsunderebug.iaatmt.jsonapis.Rule34;
+//import com.tsunderebug.iaatmt.jsonapis.Rule34;
 import com.winter.mayawinterfox.checks.ChannelChecks;
 import com.winter.mayawinterfox.command.Command;
 import com.winter.mayawinterfox.data.Node;
@@ -33,12 +33,12 @@ public class CommandRule34 extends Node<Command> {
 					if (tags.length < 1)
 						return false;
 
-					URI url = new Rule34.Builder().withTags(tags).build().randomURL();
-					if (url == null) {
-						MessageUtil.sendMessage(e.getMessage().getChannel().block(), "no-results");
-						return false;
-					}
-					MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.imageEmbed(e.getGuild().block(), url.toASCIIString()));
+					//URI url = new Rule34.Builder().withTags(tags).build().randomURL();
+					//if (url == null) {
+					//	MessageUtil.sendMessage(e.getMessage().getChannel().block(), "no-results");
+					//	return false;
+					//}
+					//MessageUtil.sendMessage(e.getMessage().getChannel().block(), EmbedUtil.imageEmbed(e.getGuild().block(), url.toASCIIString()));
 					return true;
 				}
 		), Collections.emptyList());
