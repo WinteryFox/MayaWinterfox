@@ -201,12 +201,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.github.TsundereBug</groupId>
-            <artifactId>IAmAshamedToMakeThis</artifactId>
-            <version>d5c1779568258b8f7d9a05ffef6b19d5645195d0</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
             <version>2.12.3</version>

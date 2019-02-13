@@ -8,5 +8,5 @@ data class FeedBean(
 		@JsonProperty("entry")
 		var entry: List<Entry>?
 ) {
-	constructor() : this(null)
+	constructor() : this(null) // Normally we'd include some sort default parameters but jackson is terrible.
 }
