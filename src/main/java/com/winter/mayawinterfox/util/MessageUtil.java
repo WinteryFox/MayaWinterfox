@@ -42,7 +42,7 @@ public class MessageUtil {
 			return channel.createMessage(spec -> spec
 					.setContent(Localisation.getMessage(((GuildChannel) channel).getGuild().block(), messageKey, params))
 					.setEmbed(embed)
-					.setFile(fileName, file)
+					.addFile(fileName, file)
 					.setTts(false)).block();
 		} catch (Exception e) {
 			ErrorHandler.log(e, channel, "error");
@@ -61,7 +61,7 @@ public class MessageUtil {
 	public static Message sendMessage(MessageChannel channel, Consumer<EmbedCreateSpec> embed, InputStream file, String fileName) {
 		try {
 			return channel.createMessage(spec -> spec
-					.setFile(fileName, file)
+					.addFile(fileName, file)
 					.setTts(false)).block();
 		} catch (Exception e) {
 			ErrorHandler.log(e, channel, "error");

@@ -3,10 +3,9 @@ package com.winter.mayawinterfox;
 import com.mashape.unirest.http.Unirest;
 import com.winter.mayawinterfox.command.Commands;
 import com.winter.mayawinterfox.data.Database;
+import com.winter.mayawinterfox.data.http.Feed;
 import com.winter.mayawinterfox.data.http.HTTPHandler;
 import com.winter.mayawinterfox.data.http.bean.AnimeBean;
-import com.winter.mayawinterfox.data.http.bean.Entry;
-import com.winter.mayawinterfox.data.http.bean.FeedBean;
 import com.winter.mayawinterfox.data.item.ItemProvider;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
@@ -75,9 +74,8 @@ public class Main {
 		ItemProvider.loadFoods();
 		ItemProvider.loadItems();
 
-		FeedBean entries = HTTPHandler.requestRSS("https://reddit.com/r/foxes/.rss").block();
-		for (Entry entry : entries.getEntry())
-			System.out.println(entry.getId());
+		Feed entries = HTTPHandler.requestRSS("https://reddit.com/r/foxes/.rss").block();
+		System.out.println("Entry: " + entries);
 
 		AnimeBean bean = HTTPHandler.requestAnime("Spice and Wolf").block();
 		System.out.println(bean);

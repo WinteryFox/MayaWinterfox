@@ -3,7 +3,7 @@ package com.winter.mayawinterfox.data.cache.meta;
 import com.winter.mayawinterfox.Main;
 import com.winter.mayawinterfox.data.Database;
 import com.winter.mayawinterfox.data.cache.Caches;
-import com.winter.mayawinterfox.data.http.Feed;
+import com.winter.mayawinterfox.data.http.bean.FeedBean;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.TextChannel;
 import discord4j.core.object.entity.User;
@@ -18,7 +18,7 @@ public class GuildMeta {
 	private final Guild guild;
 	private final Set<String> prefixes;
 	private final Set<Snowflake> autoroles;
-	private final Set<Feed> feeds;
+	private final Set<FeedBean> feeds;
 	private final TextChannel welcomeChannel;
 	private final String language;
 	private final String welcome;
@@ -33,7 +33,7 @@ public class GuildMeta {
 	public GuildMeta(Guild guild,
 	                 Set<String> prefixes,
 	                 Set<Snowflake> autoroles,
-	                 Set<Feed> feeds,
+	                 Set<FeedBean> feeds,
 	                 TextChannel welcomeChannel,
 	                 String language,
 	                 String welcome,
@@ -184,7 +184,7 @@ public class GuildMeta {
 				.then(Caches.getGuild(guild));
 	}
 
-	public Set<Feed> getFeeds() {
+	public Set<FeedBean> getFeeds() {
 		return feeds;
 	}
 

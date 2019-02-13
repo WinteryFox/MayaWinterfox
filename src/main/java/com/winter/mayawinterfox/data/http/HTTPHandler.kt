@@ -4,6 +4,7 @@ import com.winter.mayawinterfox.Main
 import com.winter.mayawinterfox.data.http.bean.AnimeBean
 import com.winter.mayawinterfox.data.http.bean.FeedBean
 import com.winter.mayawinterfox.util.Extensions.mapToXml
+import com.winter.mayawinterfox.util.Extensions.asString
 import org.jetbrains.annotations.NotNull
 import org.json.XML
 import reactor.core.publisher.Mono
@@ -180,15 +181,16 @@ object HTTPHandler {
      */
     @JvmStatic
     @NotNull
-    fun requestRSS(@NotNull url: String): Mono<FeedBean> {
+    fun requestRSS(@NotNull url: String): Mono<Feed> {
         return HttpClient.create()
                 .headers { h -> h.add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:65.0) Gecko/20100101 Firefox/65.0") }
                 .followRedirect(true)
                 .get()
                 .uri(url)
-                .responseSingle { response, buf -> buf.asInputStream() }
+                .responseSingle { _, buf -> buf.asInputStream() }
                 .map { stream ->
-                    stream.mapToXml(FeedBean::class.java)
+                    println("STREAM OUTPUT: ${stream.asString()}")
+                    stream.mapToXml(Feed::class.java)
                 }
     }
 

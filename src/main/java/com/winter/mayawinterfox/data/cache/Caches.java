@@ -4,7 +4,7 @@ import com.winter.mayawinterfox.data.Database;
 import com.winter.mayawinterfox.data.Row;
 import com.winter.mayawinterfox.data.cache.meta.GuildMeta;
 import com.winter.mayawinterfox.data.cache.meta.UserMeta;
-import com.winter.mayawinterfox.data.http.Feed;
+import com.winter.mayawinterfox.data.http.bean.FeedBean;
 import com.winter.mayawinterfox.data.item.ItemProvider;
 import discord4j.core.object.entity.Guild;
 import discord4j.core.object.entity.TextChannel;
@@ -35,9 +35,9 @@ public class Caches {
 				.map(v -> Snowflake.of((Long) v.get("role")))
 				.collect(Collectors.toSet());
 		final var feeds = Database.get("SELECT * FROM rss WHERE guild=?", guild)
-				.map(v -> {
-					return new Feed((String) v.get("feed"), Snowflake.of((Long) v.get("channel")), Snowflake.of((Long) v.get("guild")));
-				})
+				.map(v ->
+					 new FeedBean((String) v.get("feed"), Snowflake.of((Long) v.get("channel")), Snowflake.of((Long) v.get("guild")))
+				)
 				.collect(Collectors.toSet());
 		return Mono.zip(settings, prefixes, autoroles, feeds)
 				.zipWhen(v -> guild.getChannelById(Snowflake.of((Long) v.getT1().get("welcomeChannel"))).ofType(TextChannel.class))

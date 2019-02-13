@@ -57,7 +57,7 @@ public class Commands {
 		COMMAND_MAP.put(Category.MISC, new ArrayList<>(Arrays.asList(new CommandLinks(), new CommandInvite())));
 		COMMAND_MAP.put(Category.UTIL, new ArrayList<>(Arrays.asList(new CommandHelp(), new CommandServer(), new CommandUser(), new CommandShop())));
 		COMMAND_MAP.put(Category.MUSIC, new ArrayList<>(/*new CommandMusic()*/));
-		COMMAND_MAP.put(Category.IMAGE, new ArrayList<>(Arrays.asList(new CommandImgur(), new CommandCat(), new CommandKona(), new CommandDanbooru(), new CommandYandere(), new CommandGelbooru(), new CommandRule34())));
+		COMMAND_MAP.put(Category.IMAGE, new ArrayList<>(Arrays.asList(new CommandImgur(), new CommandCat())));
 
 		COMMAND_MAP.values().forEach(COMMANDS::addAll);
 

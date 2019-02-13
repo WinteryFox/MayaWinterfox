@@ -6,9 +6,10 @@ import com.winter.mayawinterfox.util.MessageUtil;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.event.domain.message.MessageEvent;
 import discord4j.core.event.domain.message.ReactionAddEvent;
-import discord4j.core.object.entity.*;
+import discord4j.core.object.entity.Message;
+import discord4j.core.object.entity.TextChannel;
+import discord4j.core.object.entity.User;
 import discord4j.core.object.reaction.ReactionEmoji;
-import org.apache.commons.lang3.ObjectUtils;
 import reactor.core.publisher.Mono;
 
 import java.awt.*;
@@ -181,7 +182,7 @@ public class Dialog<T> {
 			Message response = Main.getClient().getEventDispatcher().on(MessageCreateEvent.class)
 					.map(MessageCreateEvent::getMessage)
 					.filterWhen(m -> m.getChannel().map(c -> c.equals(channel)))
-					.filterWhen(m -> m.getAuthor().map(a -> a.equals(user)))
+					.filter(m -> m.getAuthor().map(a -> a.equals(user)).orElse(false))
 					.next()
 					.timeout(Duration.ofMinutes(1), Mono.empty())
 					.block();

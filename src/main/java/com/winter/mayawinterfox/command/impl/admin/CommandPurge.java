@@ -52,9 +52,9 @@ public class CommandPurge extends Node<Command> {
 
 					Flux<Snowflake> history = e.getMessage().getChannel().ofType(TextChannel.class)
 							.flatMapMany(c -> c.getMessagesBefore(e.getMessage().getId()))
-							.filterWhen(m -> m.getAuthor().map(u ->
+							.filter(m -> m.getAuthor().map(u ->
 									target == null || u.equals(target)
-							))
+							).orElse(false))
 							.filter(m -> m.getTimestamp().isAfter(LocalDate.now().minusWeeks(2).atStartOfDay().toInstant(ZoneOffset.UTC)))
 							.take(amount)
 							.map(Message::getId)
