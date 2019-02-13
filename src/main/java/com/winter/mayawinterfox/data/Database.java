@@ -120,7 +120,7 @@ public class Database {
 	 */
 	public static void connect() {
 		poolingDataSource = new MysqlConnectionPoolDataSource();
-		poolingDataSource.setServerName("localhost");
+		poolingDataSource.setServerName("51.15.87.28");
 		poolingDataSource.setPort(3306);
 		poolingDataSource.setUser("maya");
 		poolingDataSource.setPassword(Main.config.get(Main.ConfigValue.DB_PASS));
