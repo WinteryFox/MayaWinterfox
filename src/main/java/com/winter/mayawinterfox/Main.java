@@ -1,8 +1,16 @@
 package com.winter.mayawinterfox;
 
+import com.mashape.unirest.http.Unirest;
+import com.winter.mayawinterfox.command.Commands;
+import com.winter.mayawinterfox.data.Database;
 import com.winter.mayawinterfox.data.http.HTTPHandler;
 import com.winter.mayawinterfox.data.http.bean.AnimeBean;
+import com.winter.mayawinterfox.data.http.bean.Entry;
+import com.winter.mayawinterfox.data.http.bean.FeedBean;
+import com.winter.mayawinterfox.data.item.ItemProvider;
 import discord4j.core.DiscordClient;
+import discord4j.core.DiscordClientBuilder;
+import discord4j.core.event.domain.guild.MemberJoinEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +37,11 @@ public class Main {
 	 */
 	public static void main(String[] args) throws IOException {
 		InputStream configProperties = Main.class.getResourceAsStream("/config.properties");
+		if (configProperties == null) {
+			System.out.println("Could not find config.properties file");
+			System.exit(0);
+		}
+
 		Properties p = new Properties();
 		p.load(configProperties);
 		configProperties.close();
@@ -46,39 +59,39 @@ public class Main {
 			LOGGER.error("Invalid debug value, it must be 'true' or 'false'");
 			System.exit(1);
 		}
-		//DiscordClientBuilder b = new DiscordClientBuilder(token);
-		//b.setShardCount(count);
-		//client = b.build();
+		DiscordClientBuilder b = new DiscordClientBuilder(token);
+		b.setShardCount(count);
+		client = b.build();
 
-		//new Commands(client);
+		new Commands(client);
 
-		//Database.connect();
-		//if (!Database.setup()) {
-		//	LOGGER.error("Failed to setup database for bot use!");
-		//	System.exit(1);
-		//}
-		//LOGGER.info("Successfully set up database for bot usage");
+		Database.connect();
+		if (!Database.setup()) {
+			LOGGER.error("Failed to setup database for bot use!");
+			System.exit(1);
+		}
+		LOGGER.info("Successfully set up database for bot usage");
 
-		//ItemProvider.loadFoods();
-		//ItemProvider.loadItems();
+		ItemProvider.loadFoods();
+		ItemProvider.loadItems();
 
-		//FeedBean entries = HTTPHandler.requestRSS("https://reddit.com/r/foxes/.rss").block();
-		//for (Entry entry : entries.getEntry())
-		//	System.out.println(entry.getId());
+		FeedBean entries = HTTPHandler.requestRSS("https://reddit.com/r/foxes/.rss").block();
+		for (Entry entry : entries.getEntry())
+			System.out.println(entry.getId());
 
 		AnimeBean bean = HTTPHandler.requestAnime("Spice and Wolf").block();
-		//System.out.println(bean);
+		System.out.println(bean);
 
 		//musicManagers = new HashMap<>();
 		//playerManager = new DefaultAudioPlayerManager();
 		//AudioSourceManagers.registerRemoteSources(playerManager);
 		//AudioSourceManagers.registerLocalSource(playerManager);
 
-		//client.login()
-		//		.and(client.getEventDispatcher().on(MemberJoinEvent.class).flatMap(EventListener::onUserJoined))
-		//		.block();
+		client.login()
+				.and(client.getEventDispatcher().on(MemberJoinEvent.class).flatMap(EventListener::onUserJoined))
+				.block();
 
-		//Unirest.shutdown();
+		Unirest.shutdown();
 
 		//dispatch.on(ReconnectEvent.class).subscribe(this::onReconnect);
 		//dispatch.on(GuildCreateEvent.class).subscribe(this::onGuildCreated);
