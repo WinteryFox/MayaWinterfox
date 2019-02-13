@@ -3,7 +3,9 @@ package com.winter.mayawinterfox.data.http;
 import com.winter.mayawinterfox.Main
 import com.winter.mayawinterfox.data.http.bean.AnimeBean
 import com.winter.mayawinterfox.data.http.bean.FeedBean
-import com.winter.mayawinterfox.util.Extensions.mapToXml
+import com.winter.mayawinterfox.util.Extensions.`as`
+import com.winter.mayawinterfox.util.Extensions.asJsonFromXml
+import com.winter.mayawinterfox.util.Extensions.asJsonString
 import com.winter.mayawinterfox.util.Extensions.asString
 import org.jetbrains.annotations.NotNull
 import org.json.XML
@@ -188,10 +190,7 @@ object HTTPHandler {
                 .get()
                 .uri(url)
                 .responseSingle { _, buf -> buf.asInputStream() }
-                .map { stream ->
-                    println("STREAM OUTPUT: ${stream.asString()}")
-                    stream.mapToXml(Feed::class.java)
-                }
+                .map { stream -> stream.asString().asJsonFromXml().asJsonString().`as`(Feed::class.java) }
     }
 
     /**
