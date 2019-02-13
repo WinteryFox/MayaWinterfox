@@ -77,8 +77,8 @@ public class Main {
 		Feed entries = HTTPHandler.requestRSS("https://reddit.com/r/foxes/.rss").block();
 		System.out.println("Entry: " + entries);
 
-		AnimeBean bean = HTTPHandler.requestAnime("Spice and Wolf").block();
-		System.out.println(bean);
+		//AnimeBean bean = HTTPHandler.requestAnime("Spice and Wolf").block();
+		//System.out.println(bean);
 
 		//musicManagers = new HashMap<>();
 		//playerManager = new DefaultAudioPlayerManager();
