@@ -32,17 +32,6 @@ public class Main {
 	 * @throws IOException Upon failure to read the config
 	 */
 	public static void main(String[] args) throws IOException {
-//		InputStream configProperties = Main.class.getResourceAsStream("/config.properties");
-//		if (configProperties == null) {
-//			System.out.println("Could not find config.properties file");
-//			System.exit(0);
-//		}
-//
-//		Properties p = new Properties();
-//		p.load(configProperties);
-//		configProperties.close();
-//		p.keySet().forEach(k -> config.put(ConfigValue.from(k.toString()), p.getProperty(k.toString())));
-
 		InputStream configProperties = Main.class.getResourceAsStream("/config.properties");
 		if (configProperties == null) {
 			System.out.println("Could not find config.properties file");
