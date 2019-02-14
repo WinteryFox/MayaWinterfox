@@ -3,9 +3,6 @@ package com.winter.mayawinterfox;
 import com.mashape.unirest.http.Unirest;
 import com.winter.mayawinterfox.command.Commands;
 import com.winter.mayawinterfox.data.Database;
-import com.winter.mayawinterfox.data.http.Feed;
-import com.winter.mayawinterfox.data.http.HTTPHandler;
-import com.winter.mayawinterfox.data.http.bean.AnimeBean;
 import com.winter.mayawinterfox.data.item.ItemProvider;
 import discord4j.core.DiscordClient;
 import discord4j.core.DiscordClientBuilder;
@@ -35,6 +32,17 @@ public class Main {
 	 * @throws IOException Upon failure to read the config
 	 */
 	public static void main(String[] args) throws IOException {
+//		InputStream configProperties = Main.class.getResourceAsStream("/config.properties");
+//		if (configProperties == null) {
+//			System.out.println("Could not find config.properties file");
+//			System.exit(0);
+//		}
+//
+//		Properties p = new Properties();
+//		p.load(configProperties);
+//		configProperties.close();
+//		p.keySet().forEach(k -> config.put(ConfigValue.from(k.toString()), p.getProperty(k.toString())));
+
 		InputStream configProperties = Main.class.getResourceAsStream("/config.properties");
 		if (configProperties == null) {
 			System.out.println("Could not find config.properties file");
@@ -53,7 +61,6 @@ public class Main {
 			count = 10;
 		} else if (config.get(ConfigValue.DEBUG).equalsIgnoreCase("true")) {
 			token = config.get(ConfigValue.DEBUG_TOKEN);
-			count = 1;
 		} else {
 			LOGGER.error("Invalid debug value, it must be 'true' or 'false'");
 			System.exit(1);
@@ -73,9 +80,6 @@ public class Main {
 
 		ItemProvider.loadFoods();
 		ItemProvider.loadItems();
-
-		Feed entries = HTTPHandler.requestRSS("https://reddit.com/r/foxes/.rss").block();
-		System.out.println("Entry: " + entries);
 
 		//AnimeBean bean = HTTPHandler.requestAnime("Spice and Wolf").block();
 		//System.out.println(bean);
@@ -115,6 +119,9 @@ public class Main {
 		ERROR_CHANNEL("error-channel"),
 		DB_PASS("db-password"),
 		DB_POOL_SIZE("db-pool-size"),
+		DB_USER("db-user"),
+		DB_SCHEMA("db-schema"),
+		DB_IP("db-ip"),
 		GLOBALS("globals"),
 		BOTS_PW_TOKEN("bots-pw-token"),
 		BOTS_ORG_TOKEN("bots-org-token"),
