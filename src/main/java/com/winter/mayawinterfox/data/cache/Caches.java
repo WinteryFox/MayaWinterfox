@@ -24,6 +24,7 @@ public class Caches {
 	 * @param guild The guild implementation to getGuild the meta for
 	 * @return The guild meta for the guild implementation
 	 */
+	@NotNull
 	public static Mono<GuildMeta> getGuild(@NotNull Guild guild) {
 		final var settings = Database.get("SELECT * FROM guild WHERE id=?", guild.getId().asLong())
 				.next()
@@ -71,7 +72,8 @@ public class Caches {
 	 * @param user The user implementation to getGuild the meta for
 	 * @return The user meta for the user implementation
 	 */
-	public static Mono<UserMeta> getUser(User user) {
+	@NotNull
+	public static Mono<UserMeta> getUser(@NotNull User user) {
 		return Database.get("SELECT * FROM user WHERE id=?;", user.getId().asLong())
 				.next()
 				.map(Row::getColumns)

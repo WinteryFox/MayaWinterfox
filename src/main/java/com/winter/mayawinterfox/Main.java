@@ -28,37 +28,13 @@ public class Main {
 
 	/**
 	 * Main method, guh!
+	 *
 	 * @param args Args taken in from the run parameters
 	 * @throws IOException Upon failure to read the config
 	 */
 	public static void main(String[] args) throws IOException {
-		InputStream configProperties = Main.class.getResourceAsStream("/config.properties");
-		if (configProperties == null) {
-			System.out.println("Could not find config.properties file");
-			System.exit(0);
-		}
-
-		Properties p = new Properties();
-		p.load(configProperties);
-		configProperties.close();
-		p.keySet().forEach(k -> config.put(ConfigValue.from(k.toString()), p.getProperty(k.toString())));
-
-		String token = "";
-		int count = 1;
-		if(config.get(ConfigValue.DEBUG).equalsIgnoreCase("false")) {
-			token = config.get(ConfigValue.TOKEN);
-			count = 10;
-		} else if (config.get(ConfigValue.DEBUG).equalsIgnoreCase("true")) {
-			token = config.get(ConfigValue.DEBUG_TOKEN);
-		} else {
-			LOGGER.error("Invalid debug value, it must be 'true' or 'false'");
-			System.exit(1);
-		}
-		DiscordClientBuilder b = new DiscordClientBuilder(token);
-		b.setShardCount(count);
-		client = b.build();
-
-		new Commands(client);
+		loadConfig();
+		createClient();
 
 		Database.connect();
 		if (!Database.setup()) {
@@ -70,17 +46,22 @@ public class Main {
 		ItemProvider.loadFoods();
 		ItemProvider.loadItems();
 
-		//AnimeBean bean = HTTPHandler.requestAnime("Spice and Wolf").block();
-		//System.out.println(bean);
-
 		//musicManagers = new HashMap<>();
 		//playerManager = new DefaultAudioPlayerManager();
 		//AudioSourceManagers.registerRemoteSources(playerManager);
 		//AudioSourceManagers.registerLocalSource(playerManager);
 
+		new Commands();
+
 		client.login()
-				.and(client.getEventDispatcher().on(MemberJoinEvent.class).flatMap(EventListener::onUserJoined))
-				.block();
+				.and(client.getEventDispatcher()
+						.on(MemberJoinEvent.class)
+						.flatMap(EventListener::onUserJoined)
+				).block();
+		//.and(client.getEventDispatcher()
+		//		.on(MessageCreateEvent.class)
+		//		.flatMap(Commands.Companion::messageCreateEvent)
+		//).block();
 
 		Unirest.shutdown();
 
@@ -91,7 +72,49 @@ public class Main {
 	}
 
 	/**
+	 * Creates the DiscordClient and sets the values
+	 */
+	private static void createClient() {
+		String token = "";
+		int count = 1;
+		if (config.get(ConfigValue.DEBUG).equalsIgnoreCase("false")) {
+			token = config.get(ConfigValue.TOKEN);
+			count = 10;
+		} else if (config.get(ConfigValue.DEBUG).equalsIgnoreCase("true")) {
+			token = config.get(ConfigValue.DEBUG_TOKEN);
+		} else {
+			LOGGER.error("Invalid debug value, it must be 'true' or 'false'");
+			System.exit(1);
+		}
+		DiscordClientBuilder b = new DiscordClientBuilder(token);
+		b.setShardCount(count);
+		client = b.build();
+	}
+
+	/**
+	 * Loads the config and its constants, will stop the program if it encounters an exception
+	 */
+	private static void loadConfig() {
+		InputStream configProperties = Main.class.getResourceAsStream("/config.properties");
+		if (configProperties == null) {
+			System.out.println("Could not find config.properties file");
+			System.exit(0);
+		}
+
+		try {
+			Properties p = new Properties();
+			p.load(configProperties);
+			configProperties.close();
+			p.keySet().forEach(k -> config.put(ConfigValue.from(k.toString()), p.getProperty(k.toString())));
+		} catch (IOException e) {
+			LOGGER.error("Encountered a critical exception while attempting to load config.properties!", e);
+			System.exit(-1);
+		}
+	}
+
+	/**
 	 * Get the discord client
+	 *
 	 * @return Returns the IDiscordClient instance
 	 */
 	public static DiscordClient getClient() {
@@ -130,6 +153,7 @@ public class Main {
 
 		/**
 		 * Get a config value for a key
+		 *
 		 * @param key The config key to getGuild
 		 * @return The config value for the given key
 		 */

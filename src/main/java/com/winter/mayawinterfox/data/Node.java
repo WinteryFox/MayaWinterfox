@@ -46,18 +46,6 @@ public class Node<T> {
 		return me.stream().map(t -> converter.apply(t.getData())).reduce(concatenator).orElse(converter.apply(this.getData()));
 	}
 
-	public <U> Node<T> traverseThis(Function<Node<T>, U> converter, U toMatch, BiPredicate<U, U> equalityCheck) {
-		for (Node<T> child : getChildren()) {
-			if (equalityCheck.test(converter.apply(child.traverseThis(converter, toMatch, equalityCheck)), toMatch)) {
-				return child;
-			}
-		}
-		if (equalityCheck.test(converter.apply(this), toMatch)) {
-			return this;
-		}
-		return null;
-	}
-
 	public <U> Node<T> traverseThis(Function<Node<T>, Set<U>> converter, U toMatch, BiPredicate<U, U> equalityCheck, boolean unused) {
 		for (U thing : converter.apply(this)) {
 			for (Node<T> child : getChildren()) {

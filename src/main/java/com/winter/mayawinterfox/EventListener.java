@@ -1,15 +1,8 @@
 package com.winter.mayawinterfox;
 
-import com.winter.mayawinterfox.command.Commands;
-import com.winter.mayawinterfox.data.Database;
 import com.winter.mayawinterfox.data.cache.Caches;
 import com.winter.mayawinterfox.data.cache.meta.GuildMeta;
-import com.winter.mayawinterfox.data.cache.meta.UserMeta;
-import com.winter.mayawinterfox.data.schedule.Cooldowns;
-import com.winter.mayawinterfox.exceptions.ErrorHandler;
 import com.winter.mayawinterfox.util.ColorUtil;
-import com.winter.mayawinterfox.util.EmbedUtil;
-import com.winter.mayawinterfox.util.GuildUtil;
 import com.winter.mayawinterfox.util.MessageUtil;
 import discord4j.core.event.domain.channel.VoiceChannelUpdateEvent;
 import discord4j.core.event.domain.guild.GuildCreateEvent;
@@ -17,18 +10,12 @@ import discord4j.core.event.domain.guild.GuildDeleteEvent;
 import discord4j.core.event.domain.guild.MemberJoinEvent;
 import discord4j.core.event.domain.lifecycle.ReconnectEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
-import discord4j.core.object.entity.GuildChannel;
 import discord4j.core.object.entity.TextChannel;
-import discord4j.core.object.presence.Activity;
-import discord4j.core.object.presence.Presence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 public class EventListener {
 
@@ -50,8 +37,10 @@ public class EventListener {
 				.then();
 	}
 
+	// TODO: BIG TODO vvvv
+
 	public void onReconnect(ReconnectEvent e) {
-		e.getClient().updatePresence(Presence.online(Activity.playing(".mayahelp | .mayainvite"))).block();
+		//e.getClient().updatePresence(Presence.online(Activity.playing(".mayahelp | .mayainvite"))).block();
 	}
 
 	public void onUserLeftVoice(VoiceChannelUpdateEvent e) {
@@ -77,7 +66,7 @@ public class EventListener {
 	}
 
 	public void onGuildCreated(GuildCreateEvent e) {
-		try {
+		/*try {
 			Commands.THREAD_POOL.submit(() -> {
 				GuildMeta guild = Caches.getGuild(e.getGuild()).block();
 				if (guild.isNewGuild()) {
@@ -95,16 +84,16 @@ public class EventListener {
 			ErrorHandler.log(ex, "thread-interrupted");
 		} catch (ExecutionException ex) {
 			ErrorHandler.log(ex, "thread-execution");
-		}
+		}*/
 	}
 
 	public void onGuildDeleted(GuildDeleteEvent e) {
-		LOGGER.info("Lost a guild! Currently in " + e.getClient().getGuilds().collectList().block().size() + " guilds!");
-		Database.set("UPDATE guild SET newguild=TRUE WHERE id=?;", e.getGuild().get().getId().asLong());
+		//LOGGER.info("Lost a guild! Currently in " + e.getClient().getGuilds().collectList().block().size() + " guilds!");
+		//Database.set("UPDATE guild SET newguild=TRUE WHERE id=?;", e.getGuild().get().getId().asLong());
 	}
 
 	public void onMessageReceived(MessageCreateEvent e) {
-		if (e.getMessage().getChannel().block() instanceof GuildChannel && !e.getMember().get().isBot()) {
+		/*if (e.getMessage().getChannel().block() instanceof GuildChannel && !e.getMember().get().isBot()) {
 			try {
 				Commands.THREAD_POOL.submit(() -> {
 					UserMeta user = Caches.getUser(e.getMember().get()).block();
@@ -129,6 +118,6 @@ public class EventListener {
 			} catch (ExecutionException ex) {
 				ErrorHandler.log(ex, "thread-execution");
 			}
-		}
+		}*/
 	}
 }
