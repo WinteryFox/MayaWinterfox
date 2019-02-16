@@ -12,8 +12,8 @@ public class GuildMusicManager {
 	private final TrackScheduler scheduler;
 	private VoiceChannel boundChannel;
 
-	public GuildMusicManager(Guild guild, AudioPlayerManager manager) {
-		this.player = manager.createPlayer();
+	public GuildMusicManager(Guild guild, AudioPlayerManager command) {
+		this.player = command.createPlayer();
 		this.scheduler = new TrackScheduler(player, guild);
 		this.player.addListener(scheduler);
 		this.guild = guild;

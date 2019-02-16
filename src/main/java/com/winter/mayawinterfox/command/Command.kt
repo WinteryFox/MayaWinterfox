@@ -3,9 +3,8 @@ package com.winter.mayawinterfox.command;
 import com.winter.mayawinterfox.command.Command.Category
 import discord4j.core.event.domain.message.MessageCreateEvent
 import reactor.core.publisher.Mono
-import java.util.function.Consumer
 
-class Command(
+abstract class Command(
 		/**
 		 * Name of the command
 		 */
@@ -23,25 +22,21 @@ class Command(
 		val category: Category,
 
 		/**
-		 * The permission manager for this command, checks bot & user permissions
+		 * The permission command for this command, checks bot & user permissions
 		 * before execution of the command
-		 * @see PermissionManager
+		 * @see CommandPermission
 		 */
-		val manager: PermissionManager,
-
-		/**
-		 * The actual command call, where the command is actually executed
-		 */
-		private val call: Consumer<MessageCreateEvent>,
+		val permissions: CommandPermission,
 
 		/**
 		 * Aliases for the command
 		 */
 		val aliases: Set<String> = emptySet()
 ) {
-	fun call(event: MessageCreateEvent): Mono<Void> {
-		return Mono.fromCallable { call.accept(event) }.then()
-	}
+	/**
+	 * Execute the command, this does not do permission checking
+	 */
+	abstract fun call(event: MessageCreateEvent): Mono<Void>
 
 	/**
 	 * All the command categories and their labels

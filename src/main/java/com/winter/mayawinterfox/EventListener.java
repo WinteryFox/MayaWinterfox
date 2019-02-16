@@ -11,17 +11,15 @@ import discord4j.core.event.domain.guild.MemberJoinEvent;
 import discord4j.core.event.domain.lifecycle.ReconnectEvent;
 import discord4j.core.event.domain.message.MessageCreateEvent;
 import discord4j.core.object.entity.TextChannel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jetbrains.annotations.NotNull;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
 
 public class EventListener {
 
-	private final Logger LOGGER = LoggerFactory.getLogger(EventListener.class);
-
-	static Mono<Void> onUserJoined(MemberJoinEvent e) {
+	@NotNull
+	static Mono<Void> onUserJoined(@NotNull MemberJoinEvent e) {
 		Mono<GuildMeta> meta = e.getGuild().flatMap(Caches::getGuild);
 		Mono<TextChannel> channel = meta.map(GuildMeta::getWelcomeChannel);
 		Mono<String> message = meta.map(m -> m.getWelcome(e.getMember()));
@@ -48,11 +46,11 @@ public class EventListener {
 			Commands.THREAD_POOL.submit(() -> {
 				Guild guild = e.getCurrent().getGuild().block();
 				if (guild.getConnectedVoiceChannel() != null && guild.getConnectedVoiceChannel().getConnectedUsers().size() <= 1) {
-					GuildMusicManager manager = MusicUtils.getGuildMusicManager(guild);
-					manager.getScheduler().clearQueue();
-					manager.getPlayer().stopTrack();
+					GuildMusicManager command = MusicUtils.getGuildMusicManager(guild);
+					command.getScheduler().clearQueue();
+					command.getPlayer().stopTrack();
 					guild.getConnectedVoiceChannel().leave();
-					MessageUtil.sendMessage(manager.getBoundChannel(), "inactive-disconnected");
+					MessageUtil.sendMessage(command.getBoundChannel(), "inactive-disconnected");
 					MusicUtils.getGuildMusicManager(guild).setBoundChannel(null);
 				}
 			}).get(60, TimeUnit.SECONDS);

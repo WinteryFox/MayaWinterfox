@@ -1,22 +1,37 @@
 package com.winter.mayawinterfox.command;
 
 import com.winter.mayawinterfox.Main
+import com.winter.mayawinterfox.command.impl.status.CommandHello
 import com.winter.mayawinterfox.command.impl.status.CommandPing
-import com.winter.mayawinterfox.data.Node
+import com.winter.mayawinterfox.data.cache.Caches
+import com.winter.mayawinterfox.data.cache.meta.GuildMeta
+import com.winter.mayawinterfox.util.Embeds
+import com.winter.mayawinterfox.util.MessageUtil
 import discord4j.core.event.domain.message.MessageCreateEvent
 import reactor.core.publisher.Mono
+import reactor.core.publisher.toMono
 
 class Commands {
-	val commands: List<Node<Command>> = listOf(CommandPing())
+	private val commands: Map<String, Command>
+	private val commandNodes: List<Node<Command>> = listOf(
+			Node<Command>(CommandPing(), emptyList()),
+			Node<Command>(CommandHello(), emptyList())
+	)
 
 	init {
+		val temp: MutableMap<String, Command> = hashMapOf()
+		for (command in commandNodes) {
+			temp[command.data.name] = command.data
+			command.data.aliases.forEach { alias -> temp[alias] = command.data }
+		}
+		commands = temp
+
 		Main.getClient().eventDispatcher
 				.on(MessageCreateEvent::class.java)
 				.filter { e -> e.member.isPresent }
 				.filter { e -> !e.member.get().isBot }
 				.filter { e -> e.message.content.isPresent }
-				.map(this::messageCreateEvent)
-				.log()
+				.flatMap(this::messageCreateEvent)
 				.subscribe()
 	}
 
@@ -27,7 +42,57 @@ class Commands {
 	 * @param event The event context
 	 */
 	fun messageCreateEvent(event: MessageCreateEvent): Mono<Void> {
-		return commands[0].data.call(event)
+		val content = event.message.content.get()
+
+		return event.guild
+				.flatMap(Caches::getGuild).map(GuildMeta::getPrefixes) // Get the prefixes for this guild
+				.flatMap { prefixes ->
+					Mono.justOrEmpty(
+							prefixes.firstOrNull { prefix -> content.startsWith(prefix) }
+					)
+				} // Check if the message starts with one of the guild's prefixes
+				.map { prefix ->
+					val pos = content.indexOf(' ')
+					if (pos == -1) content.substring(prefix!!.length, content.length) else content.substring(prefix!!.length, pos)
+				} // Substring the prefix and the arguments out
+				.filter { command -> command.isNotBlank() }
+				.flatMap { command -> Mono.justOrEmpty(commands[command]) } // Find the relevant command
+				.filterWhen { command ->
+					command!!.permissions.testBot(event)
+							.flatMap { set ->
+								set.isEmpty()
+										.toMono()
+										.filter { it }
+										.switchIfEmpty(Mono.error(BotPermissionException(set)))
+							}
+				} // Checks the necessary bot permissions, will throw error on missing permissions, handled later in the chain
+				.filterWhen { command ->
+					command!!.permissions.testMember(event)
+							.flatMap { set ->
+								set.isEmpty()
+										.toMono()
+										.filter { it }
+										.switchIfEmpty(Mono.error(MemberPermissionException(set)))
+							}
+				} // Checks the user permissions, will throw error on missing permissions, handled later in the chain
+				.flatMapMany { command ->
+					event.message.channel.flatMapMany { c -> c.typeUntil(command!!.call(event)) }
+				} // Execute the command and type until it finishes
+				.then()
+				.onErrorResume(BotPermissionException::class.java) {
+					event.message.channel
+							.flatMap { c ->
+								event.guild.flatMap { g -> MessageUtil.sendMessage(c, Embeds.botPermissions(g, it.message)) }
+							}
+							.then()
+				} // Handle bot missing permissions, sends a message with the missing permissions
+				.onErrorResume(MemberPermissionException::class.java) {
+					event.message.channel
+							.flatMap { c ->
+								event.guild.flatMap { g -> MessageUtil.sendMessage(c, Embeds.memberPermissions(g, it.message)) }
+							}
+							.then()
+				} // Handle user missing permissions, sends a message with the missing permissions
 	}
 
 	/*

@@ -56,7 +56,7 @@ public class Localisation {
 	 * @param language The language to update to
 	 */
 	private static void updateGuildLanguage(Guild guild, String language) throws UpdateFailedException {
-		Caches.getGuild(guild).block().setLanguage(language);
+		Caches.getGuild(guild).block().setLanguage(language).block();
 	}
 
 	/**

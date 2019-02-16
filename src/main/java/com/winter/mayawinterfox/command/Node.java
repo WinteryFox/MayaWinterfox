@@ -1,4 +1,4 @@
-package com.winter.mayawinterfox.data;
+package com.winter.mayawinterfox.command;
 
 import java.util.LinkedList;
 import java.util.List;

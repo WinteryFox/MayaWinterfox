@@ -88,6 +88,8 @@ public class Main {
 		}
 		DiscordClientBuilder b = new DiscordClientBuilder(token);
 		b.setShardCount(count);
+		// TODO: After removing all blocking
+		//b.setEventScheduler(Schedulers.immediate());
 		client = b.build();
 	}
 

@@ -115,14 +115,16 @@ public class Dialog<T> {
 					.setTitle(Localisation.getMessage(this.getChannel().getGuild().block(), this.getTitle()))
 					.setDescription(Localisation.getMessage(this.getChannel().getGuild().block(), this.getDescription()) + "\n\n" + list.toString())
 					.setFooter(Localisation.getMessage(this.getChannel().getGuild().block(), "pick-reaction"), null)
-					.setColor(this.getColor()));
-			MessageUtil.addReaction(message, ReactionEmoji.unicode("x"));
+					.setColor(this.getColor()))
+					.block();
+			//MessageUtil.addReaction(message, ReactionEmoji.unicode("x"));
+			// TODO
 			HashMap<String, T> c = new HashMap<>();
 			int i = 1;
 			for (Map.Entry<String, T> entry : choices.entrySet()) {
 				ReactionEmoji emoji = ReactionEmoji.unicode(Reactions.valueOf(i).getEmoji());
 				c.put(Reactions.valueOf(i).getEmoji(), entry.getValue());
-				MessageUtil.addReaction(message, emoji);
+				message.addReaction(emoji).block();
 				i++;
 			}
 			MessageEvent response = null;
@@ -151,7 +153,7 @@ public class Dialog<T> {
 					.timeout(Duration.ofMinutes(1))
 					.block();
 
-			MessageUtil.delete(message);
+			message.delete().block();
 			if (response == null)
 				throw new NullPointerException("No input received");
 
@@ -177,7 +179,8 @@ public class Dialog<T> {
 					.setTitle(Localisation.getMessage(this.getChannel().getGuild().block(), this.getTitle(), this.getTitleReplacements()))
 					.setDescription(Localisation.getMessage(this.getChannel().getGuild().block(), this.getDescription(), this.getDescriptionReplacements()))
 					.setFooter(Localisation.getMessage(this.getChannel().getGuild().block(), "type-response"), "")
-					.setColor(this.getColor()));
+					.setColor(this.getColor()))
+					.block();
 
 			Message response = Main.getClient().getEventDispatcher().on(MessageCreateEvent.class)
 					.map(MessageCreateEvent::getMessage)
@@ -187,12 +190,12 @@ public class Dialog<T> {
 					.timeout(Duration.ofMinutes(1), Mono.empty())
 					.block();
 
-			MessageUtil.delete(message);
+			message.delete().block();
 			if (response == null)
 				throw new NullPointerException("No input received");
 
 			String content = response.getContent().get();
-			MessageUtil.delete(response);
+			response.delete().block();
 			if (response.getContent().get().equalsIgnoreCase("x") || response.getContent().get().equalsIgnoreCase("none") || response.getContent().get().equalsIgnoreCase("quit") || response.getContent().get().equalsIgnoreCase("close"))
 				return null;
 			return this.getFunction().apply(content);

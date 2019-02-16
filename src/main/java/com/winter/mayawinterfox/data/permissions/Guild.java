@@ -18,9 +18,9 @@ public class Guild {
 	public Guild(Guild guild) {
 		this.guild = guild;
 		//Group d = new Group("maya.default");
-		//for (Map.Entry<Commands.Category, List<com.winter.mayawinterfox.data.Node<Command>>> entry : Commands.COMMAND_MAP.entrySet())
+		//for (Map.Entry<Commands.Category, List<com.winter.mayawinterfox.command.Node<Command>>> entry : Commands.COMMAND_MAP.entrySet())
 		//	if (entry.getKey() != Commands.Category.ADMIN)
-		//		for (com.winter.mayawinterfox.data.Node<Command> command : entry.getValue())
+		//		for (com.winter.mayawinterfox.command.Node<Command> command : entry.getValue())
 		//			d.addPermission(Commands.getPermission(command));
 		//groups.put("maya.default", d);
 		for (Row row : Database.get("SELECT groupname, permission FROM groups WHERE guild=?;", guild.getLongID())) {

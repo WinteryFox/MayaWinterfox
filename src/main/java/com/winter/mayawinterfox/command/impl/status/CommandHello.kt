@@ -8,16 +8,16 @@ import discord4j.core.`object`.util.PermissionSet
 import discord4j.core.event.domain.message.MessageCreateEvent
 import reactor.core.publisher.Mono
 
-class CommandPing : Command(
-		"ping",
-		"ping-help",
+class CommandHello : Command(
+		"hello",
+		"hello-help",
 		Command.Category.STATUS,
-		CommandPermission(PermissionSet.of(Permission.SEND_MESSAGES), PermissionSet.of(Permission.SEND_MESSAGES, Permission.ADMINISTRATOR)),
-		setOf("pong")
+		CommandPermission(PermissionSet.of(Permission.SEND_MESSAGES), PermissionSet.of(Permission.SEND_MESSAGES)),
+		setOf("hi")
 ) {
 	override fun call(event: MessageCreateEvent): Mono<Void> {
 		return event.message.channel
-				.flatMap { c -> MessageUtil.sendMessage(c, "pong", event.client.responseTime) }
+				.flatMap { c -> MessageUtil.sendMessage(c, "hello") }
 				.then()
 	}
 }

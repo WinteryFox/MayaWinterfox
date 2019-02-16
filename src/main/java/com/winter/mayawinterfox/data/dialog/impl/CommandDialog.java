@@ -1,7 +1,7 @@
 package com.winter.mayawinterfox.data.dialog.impl;
 
 import com.winter.mayawinterfox.command.Command;
-import com.winter.mayawinterfox.data.Node;
+import com.winter.mayawinterfox.command.Node;
 import com.winter.mayawinterfox.data.dialog.Dialog;
 import com.winter.mayawinterfox.data.dialog.DialogType;
 import com.winter.mayawinterfox.util.ColorUtil;
