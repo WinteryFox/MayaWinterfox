@@ -1,7 +1,6 @@
 package com.winter.mayawinterfox.data.locale;
 
 import com.winter.mayawinterfox.data.cache.Caches;
-import com.winter.mayawinterfox.exceptions.impl.UpdateFailedException;
 import discord4j.core.object.entity.Guild;
 
 import java.util.ResourceBundle;
@@ -17,6 +16,7 @@ public class Localisation {
 
 	/**
 	 * Check a guilds language
+	 *
 	 * @param guild The guild to check the language of
 	 * @return Returns the 2 letter code for the language
 	 */
@@ -26,44 +26,43 @@ public class Localisation {
 
 	/**
 	 * Change a guilds language to something else
-	 * @param guild The guild to change
+	 *
+	 * @param guild    The guild to change
 	 * @param language The language to change to
 	 * @return true on success, false on failure
 	 */
 	public static boolean changeLanguage(Guild guild, String language) {
-		try {
-			switch (language) {
-				case "en":
-					updateGuildLanguage(guild, "en");
-					return true;
-				case "es":
-					updateGuildLanguage(guild, "es");
-					return true;
-				case "th":
-					updateGuildLanguage(guild, "th");
-					return true;
-				default:
-					return false;
-			}
-		} catch (UpdateFailedException e) {
-			return false;
+		switch (language) {
+			case "en":
+				updateGuildLanguage(guild, "en");
+				return true;
+			case "es":
+				updateGuildLanguage(guild, "es");
+				return true;
+			case "th":
+				updateGuildLanguage(guild, "th");
+				return true;
+			default:
+				return false;
 		}
 	}
 
 	/**
 	 * Update a guilds language
-	 * @param guild The guild to update
+	 *
+	 * @param guild    The guild to update
 	 * @param language The language to update to
 	 */
-	private static void updateGuildLanguage(Guild guild, String language) throws UpdateFailedException {
+	private static void updateGuildLanguage(Guild guild, String language) {
 		Caches.getGuild(guild).block().setLanguage(language).block();
 	}
 
 	/**
 	 * Get a localised message
-	 * @param guild The guild to getGuild the message for
+	 *
+	 * @param guild      The guild to getGuild the message for
 	 * @param messageKey The key of the message to getGuild
-	 * @param params The params to replace in the message
+	 * @param params     The params to replace in the message
 	 * @return Returns a localised message
 	 */
 	public static String getMessage(Guild guild, String messageKey, Object... params) {
@@ -82,9 +81,10 @@ public class Localisation {
 
 	/**
 	 * Shortcut for getMessage
-	 * @param guild The guild to grab the message for
+	 *
+	 * @param guild      The guild to grab the message for
 	 * @param messageKey The key of the message to getGuild
-	 * @param params The params to replace in the message
+	 * @param params     The params to replace in the message
 	 * @return localised message
 	 */
 	public static String of(Guild guild, String messageKey, Object... params) {
@@ -93,11 +93,12 @@ public class Localisation {
 
 	/**
 	 * If it's not a guild you wish to getGuild the message for, getGuild the default English localisation for the message
+	 *
 	 * @param messageKey The key of the message you wish to getGuild
 	 * @return Returns the localised message
 	 */
 	public static String getDefaultMessage(String messageKey) {
-		if(enLang.containsKey(messageKey))
+		if (enLang.containsKey(messageKey))
 			return enLang.getString(messageKey);
 		return null;
 	}

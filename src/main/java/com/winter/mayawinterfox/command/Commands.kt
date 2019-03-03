@@ -5,8 +5,11 @@ import com.winter.mayawinterfox.command.impl.status.CommandHello
 import com.winter.mayawinterfox.command.impl.status.CommandPing
 import com.winter.mayawinterfox.data.cache.Caches
 import com.winter.mayawinterfox.data.cache.meta.GuildMeta
+import com.winter.mayawinterfox.exceptions.impl.BotPermissionException
+import com.winter.mayawinterfox.exceptions.impl.MemberPermissionException
 import com.winter.mayawinterfox.util.Embeds
 import com.winter.mayawinterfox.util.MessageUtil
+import discord4j.core.`object`.entity.Channel
 import discord4j.core.event.domain.message.MessageCreateEvent
 import reactor.core.publisher.Mono
 import reactor.core.publisher.toMono
@@ -28,6 +31,7 @@ class Commands {
 
 		Main.getClient().eventDispatcher
 				.on(MessageCreateEvent::class.java)
+				.filterWhen { e -> e.message.channel.map { it.type == Channel.Type.GUILD_TEXT } }
 				.filter { e -> e.member.isPresent }
 				.filter { e -> !e.member.get().isBot }
 				.filter { e -> e.message.content.isPresent }

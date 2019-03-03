@@ -1,4 +1,4 @@
-package com.winter.mayawinterfox.command
+package com.winter.mayawinterfox.exceptions.impl
 
 import discord4j.core.`object`.util.PermissionSet
 
